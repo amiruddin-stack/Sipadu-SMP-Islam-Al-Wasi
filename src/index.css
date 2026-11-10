@@ -16,8 +16,7 @@ body {
 }
 
 img,
-svg[aria-hidden="true"],
-svg[role="img"] {
+svg {
   display: none !important;
 }
 

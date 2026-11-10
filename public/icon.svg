@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="110" fill="#0F5132"/>
+  <!-- Gold Accent Ring -->
+  <circle cx="256" cy="256" r="210" fill="none" stroke="#D97706" stroke-width="10"/>
+  <!-- Inner Shield -->
+  <path d="M 256 95 L 375 145 C 375 270 256 365 256 385 C 256 365 137 270 137 145 Z" fill="#134E39" stroke="#F8FAF9" stroke-width="6"/>
+  <!-- Open Book Symbol (Al-Qur'an & Education) -->
+  <path d="M 256 225 C 225 210 185 215 165 228 L 165 295 C 185 282 225 278 256 292 C 287 278 327 282 347 295 L 347 228 C 327 215 287 210 256 225 Z" fill="#FFFFFF"/>
+  <line x1="256" y1="225" x2="256" y2="292" stroke="#0F5132" stroke-width="4"/>
+  <!-- Golden Star -->
+  <polygon points="256,135 264,158 288,158 269,172 276,195 256,181 236,195 243,172 224,158 248,158" fill="#F59E0B"/>
+  <!-- Typography / Brand -->
+  <text x="256" y="445" font-family="system-ui, sans-serif" font-size="44" font-weight="800" fill="#FFFFFF" text-anchor="middle" letter-spacing="4">SIPADU</text>
+  <text x="256" y="475" font-family="system-ui, sans-serif" font-size="20" font-weight="600" fill="#D97706" text-anchor="middle" letter-spacing="2">SMP ISLAM AL-WASI'</text>
+</svg>

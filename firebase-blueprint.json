@@ -1,0 +1,176 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with role-based access for SIPADU AL WASI",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 128 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "role": { "type": "string", "enum": ["super_admin", "kepala_sekolah", "operator", "guru", "wali_kelas", "guru_bk"] },
+        "nip": { "type": "string", "maxLength": 50 },
+        "assignedClass": { "type": "string", "maxLength": 50 },
+        "subject": { "type": "string", "maxLength": 100 },
+        "createdAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["uid", "email", "displayName", "role"]
+    },
+    "Student": {
+      "title": "Student",
+      "description": "Student master data",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "nis": { "type": "string", "maxLength": 30 },
+        "nisn": { "type": "string", "maxLength": 30 },
+        "name": { "type": "string", "maxLength": 100 },
+        "gender": { "type": "string", "enum": ["L", "P"] },
+        "className": { "type": "string", "maxLength": 20 },
+        "status": { "type": "string", "enum": ["Aktif", "Lulus", "Mutasi"] },
+        "parentPhone": { "type": "string", "maxLength": 30 }
+      },
+      "required": ["id", "nis", "name", "gender", "className", "status"]
+    },
+    "Attendance": {
+      "title": "Attendance",
+      "description": "Class session attendance record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "date": { "type": "string", "maxLength": 20 },
+        "className": { "type": "string", "maxLength": 20 },
+        "academicYear": { "type": "string", "maxLength": 20 },
+        "semester": { "type": "string", "maxLength": 20 },
+        "records": { "type": "string", "maxLength": 50000 },
+        "recordedBy": { "type": "string", "maxLength": 128 },
+        "recordedByName": { "type": "string", "maxLength": 100 },
+        "updatedAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "date", "className", "recordedBy"]
+    },
+    "Journal": {
+      "title": "Journal",
+      "description": "Teacher instructional log entry",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "date": { "type": "string", "maxLength": 20 },
+        "teacherId": { "type": "string", "maxLength": 128 },
+        "teacherName": { "type": "string", "maxLength": 100 },
+        "subject": { "type": "string", "maxLength": 100 },
+        "className": { "type": "string", "maxLength": 20 },
+        "lessonHours": { "type": "string", "maxLength": 50 },
+        "topic": { "type": "string", "maxLength": 200 },
+        "activity": { "type": "string", "maxLength": 1000 },
+        "notes": { "type": "string", "maxLength": 500 },
+        "status": { "type": "string", "enum": ["Selesai", "Berlangsung"] }
+      },
+      "required": ["id", "date", "teacherId", "teacherName", "subject", "className", "topic", "status"]
+    },
+    "BehaviorRecord": {
+      "title": "BehaviorRecord",
+      "description": "Student behavior and coaching incident record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "studentId": { "type": "string", "maxLength": 128 },
+        "studentName": { "type": "string", "maxLength": 100 },
+        "className": { "type": "string", "maxLength": 20 },
+        "date": { "type": "string", "maxLength": 20 },
+        "category": { "type": "string", "enum": ["Perilaku Positif", "Pelanggaran Tata Tertib", "Kedisiplinan", "Tanggung Jawab", "Interaksi Sosial", "Catatan Pembinaan"] },
+        "description": { "type": "string", "maxLength": 1000 },
+        "coachingAction": { "type": "string", "maxLength": 1000 },
+        "recordedBy": { "type": "string", "maxLength": 100 },
+        "status": { "type": "string", "enum": ["Selesai", "Dalam Pembinaan", "Perlu Perhatian"] }
+      },
+      "required": ["id", "studentId", "studentName", "className", "date", "category", "description", "status"]
+    },
+    "CounselingRecord": {
+      "title": "CounselingRecord",
+      "description": "Confidential counseling record for BK counselor and admin",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "studentId": { "type": "string", "maxLength": 128 },
+        "studentName": { "type": "string", "maxLength": 100 },
+        "className": { "type": "string", "maxLength": 20 },
+        "date": { "type": "string", "maxLength": 20 },
+        "serviceType": { "type": "string", "enum": ["Pribadi", "Sosial", "Belajar", "Karir"] },
+        "issueSummary": { "type": "string", "maxLength": 1000 },
+        "actionPlan": { "type": "string", "maxLength": 1000 },
+        "followUpStatus": { "type": "string", "enum": ["Proses", "Selesai", "Rujukan"] },
+        "counselorId": { "type": "string", "maxLength": 128 },
+        "counselorName": { "type": "string", "maxLength": 100 }
+      },
+      "required": ["id", "studentId", "studentName", "date", "serviceType", "issueSummary", "followUpStatus", "counselorId"]
+    },
+    "Assessment": {
+      "title": "Assessment",
+      "description": "Grading batch session and scores",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "academicYear": { "type": "string", "maxLength": 20 },
+        "semester": { "type": "string", "maxLength": 20 },
+        "className": { "type": "string", "maxLength": 20 },
+        "subject": { "type": "string", "maxLength": 100 },
+        "assessmentType": { "type": "string", "maxLength": 50 },
+        "teacherId": { "type": "string", "maxLength": 128 },
+        "teacherName": { "type": "string", "maxLength": 100 },
+        "date": { "type": "string", "maxLength": 20 },
+        "scores": { "type": "string", "maxLength": 50000 }
+      },
+      "required": ["id", "academicYear", "semester", "className", "subject", "assessmentType", "teacherId"]
+    },
+    "SchoolSetting": {
+      "title": "SchoolSetting",
+      "description": "School operational settings and profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "schoolName": { "type": "string", "maxLength": 100 },
+        "npsn": { "type": "string", "maxLength": 30 },
+        "address": { "type": "string", "maxLength": 200 },
+        "principal": { "type": "string", "maxLength": 100 },
+        "activeAcademicYear": { "type": "string", "maxLength": 30 },
+        "activeSemester": { "type": "string", "maxLength": 20 }
+      },
+      "required": ["id", "schoolName"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profiles and role information"
+    },
+    "/students/{studentId}": {
+      "schema": "Student",
+      "description": "Master student records"
+    },
+    "/attendance/{attendanceId}": {
+      "schema": "Attendance",
+      "description": "Attendance daily logs per class"
+    },
+    "/journals/{journalId}": {
+      "schema": "Journal",
+      "description": "Teacher classroom instructional logs"
+    },
+    "/behaviors/{behaviorId}": {
+      "schema": "BehaviorRecord",
+      "description": "Student behavior logs and coaching"
+    },
+    "/counseling/{counselingId}": {
+      "schema": "CounselingRecord",
+      "description": "Confidential BK counseling documentation"
+    },
+    "/assessments/{assessmentId}": {
+      "schema": "Assessment",
+      "description": "Classroom academic grades and assessments"
+    },
+    "/settings/{settingId}": {
+      "schema": "SchoolSetting",
+      "description": "School master settings"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "Sipadu SMP Islam Al Wasi",
+  "description": "Sistem Informasi Terpadu (SIPADU) SMP Islam Al Wasi untuk manajemen akademik, presensi, nilai, dan informasi sekolah.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

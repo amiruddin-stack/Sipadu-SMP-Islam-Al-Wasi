@@ -1,0 +1,141 @@
+import React, { useState } from 'react';
+import { AuthProvider } from './context/AuthContext';
+import { DataProvider } from './context/DataContext';
+import { Header } from './components/layout/Header';
+import { NavTab, Sidebar } from './components/layout/Sidebar';
+import { OfflineIndicator } from './components/common/OfflineIndicator';
+import { DashboardPage } from './pages/DashboardPage';
+import { AttendancePage } from './pages/AttendancePage';
+import { JournalPage } from './pages/JournalPage';
+import { BehaviorPage } from './pages/BehaviorPage';
+import { CounselingPage } from './pages/CounselingPage';
+import { AssessmentPage } from './pages/AssessmentPage';
+import { GradeSummaryPage } from './pages/GradeSummaryPage';
+import { MasterDataPage } from './pages/MasterDataPage';
+import { ReportsPage } from './pages/ReportsPage';
+import { SettingsPage } from './pages/SettingsPage';
+
+function AppContent() {
+  const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
+  const [collapsed, setCollapsed] = useState<boolean>(false);
+  const [mobileOpen, setMobileOpen] = useState<boolean>(false);
+
+  const renderCurrentPage = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return <DashboardPage onNavigate={(tab) => setActiveTab(tab)} />;
+      case 'attendance':
+        return <AttendancePage />;
+      case 'journal':
+        return <JournalPage />;
+      case 'behavior':
+        return <BehaviorPage />;
+      case 'counseling':
+        return <CounselingPage />;
+      case 'assessment':
+        return <AssessmentPage />;
+      case 'grades':
+        return <GradeSummaryPage />;
+      case 'master':
+        return <MasterDataPage />;
+      case 'reports':
+        return <ReportsPage />;
+      case 'settings':
+        return <SettingsPage />;
+      default:
+        return <DashboardPage onNavigate={(tab) => setActiveTab(tab)} />;
+    }
+  };
+
+  return (
+    <div className="flex h-screen w-full bg-[#F8FAF9] text-slate-800 overflow-hidden font-sans">
+      {/* Sidebar for PC and Mobile Drawer */}
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        collapsed={collapsed}
+        setCollapsed={setCollapsed}
+        mobileOpen={mobileOpen}
+        setMobileOpen={setMobileOpen}
+      />
+
+      {/* Main View Area */}
+      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+        {/* Sticky Header */}
+        <Header
+          activeTab={activeTab}
+          onOpenMobileSidebar={() => setMobileOpen(true)}
+        />
+
+        {/* Scrollable Content Body */}
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-8">
+          <div className="max-w-7xl mx-auto">{renderCurrentPage()}</div>
+        </main>
+
+        {/* Mobile Bottom Navigation Bar (Android Touch Friendly) */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-slate-200 px-2 py-1.5 flex items-center justify-around shadow-lg">
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-semibold transition-colors ${
+              activeTab === 'dashboard' ? 'text-[#0F5132] font-bold' : 'text-slate-500'
+            }`}
+          >
+            <span className="text-base">📊</span>
+            <span>Dashboard</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('attendance')}
+            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-semibold transition-colors ${
+              activeTab === 'attendance' ? 'text-[#0F5132] font-bold' : 'text-slate-500'
+            }`}
+          >
+            <span className="text-base">📋</span>
+            <span>Absensi</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('journal')}
+            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-semibold transition-colors ${
+              activeTab === 'journal' ? 'text-[#0F5132] font-bold' : 'text-slate-500'
+            }`}
+          >
+            <span className="text-base">📖</span>
+            <span>Jurnal</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('assessment')}
+            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-semibold transition-colors ${
+              activeTab === 'assessment' ? 'text-[#0F5132] font-bold' : 'text-slate-500'
+            }`}
+          >
+            <span className="text-base">📝</span>
+            <span>Nilai</span>
+          </button>
+
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-semibold text-slate-500"
+          >
+            <span className="text-base">☰</span>
+            <span>Menu</span>
+          </button>
+        </nav>
+      </div>
+
+      {/* Floating Offline Notification */}
+      <OfflineIndicator />
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <DataProvider>
+        <AppContent />
+      </DataProvider>
+    </AuthProvider>
+  );
+}

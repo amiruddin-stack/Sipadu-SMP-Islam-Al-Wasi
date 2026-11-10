@@ -52,7 +52,7 @@ export const SettingsPage: React.FC = () => {
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <span>📱</span> Status PWA & Build APK Android
+               Status PWA & Build APK Android
             </h3>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
               Siap Kompilasi
@@ -82,7 +82,7 @@ export const SettingsPage: React.FC = () => {
                 onClick={install}
                 className="w-full mt-2 py-2 text-xs font-bold text-white bg-[#0F5132] hover:bg-[#0B3D26] rounded-xl shadow-xs text-center"
               >
-                📲 Pasang Aplikasi ke Layar Utama Sekarang
+                 Pasang Aplikasi ke Layar Utama Sekarang
               </button>
             )}
           </div>
@@ -90,7 +90,7 @@ export const SettingsPage: React.FC = () => {
           {/* Android APK Build Instructions Box */}
           <div className="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-100 space-y-2">
             <span className="text-xs font-bold text-emerald-950 block">
-              🚀 Cara Build APK Android dengan Capacitor:
+               Cara Build APK Android dengan Capacitor:
             </span>
             <div className="text-[11px] font-mono text-slate-700 bg-white p-2.5 rounded-lg border border-emerald-200/50 space-y-1">
               <p># 1. Bangun aset web produksi</p>
@@ -111,7 +111,7 @@ export const SettingsPage: React.FC = () => {
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <span>☁️</span> Sinkronisasi Database Firestore
+               Sinkronisasi Database Firestore
             </h3>
             <span
               className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
@@ -147,7 +147,7 @@ export const SettingsPage: React.FC = () => {
               disabled={isSyncing}
               className="w-full py-2 px-3 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors text-center"
             >
-              {isSyncing ? 'Menyinkronkan...' : '🔄 Segarkan Cache Lokal'}
+              {isSyncing ? 'Menyinkronkan...' : ' Segarkan Cache Lokal'}
             </button>
           </div>
         </div>
@@ -157,14 +157,14 @@ export const SettingsPage: React.FC = () => {
       <div className="p-5 md:p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <span>🏫</span> Profil Identitas SMP Islam Al-Wasi’
+             Profil Identitas SMP Islam Al-Wasi’
           </h3>
           <span className="text-xs text-slate-400">Maros, Sulawesi Selatan</span>
         </div>
 
         {savedSuccess && (
           <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
-            <span>✅</span> Profil sekolah dan tahun akademik berhasil disimpan!
+             Profil sekolah dan tahun akademik berhasil disimpan!
           </div>
         )}
 
@@ -304,7 +304,7 @@ export const SettingsPage: React.FC = () => {
                 type="submit"
                 className="px-6 py-2.5 text-xs font-bold text-white bg-[#0F5132] hover:bg-[#0B3D26] rounded-xl transition-colors shadow-xs"
               >
-                💾 Simpan Konfigurasi Sekolah
+                 Simpan Konfigurasi Sekolah
               </button>
             </div>
           )}

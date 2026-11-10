@@ -9,7 +9,7 @@ export const PWAInstallButton: React.FC = () => {
   if (isInstalled) {
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg">
-        <span>📲</span>
+        
         <span className="hidden sm:inline">PWA Terpasang</span>
       </span>
     );
@@ -23,7 +23,7 @@ export const PWAInstallButton: React.FC = () => {
         className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#0F5132] hover:bg-[#0B3D26] active:bg-[#09301E] rounded-lg transition-colors shadow-xs"
         title="Instal SIPADU ke layar beranda"
       >
-        <span>⬇️</span>
+        
         <span>Instal Aplikasi</span>
       </button>
     );
@@ -37,7 +37,7 @@ export const PWAInstallButton: React.FC = () => {
           onClick={() => setShowIOSGuide(true)}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition-colors"
         >
-          <span>📲</span>
+          
           <span>Instal di iOS</span>
         </button>
 
@@ -46,7 +46,7 @@ export const PWAInstallButton: React.FC = () => {
             <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
-                  <span>📱</span> Instal SIPADU di iPhone / iPad
+                   Instal SIPADU di iPhone / iPad
                 </h3>
                 <button
                   onClick={() => setShowIOSGuide(false)}

@@ -125,7 +125,7 @@ export const BehaviorPage: React.FC = () => {
             onClick={handleOpenAdd}
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-[#0F5132] hover:bg-[#0B3D26] rounded-lg transition-colors shadow-xs"
           >
-            <span>➕</span>
+            
             <span>Catat Perilaku</span>
           </button>
         </div>
@@ -203,7 +203,7 @@ export const BehaviorPage: React.FC = () => {
       <div className="space-y-3">
         {filteredRecords.length === 0 ? (
           <div className="p-12 text-center rounded-2xl bg-white border border-slate-200 text-slate-400">
-            <span className="text-3xl block mb-2">🌟</span>
+            
             <p className="text-sm font-medium">Tidak ada catatan perilaku yang cocok dengan filter.</p>
           </div>
         ) : (
@@ -233,7 +233,7 @@ export const BehaviorPage: React.FC = () => {
                     >
                       {item.category}
                     </span>
-                    <span className="text-xs text-slate-400">📅 {item.date}</span>
+                    <span className="text-xs text-slate-400"> {item.date}</span>
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -265,14 +265,14 @@ export const BehaviorPage: React.FC = () => {
                       className="p-1.5 text-xs text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-md"
                       title="Edit"
                     >
-                      ✏️
+                      
                     </button>
                     <button
                       onClick={() => handleDelete(item.id)}
                       className="p-1.5 text-xs text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md"
                       title="Hapus"
                     >
-                      🗑️
+                      
                     </button>
                   </div>
                 </div>

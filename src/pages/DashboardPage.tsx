@@ -65,7 +65,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="text-xl">👋</span>
               <h2 className="text-lg md:text-xl font-bold text-slate-900">
                 Ahlan wa Sahlan, {currentUser?.displayName || 'Pengguna'}
               </h2>
@@ -79,23 +78,20 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => onNavigate('attendance')}
-              className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-white bg-[#0F5132] hover:bg-[#0B3D26] rounded-xl transition-colors shadow-xs"
+              className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-white bg-[#25D366] hover:bg-[#20C45E] rounded-xl transition-colors shadow-xs"
             >
-              <span>📋</span>
               <span>Input Presensi</span>
             </button>
             <button
               onClick={() => onNavigate('journal')}
               className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
             >
-              <span>📖</span>
               <span>Tulis Jurnal</span>
             </button>
             <button
               onClick={() => onNavigate('assessment')}
               className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
             >
-              <span>📝</span>
               <span>Input Nilai</span>
             </button>
           </div>
@@ -110,8 +106,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Total Siswa
             </span>
-            <span className="text-xl">🎓</span>
-          </div>
+            </div>
           <div className="mt-2 text-2xl font-bold text-slate-900">{activeStudentsCount}</div>
           <div className="mt-1 flex items-center text-xs text-emerald-700 font-medium">
             <span>6 Kelas Aktif (VII - IX)</span>
@@ -124,8 +119,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Guru & Pendidik
             </span>
-            <span className="text-xl">👨‍🏫</span>
-          </div>
+            </div>
           <div className="mt-2 text-2xl font-bold text-slate-900">{activeTeachersCount}</div>
           <div className="mt-1 flex items-center text-xs text-slate-500">
             <span>12 Mata Pelajaran</span>
@@ -138,9 +132,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Kehadiran Hari Ini
             </span>
-            <span className="text-xl">✅</span>
-          </div>
-          <div className="mt-2 text-2xl font-bold text-[#0F5132]">{attendancePercent}%</div>
+            </div>
+          <div className="mt-2 text-2xl font-bold text-[#25D366]">{attendancePercent}%</div>
           <div className="mt-1 text-xs text-slate-500">
             {totalHadir} dari {totalRecorded || activeStudentsCount} siswa hadir
           </div>
@@ -152,8 +145,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Jurnal Pembelajaran
             </span>
-            <span className="text-xl">📚</span>
-          </div>
+            </div>
           <div className="mt-2 text-2xl font-bold text-slate-900">{journals.length}</div>
           <div className="mt-1 text-xs text-slate-500">
             {journals.filter((j) => j.status === 'Selesai').length} sesi tuntas terlaksana
@@ -168,7 +160,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <span>📋</span> Status Kehadiran Terkini
+                Status Kehadiran Terkini
               </h3>
               <span className="text-xs text-slate-400">Kelas VII-A</span>
             </div>
@@ -177,13 +169,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               <div>
                 <div className="flex justify-between text-xs font-medium mb-1">
                   <span className="text-emerald-700 flex items-center gap-1">
-                    <span>🟢</span> Hadir
+                    Hadir
                   </span>
                   <span className="font-bold text-slate-800">{totalHadir} Siswa</span>
                 </div>
                 <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
                   <div
-                    className="h-full bg-[#0F5132] rounded-full"
+                    className="h-full bg-[#25D366] rounded-full"
                     style={{
                       width: `${totalRecorded ? (totalHadir / totalRecorded) * 100 : 85}%`,
                     }}
@@ -194,7 +186,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               <div>
                 <div className="flex justify-between text-xs font-medium mb-1">
                   <span className="text-blue-700 flex items-center gap-1">
-                    <span>🔵</span> Sakit
+                    Sakit
                   </span>
                   <span className="font-bold text-slate-800">{totalSakit} Siswa</span>
                 </div>
@@ -211,7 +203,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               <div>
                 <div className="flex justify-between text-xs font-medium mb-1">
                   <span className="text-amber-700 flex items-center gap-1">
-                    <span>🟡</span> Izin
+                    Izin
                   </span>
                   <span className="font-bold text-slate-800">{totalIzin} Siswa</span>
                 </div>
@@ -228,7 +220,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               <div>
                 <div className="flex justify-between text-xs font-medium mb-1">
                   <span className="text-rose-700 flex items-center gap-1">
-                    <span>🔴</span> Alpa
+                    Alpa
                   </span>
                   <span className="font-bold text-slate-800">{totalAlpa} Siswa</span>
                 </div>
@@ -246,7 +238,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
           <button
             onClick={() => onNavigate('attendance')}
-            className="mt-5 w-full py-2 px-3 text-xs font-semibold text-[#0F5132] bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-colors text-center"
+            className="mt-5 w-full py-2 px-3 text-xs font-semibold text-[#25D366] bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-colors text-center"
           >
             Lihat Rekap Absensi Lengkap →
           </button>
@@ -256,11 +248,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         <div className="lg:col-span-2 p-5 rounded-2xl bg-white border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <span>📖</span> Aktivitas Jurnal KBM Terbaru
+              Aktivitas Jurnal KBM Terbaru
             </h3>
             <button
               onClick={() => onNavigate('journal')}
-              className="text-xs font-semibold text-[#0F5132] hover:underline"
+              className="text-xs font-semibold text-[#25D366] hover:underline"
             >
               Semua Jurnal →
             </button>
@@ -297,11 +289,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <span>🌟</span> Catatan Karakter & Perilaku Siswa
+              Catatan Karakter & Perilaku Siswa
             </h3>
             <button
               onClick={() => onNavigate('behavior')}
-              className="text-xs font-semibold text-[#0F5132] hover:underline"
+              className="text-xs font-semibold text-[#25D366] hover:underline"
             >
               Kelola Perilaku →
             </button>
@@ -343,7 +335,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <span>🏫</span> Informasi Akademik & Kalender Efektif
+              Informasi Akademik & Kalender Efektif
             </h3>
             <span className="text-xs font-semibold text-slate-500">
               TA {settings.activeAcademicYear}
@@ -352,7 +344,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
           <div className="mt-4 space-y-3">
             <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-100 flex items-start gap-3">
-              <span className="text-xl">📌</span>
               <div className="space-y-0.5">
                 <span className="text-xs font-bold text-emerald-950">
                   Target Penilaian Tengah Semester (PTS)

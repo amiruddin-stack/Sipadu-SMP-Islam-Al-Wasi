@@ -2,7 +2,7 @@
 
 :root { color-scheme: light; }
 html, body, #root { min-height: 100%; }
-body { background: #F7FAF8; color: #172B22; }
+body { background: #F4F9F7; color: #172B22; }
 img, svg[aria-hidden="true"] { display: none !important; }
 
 @layer base {

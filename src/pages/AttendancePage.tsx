@@ -155,7 +155,7 @@ export const AttendancePage: React.FC = () => {
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              <span>✍️</span> Input Presensi
+               Input Presensi
             </button>
             <button
               onClick={() => setActiveTab('rekap')}
@@ -165,7 +165,7 @@ export const AttendancePage: React.FC = () => {
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              <span>📊</span> Rekap Kehadiran
+               Rekap Kehadiran
             </button>
           </div>
 
@@ -175,7 +175,7 @@ export const AttendancePage: React.FC = () => {
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
               title="Ekspor Data ke File CSV/Excel"
             >
-              <span>📥</span>
+              
               <span className="hidden sm:inline">Ekspor Excel</span>
             </button>
             <button
@@ -183,7 +183,7 @@ export const AttendancePage: React.FC = () => {
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
               title="Cetak Presensi Resmi"
             >
-              <span>🖨️</span>
+              
               <span className="hidden sm:inline">Cetak</span>
             </button>
           </div>
@@ -282,7 +282,7 @@ export const AttendancePage: React.FC = () => {
                   onClick={handleSave}
                   className="px-4 py-1.5 text-xs font-bold text-white bg-[#0F5132] hover:bg-[#0B3D26] rounded-lg transition-colors shadow-xs"
                 >
-                  💾 Simpan Presensi
+                   Simpan Presensi
                 </button>
               )}
             </div>
@@ -290,7 +290,7 @@ export const AttendancePage: React.FC = () => {
 
           {savedSuccess && (
             <div className="m-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
-              <span>✅</span> Presensi Kelas {selectedClass} berhasil disimpan ke Firestore!
+               Presensi Kelas {selectedClass} berhasil disimpan ke Firestore!
             </div>
           )}
 

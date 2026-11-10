@@ -53,7 +53,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl p-5 md:p-6 text-white shadow-sm" style={{ background: 'linear-gradient(180deg, #05A287 0%, #1FA189 50%, #84C6BC 100%)' }}>
+      <section className="block lg:hidden rounded-2xl p-5 md:p-6 text-white shadow-sm" style={{ background: 'linear-gradient(180deg, #05A287 0%, #1FA189 50%, #84C6BC 100%)' }}>
         <h2 className="text-xl md:text-2xl font-bold">Dashboard</h2>
       </section>
 

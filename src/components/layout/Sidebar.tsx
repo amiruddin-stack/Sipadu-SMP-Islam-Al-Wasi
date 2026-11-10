@@ -25,7 +25,6 @@ interface SidebarProps {
 interface MenuItem {
   id: NavTab;
   label: string;
-  emoji: string;
   badge?: string;
   restricted?: boolean;
 }
@@ -44,26 +43,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
     {
       title: 'Utama',
       items: [
-        { id: 'dashboard', label: 'Dashboard', emoji: '📊' },
+        { id: 'dashboard', label: 'Dashboard' },
       ],
     },
     {
       title: 'KBM & Akademik',
       items: [
-        { id: 'attendance', label: 'Absensi Digital', emoji: '📋' },
-        { id: 'journal', label: 'Jurnal Guru', emoji: '📖' },
-        { id: 'assessment', label: 'Penilaian', emoji: '📝' },
-        { id: 'grades', label: 'Rekap Nilai', emoji: '📈' },
+        { id: 'attendance', label: 'Absensi Digital' },
+        { id: 'journal', label: 'Jurnal Guru' },
+        { id: 'assessment', label: 'Penilaian' },
+        { id: 'grades', label: 'Rekap Nilai' },
       ],
     },
     {
       title: 'Kesiswaan & Karakter',
       items: [
-        { id: 'behavior', label: 'Perilaku Siswa', emoji: '🌟' },
+        { id: 'behavior', label: 'Perilaku Siswa' },
         {
           id: 'counseling',
           label: 'Bimbingan Konseling (BK)',
-          emoji: '🤝',
           badge: canAccessBK ? undefined : 'Terbatas',
           restricted: !canAccessBK,
         },
@@ -72,9 +70,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
     {
       title: 'Data & Informasi',
       items: [
-        { id: 'master', label: 'Data Master', emoji: '🗂️' },
-        { id: 'reports', label: 'Laporan', emoji: '📑' },
-        { id: 'settings', label: 'Pengaturan', emoji: '⚙️' },
+        { id: 'master', label: 'Data Master' },
+        { id: 'reports', label: 'Laporan' },
+        { id: 'settings', label: 'Pengaturan' },
       ],
     },
   ];
@@ -103,9 +101,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Brand Header */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-slate-100">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-[#0F5132] text-white flex items-center justify-center font-bold text-lg shadow-xs">
-              <span>🕌</span>
-            </div>
             {!collapsed && (
               <div className="flex flex-col min-w-0">
                 <span className="text-sm font-bold tracking-tight text-slate-900 truncate">
@@ -156,12 +151,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         collapsed ? 'justify-center' : 'justify-start'
                       } ${
                         isActive
-                          ? 'bg-[#0F5132] text-white shadow-xs'
+                          ? 'bg-[#25D366] text-white shadow-xs'
                           : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                       }`}
                       title={collapsed ? item.label : undefined}
                     >
-                      <span className="text-base flex-shrink-0">{item.emoji}</span>
                       {!collapsed && (
                         <div className="flex-1 flex items-center justify-between text-left truncate">
                           <span className="truncate">{item.label}</span>
@@ -187,9 +181,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               collapsed ? 'justify-center' : 'justify-start'
             }`}
           >
-            <div className="w-8 h-8 rounded-full bg-[#0F5132] text-white flex items-center justify-center text-xs font-semibold flex-shrink-0">
-              👤
-            </div>
+            
             {!collapsed && (
               <div className="flex flex-col min-w-0">
                 <span className="text-xs font-semibold text-slate-800 truncate">

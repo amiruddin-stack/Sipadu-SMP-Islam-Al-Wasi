@@ -18,7 +18,7 @@ export default defineConfig(() => {
           name: 'SIPADU SMP Islam Al Wasi',
           short_name: 'SIPADU',
           description: 'Sistem Informasi Akademik Terpadu SMP Islam Al-Wasi’',
-          theme_color: '#0F5132',
+          theme_color: '#25D366',
           background_color: '#F8FAF9',
           display: 'standalone',
           orientation: 'portrait-primary',
@@ -60,10 +60,7 @@ export default defineConfig(() => {
       },
     },
     server: {
-      // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modify—file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',
-      // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
     },
   };

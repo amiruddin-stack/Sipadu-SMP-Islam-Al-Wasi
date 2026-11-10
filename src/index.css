@@ -1,9 +1,25 @@
 @import "tailwindcss";
 
-:root { color-scheme: light; }
-html, body, #root { min-height: 100%; }
-body { background: #F4F9F7; color: #172B22; }
-img, svg[aria-hidden="true"] { display: none !important; }
+:root {
+  color-scheme: light;
+  --sipadu-primary: #25D366;
+  --sipadu-primary-dark: #075B36;
+}
+
+html, body, #root {
+  min-height: 100%;
+}
+
+body {
+  background: #F8FAF9;
+  color: #172B22;
+}
+
+img,
+svg[aria-hidden="true"],
+svg[role="img"] {
+  display: none !important;
+}
 
 @layer base {
   body {
@@ -16,7 +32,7 @@ img, svg[aria-hidden="true"] { display: none !important; }
   header,
   nav,
   button,
-  .print\:hidden {
+  .print\\:hidden {
     display: none !important;
   }
 

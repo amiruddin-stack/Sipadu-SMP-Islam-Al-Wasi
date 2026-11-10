@@ -143,7 +143,7 @@ export const AssessmentPage: React.FC = () => {
                 onClick={handleSaveBatch}
                 className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold text-white bg-[#0F5132] hover:bg-[#0B3D26] rounded-lg transition-colors shadow-xs"
               >
-                <span>💾</span>
+                
                 <span>Simpan Nilai Kelas</span>
               </button>
             )}
@@ -246,7 +246,7 @@ export const AssessmentPage: React.FC = () => {
 
       {saveSuccess && (
         <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
-          <span>✅</span> Nilai {selectedType} untuk {selectedSubject} Kelas {selectedClass} berhasil disimpan ke Firestore!
+           Nilai {selectedType} untuk {selectedSubject} Kelas {selectedClass} berhasil disimpan ke Firestore!
         </div>
       )}
 

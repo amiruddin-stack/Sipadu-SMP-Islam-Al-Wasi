@@ -11,7 +11,7 @@ interface HeaderProps {
   onOpenMobileSidebar: () => void;
 }
 
-const tabTitles: Record<NavTab, { title: string; subtitle: string; emoji: string }> = {
+const tabTitles: Record<NavTab, { title: string; subtitle: string }> = {
   dashboard: { title: 'Dashboard', subtitle: 'Ringkasan operasional dan statistik akademik' },
   attendance: { title: 'Absensi Digital', subtitle: 'Pencatatan dan rekap kehadiran harian kelas' },
   journal: { title: 'Jurnal Guru', subtitle: 'Dokumentasi kegiatan belajar mengajar (KBM)' },

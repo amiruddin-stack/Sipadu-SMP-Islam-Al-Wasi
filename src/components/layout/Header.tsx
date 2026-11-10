@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
-import { useOnlineStatus } from '../../hooks/useOnlineStatus';
 import { UserRole } from '../../types';
 import { PWAInstallButton } from '../common/PWAInstallButton';
 import { NavTab } from './Sidebar';
@@ -27,7 +26,6 @@ const tabTitles: Record<NavTab, { title: string; subtitle: string }> = {
 export const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMobileSidebar }) => {
   const { currentUser, switchRole, loginWithGoogle, logout, firebaseUser } = useAuth();
   const { settings } = useData();
-  const isOnline = useOnlineStatus();
   const [showRoleMenu, setShowRoleMenu] = useState(false);
 
   const roleOptions: { role: UserRole; label: string; desc: string }[] = [
@@ -40,16 +38,6 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMobileSidebar }
   ];
 
   const currentTabInfo = tabTitles[activeTab] || tabTitles.dashboard;
-
-  const roleBadgeColors: Record<UserRole, string> = {
-    super_admin: 'bg-emerald-100 text-emerald-900 border-emerald-300',
-    kepala_sekolah: 'bg-blue-100 text-blue-900 border-blue-300',
-    operator: 'bg-indigo-100 text-indigo-900 border-indigo-300',
-    guru: 'bg-teal-100 text-teal-900 border-teal-300',
-    wali_kelas: 'bg-amber-100 text-amber-900 border-amber-300',
-    guru_bk: 'bg-rose-100 text-rose-900 border-rose-300',
-  };
-
   const roleLabels: Record<UserRole, string> = {
     super_admin: 'Super Admin',
     kepala_sekolah: 'Kepala Sekolah',
@@ -60,24 +48,24 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMobileSidebar }
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-[linear-gradient(180deg,#05A287_0%,#1FA189_50%,#84C6BC_100%)] border-b border-[#078F7B]">
+    <header className="sticky top-0 z-30 bg-[#25D366] border-b border-[#1DB954]">
       <div className="flex items-center justify-between h-16 px-4 md:px-6 text-[#073B2A]">
-        {/* Left: Mobile hamburger & Current page title */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={onOpenMobileSidebar}
-            className="md:hidden flex items-center justify-center w-9 h-9 text-slate-700 hover:bg-slate-100 rounded-lg"
+            className="md:hidden flex items-center justify-center min-h-9 px-2 text-xs font-semibold text-[#073B2A] hover:bg-white/20 rounded-lg"
             title="Buka Menu"
+            aria-label="Buka Menu"
           >
-            
+            Menu
           </button>
 
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
               <h1 className="text-base md:text-lg font-bold text-[#073B2A]">
                 {currentTabInfo.title}
               </h1>
-              <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+              <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-white/90 text-[#075B36] border border-white/70">
                 {settings.activeAcademicYear} {settings.activeSemester}
               </span>
             </div>
@@ -87,7 +75,6 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMobileSidebar }
           </div>
         </div>
 
-        {/* Desktop account area */}
         <div className="hidden lg:flex items-center gap-4">
           <div className="text-right leading-tight">
             <p className="text-sm font-semibold text-[#073B2A]">
@@ -99,42 +86,19 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMobileSidebar }
           </div>
           <button
             onClick={logout}
-            className="inline-flex items-center justify-center rounded-lg border border-white/70 bg-white/85 px-4 py-2 text-xs font-semibold text-[#075B36] shadow-sm transition-colors hover:bg-white hover:text-rose-700"
+            className="inline-flex items-center justify-center rounded-lg border border-white/70 bg-white/90 px-4 py-2 text-xs font-semibold text-[#075B36] shadow-sm transition-colors hover:bg-white hover:text-rose-700"
             title="Keluar dari aplikasi"
           >
             Keluar
           </button>
         </div>
 
-        {/* Existing controls retained for mobile and tablet */}
         <div className="flex items-center gap-2 md:gap-3 lg:hidden">
-          {/* Online/Offline Status */}
-          <div
-            className={`hidden lg:flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-lg border font-medium ${
-              isOnline
-                ? 'bg-white/70 text-[#075B36] border-white/60'
-                : 'bg-white/70 text-amber-900 border-white/60'
-            }`}
-            title={isOnline ? 'Terhubung dengan Firestore' : 'Mode Offline Lokal'}
-          >
-            <span
-              className={`w-2 h-2 rounded-full ${
-                isOnline ? 'bg-emerald-600' : 'bg-amber-600 animate-pulse'
-              }`}
-            />
-            <span>{isOnline ? 'Online' : 'Offline'}</span>
-          </div>
-
-          {/* PWA Install Button */}
           <PWAInstallButton />
-
-          {/* Role Switcher (RBAC Evaluation) */}
           <div className="relative">
             <button
               onClick={() => setShowRoleMenu(!showRoleMenu)}
-              className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg border transition-colors ${
-                currentUser ? roleBadgeColors[currentUser.role] : 'bg-slate-100 text-slate-700'
-              }`}
+              className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg border border-white/70 bg-white/80 text-[#075B36] transition-colors"
               title="Ganti Peran Hak Akses (RBAC)"
             >
               <span className="hidden sm:inline">Peran:</span>
@@ -144,10 +108,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMobileSidebar }
 
             {showRoleMenu && (
               <>
-                <div
-                  className="fixed inset-0 z-40"
-                  onClick={() => setShowRoleMenu(false)}
-                />
+                <div className="fixed inset-0 z-40" onClick={() => setShowRoleMenu(false)} />
                 <div className="absolute right-0 mt-2 w-64 rounded-xl bg-white border border-slate-200 shadow-xl z-50 p-2 space-y-1">
                   <div className="px-2.5 py-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
                     Pilih Hak Akses (RBAC)
@@ -165,13 +126,8 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMobileSidebar }
                           : 'hover:bg-slate-50 text-slate-700'
                       }`}
                     >
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium text-slate-900">{opt.label}</span>
-                        {currentUser?.role === opt.role && <span className="text-emerald-700 font-bold">✓</span>}
-                      </div>
-                      <span className="text-[11px] text-slate-400 font-normal">
-                        {opt.desc}
-                      </span>
+                      <span className="font-medium text-slate-900">{opt.label}</span>
+                      <span className="text-[11px] text-slate-400 font-normal">{opt.desc}</span>
                     </button>
                   ))}
                 </div>
@@ -179,11 +135,10 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMobileSidebar }
             )}
           </div>
 
-          {/* Google Auth or Current User Menu */}
           {firebaseUser ? (
             <button
               onClick={logout}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-rose-600 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200"
+              className="px-2.5 py-1.5 text-xs font-medium text-[#075B36] bg-white/80 hover:bg-white rounded-lg border border-white/70"
               title="Keluar / Logout"
             >
               <span className="hidden md:inline">Keluar</span>
@@ -191,7 +146,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMobileSidebar }
           ) : (
             <button
               onClick={loginWithGoogle}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors border border-slate-300"
+              className="px-3 py-1.5 text-xs font-semibold text-[#075B36] bg-white/80 hover:bg-white rounded-lg border border-white/70"
               title="Masuk dengan Akun Google Sekolah"
             >
               <span className="hidden sm:inline">Google Auth</span>

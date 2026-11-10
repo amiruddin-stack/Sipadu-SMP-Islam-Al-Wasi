@@ -60,7 +60,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMobileSidebar }
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-[#25D366] border-b border-[#1EBE5D]">
+    <header className="sticky top-0 z-30 bg-[linear-gradient(180deg,#05A287_0%,#1FA189_50%,#84C6BC_100%)] border-b border-[#078F7B]">
       <div className="flex items-center justify-between h-16 px-4 md:px-6 text-[#073B2A]">
         {/* Left: Mobile hamburger & Current page title */}
         <div className="flex items-center gap-3">

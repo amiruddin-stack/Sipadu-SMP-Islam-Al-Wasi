@@ -48,7 +48,7 @@ function AppContent() {
   };
 
   return (
-    <div className="flex h-screen w-full bg-[#F8FAF9] text-slate-800 overflow-hidden font-sans">
+    <div className="flex h-screen w-full bg-[#F4F9F7] text-slate-800 overflow-hidden font-sans">
       {/* Sidebar for PC and Mobile Drawer */}
       <Sidebar
         activeTab={activeTab}

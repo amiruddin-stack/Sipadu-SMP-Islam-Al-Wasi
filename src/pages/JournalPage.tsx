@@ -145,14 +145,14 @@ export const JournalPage: React.FC = () => {
               onClick={handleExportCSV}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
             >
-              <span>📥</span>
+              
               <span className="hidden sm:inline">Ekspor CSV</span>
             </button>
             <button
               onClick={handleOpenAdd}
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-[#0F5132] hover:bg-[#0B3D26] rounded-lg transition-colors shadow-xs"
             >
-              <span>➕</span>
+              
               <span>Tambah Jurnal</span>
             </button>
           </div>
@@ -215,7 +215,7 @@ export const JournalPage: React.FC = () => {
       <div className="space-y-3">
         {filteredJournals.length === 0 ? (
           <div className="p-12 text-center rounded-2xl bg-white border border-slate-200 text-slate-400">
-            <span className="text-3xl block mb-2">📖</span>
+            
             <p className="text-sm font-medium">Belum ada jurnal KBM yang sesuai filter.</p>
           </div>
         ) : (
@@ -233,10 +233,10 @@ export const JournalPage: React.FC = () => {
                     {journal.className}
                   </span>
                   <span className="text-xs text-slate-500 font-medium">
-                    📅 {journal.date}
+                     {journal.date}
                   </span>
                   <span className="text-xs text-slate-400">
-                    ⏰ {journal.lessonHours}
+                     {journal.lessonHours}
                   </span>
                 </div>
 
@@ -249,14 +249,14 @@ export const JournalPage: React.FC = () => {
                     className="p-1.5 text-xs text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-md"
                     title="Edit Jurnal"
                   >
-                    ✏️
+                    
                   </button>
                   <button
                     onClick={() => handleDelete(journal.id)}
                     className="p-1.5 text-xs text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md"
                     title="Hapus Jurnal"
                   >
-                    🗑️
+                    
                   </button>
                 </div>
               </div>

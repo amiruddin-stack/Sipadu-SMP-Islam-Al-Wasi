@@ -12,16 +12,16 @@ interface HeaderProps {
 }
 
 const tabTitles: Record<NavTab, { title: string; subtitle: string; emoji: string }> = {
-  dashboard: { title: 'Dashboard', subtitle: 'Ringkasan operasional dan statistik akademik', emoji: '📊' },
-  attendance: { title: 'Absensi Digital', subtitle: 'Pencatatan dan rekap kehadiran harian kelas', emoji: '📋' },
-  journal: { title: 'Jurnal Guru', subtitle: 'Dokumentasi kegiatan belajar mengajar (KBM)', emoji: '📖' },
-  behavior: { title: 'Perilaku Siswa', subtitle: 'Pencatatan perkembangan karakter dan pembinaan', emoji: '🌟' },
-  counseling: { title: 'Bimbingan Konseling (BK)', subtitle: 'Dokumentasi layanan konseling dan tindak lanjut', emoji: '🤝' },
-  assessment: { title: 'Penilaian Kelas', subtitle: 'Input nilai tugas, ulangan harian, PTS, dan PAS', emoji: '📝' },
-  grades: { title: 'Rekap Nilai', subtitle: 'Buku leger nilai dan capaian kompetensi siswa', emoji: '📈' },
-  master: { title: 'Data Master', subtitle: 'Pengelolaan data siswa, guru, kelas, dan mapel', emoji: '🗂️' },
-  reports: { title: 'Pusat Laporan', subtitle: 'Cetak dan ekspor laporan terpadu ke PDF/Excel', emoji: '📑' },
-  settings: { title: 'Pengaturan', subtitle: 'Profil sekolah, hak akses, dan panduan APK', emoji: '⚙️' },
+  dashboard: { title: 'Dashboard', subtitle: 'Ringkasan operasional dan statistik akademik' },
+  attendance: { title: 'Absensi Digital', subtitle: 'Pencatatan dan rekap kehadiran harian kelas' },
+  journal: { title: 'Jurnal Guru', subtitle: 'Dokumentasi kegiatan belajar mengajar (KBM)' },
+  behavior: { title: 'Perilaku Siswa', subtitle: 'Pencatatan perkembangan karakter dan pembinaan' },
+  counseling: { title: 'Bimbingan Konseling (BK)', subtitle: 'Dokumentasi layanan konseling dan tindak lanjut' },
+  assessment: { title: 'Penilaian Kelas', subtitle: 'Input nilai tugas, ulangan harian, PTS, dan PAS' },
+  grades: { title: 'Rekap Nilai', subtitle: 'Buku leger nilai dan capaian kompetensi siswa' },
+  master: { title: 'Data Master', subtitle: 'Pengelolaan data siswa, guru, kelas, dan mapel' },
+  reports: { title: 'Pusat Laporan', subtitle: 'Cetak dan ekspor laporan terpadu ke PDF/Excel' },
+  settings: { title: 'Pengaturan', subtitle: 'Profil sekolah, hak akses, dan panduan APK' },
 };
 
 export const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMobileSidebar }) => {
@@ -60,8 +60,8 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMobileSidebar }
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-white border-b border-slate-200">
-      <div className="flex items-center justify-between h-16 px-4 md:px-6">
+    <header className="sticky top-0 z-30 bg-[#25D366] border-b border-[#1EBE5D]">
+      <div className="flex items-center justify-between h-16 px-4 md:px-6 text-[#073B2A]">
         {/* Left: Mobile hamburger & Current page title */}
         <div className="flex items-center gap-3">
           <button
@@ -69,20 +69,19 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMobileSidebar }
             className="md:hidden flex items-center justify-center w-9 h-9 text-slate-700 hover:bg-slate-100 rounded-lg"
             title="Buka Menu"
           >
-            <span className="text-xl">☰</span>
+            
           </button>
 
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-lg md:text-xl">{currentTabInfo.emoji}</span>
-              <h1 className="text-base md:text-lg font-bold text-slate-900">
+              <h1 className="text-base md:text-lg font-bold text-[#073B2A]">
                 {currentTabInfo.title}
               </h1>
               <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
                 {settings.activeAcademicYear} {settings.activeSemester}
               </span>
             </div>
-            <p className="hidden md:block text-xs text-slate-500">
+            <p className="hidden md:block text-xs text-[#145C3F]">
               {currentTabInfo.subtitle}
             </p>
           </div>
@@ -94,8 +93,8 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMobileSidebar }
           <div
             className={`hidden lg:flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-lg border font-medium ${
               isOnline
-                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                : 'bg-amber-50 text-amber-800 border-amber-200'
+                ? 'bg-white/70 text-[#075B36] border-white/60'
+                : 'bg-white/70 text-amber-900 border-white/60'
             }`}
             title={isOnline ? 'Terhubung dengan Firestore' : 'Mode Offline Lokal'}
           >
@@ -119,7 +118,6 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMobileSidebar }
               }`}
               title="Ganti Peran Hak Akses (RBAC)"
             >
-              <span>🎭</span>
               <span className="hidden sm:inline">Peran:</span>
               <span>{currentUser ? roleLabels[currentUser.role] : 'Admin'}</span>
               <span className="text-[10px]">▼</span>
@@ -169,7 +167,6 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMobileSidebar }
               className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-rose-600 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200"
               title="Keluar / Logout"
             >
-              <span>🚪</span>
               <span className="hidden md:inline">Keluar</span>
             </button>
           ) : (
@@ -178,7 +175,6 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMobileSidebar }
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors border border-slate-300"
               title="Masuk dengan Akun Google Sekolah"
             >
-              <span>🔑</span>
               <span className="hidden sm:inline">Google Auth</span>
             </button>
           )}

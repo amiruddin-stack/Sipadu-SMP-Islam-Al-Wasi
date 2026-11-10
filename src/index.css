@@ -3,7 +3,7 @@
 :root { color-scheme: light; }
 html, body, #root { min-height: 100%; }
 body { background: #F7FAF8; color: #172B22; }
-img[alt=""], img[aria-hidden="true"] { display: none !important; }
+img, svg[aria-hidden="true"] { display: none !important; }
 
 @layer base {
   body {

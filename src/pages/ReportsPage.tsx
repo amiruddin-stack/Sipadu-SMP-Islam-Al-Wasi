@@ -111,14 +111,14 @@ export const ReportsPage: React.FC = () => {
               onClick={handleExportCSV}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
             >
-              <span>📥</span>
+              
               <span>Ekspor CSV</span>
             </button>
             <button
               onClick={handlePrint}
               className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold text-white bg-[#0F5132] hover:bg-[#0B3D26] rounded-lg transition-colors shadow-xs"
             >
-              <span>🖨️</span>
+              
               <span>Cetak Dokumen Resmi</span>
             </button>
           </div>
@@ -134,7 +134,7 @@ export const ReportsPage: React.FC = () => {
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            <span>📋</span> Laporan Presensi
+             Laporan Presensi
           </button>
 
           <button
@@ -145,7 +145,7 @@ export const ReportsPage: React.FC = () => {
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            <span>📖</span> Laporan Jurnal KBM
+             Laporan Jurnal KBM
           </button>
 
           <button
@@ -156,7 +156,7 @@ export const ReportsPage: React.FC = () => {
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            <span>🌟</span> Laporan Karakter Siswa
+             Laporan Karakter Siswa
           </button>
 
           {canAccessBK && (
@@ -168,7 +168,7 @@ export const ReportsPage: React.FC = () => {
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              <span>🤝</span> Laporan Layanan BK
+               Laporan Layanan BK
             </button>
           )}
 
@@ -180,7 +180,7 @@ export const ReportsPage: React.FC = () => {
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            <span>📈</span> Laporan Hasil Belajar
+             Laporan Hasil Belajar
           </button>
         </div>
 
@@ -207,7 +207,7 @@ export const ReportsPage: React.FC = () => {
         <div className="text-center pb-4 border-b-2 border-slate-900 space-y-1">
           <div className="flex items-center justify-center gap-4">
             <div className="w-14 h-14 rounded-full bg-[#0F5132] text-white flex items-center justify-center text-2xl font-bold">
-              🕌
+              
             </div>
             <div className="text-left">
               <span className="text-xs font-semibold text-slate-600 tracking-wider uppercase block">

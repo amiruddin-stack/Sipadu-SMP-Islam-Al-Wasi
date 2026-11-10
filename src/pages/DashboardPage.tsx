@@ -53,7 +53,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
   return (
     <div className="space-y-6">
-      <section className="block lg:hidden rounded-2xl p-5 md:p-6 text-white shadow-sm" style={{ background: 'linear-gradient(180deg, #05A287 0%, #1FA189 50%, #84C6BC 100%)' }}>
+      <section className="block lg:hidden rounded-2xl p-5 md:p-6 text-[#073B2A] shadow-sm bg-[#25D366]">
         <h2 className="text-xl md:text-2xl font-bold">Dashboard</h2>
       </section>
 
@@ -68,10 +68,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
             {([
-              ['Hadir', totals.Hadir, 'text-emerald-700', 'bg-emerald-500'],
-              ['Sakit', totals.Sakit, 'text-blue-700', 'bg-blue-500'],
-              ['Izin', totals.Izin, 'text-amber-700', 'bg-amber-500'],
-              ['Alpa', totals.Alpa, 'text-rose-700', 'bg-rose-500'],
+              ['Hadir', totals.Hadir, 'text-emerald-700'],
+              ['Sakit', totals.Sakit, 'text-blue-700'],
+              ['Izin', totals.Izin, 'text-amber-700'],
+              ['Alpa', totals.Alpa, 'text-rose-700'],
             ] as const).map(([label, value, textColor]) => (
               <div key={label} className="rounded-xl bg-slate-50 p-3">
                 <p className="text-xs text-slate-500">{label}</p>
@@ -86,7 +86,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               <strong className="text-[#058D78]">{attendancePercent}%</strong>
             </div>
             <div className="h-2.5 rounded-full bg-slate-100 overflow-hidden">
-              <div className="h-full rounded-full bg-[#05A287]" style={{ width: `${attendancePercent}%` }} />
+              <div className="h-full rounded-full bg-[#25D366]" style={{ width: `${attendancePercent}%` }} />
             </div>
             <p className="text-[11px] text-slate-400 mt-2">{totalRecorded} catatan kehadiran dari seluruh kelas</p>
           </div>

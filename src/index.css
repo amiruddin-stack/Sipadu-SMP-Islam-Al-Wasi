@@ -32,7 +32,7 @@ svg[role="img"] {
   header,
   nav,
   button,
-  .print\\:hidden {
+  .print\:hidden {
     display: none !important;
   }
 

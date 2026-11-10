@@ -95,13 +95,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Sidebar Container */}
       <aside
         className={`fixed top-0 bottom-0 left-0 z-50 flex flex-col bg-white border-r border-slate-200 transition-all duration-200 md:static ${
-          collapsed ? 'w-20' : 'w-64'
+          'w-64'
         } ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
       >
         {/* Brand Header */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-slate-100">
           <div className="flex items-center gap-3 overflow-hidden">
-            {!collapsed && (
+            {true && (
               <div className="flex flex-col min-w-0">
                 <span className="text-sm font-bold tracking-tight text-slate-900 truncate">
                   SIPADU AL WASI
@@ -112,16 +112,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </div>
             )}
           </div>
-
-          {/* Desktop Toggle Button */}
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="hidden md:flex items-center justify-center w-7 h-7 text-xs text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-            title={collapsed ? 'Perluas Menu' : 'Perkecil Menu'}
-          >
-            <span>{collapsed ? '▶' : '◀'}</span>
-          </button>
-
           {/* Mobile Close Button */}
           <button
             onClick={() => setMobileOpen(false)}
@@ -135,7 +125,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
           {menuSections.map((section, idx) => (
             <div key={idx} className="space-y-1">
-              {!collapsed && (
+              {true && (
                 <div className="px-3 pb-1 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
                   {section.title}
                 </div>

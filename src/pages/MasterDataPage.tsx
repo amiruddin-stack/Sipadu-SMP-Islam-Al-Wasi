@@ -99,7 +99,7 @@ export const MasterDataPage: React.FC = () => {
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            <span>🎓</span> Data Siswa ({students.length})
+             Data Siswa ({students.length})
           </button>
           <button
             onClick={() => setActiveSubTab('guru')}
@@ -109,7 +109,7 @@ export const MasterDataPage: React.FC = () => {
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            <span>👨‍🏫</span> Data Guru ({teachers.length})
+             Data Guru ({teachers.length})
           </button>
           <button
             onClick={() => setActiveSubTab('akademik')}
@@ -119,7 +119,7 @@ export const MasterDataPage: React.FC = () => {
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            <span>🏫</span> Kelas & Mapel
+             Kelas & Mapel
           </button>
         </div>
 
@@ -128,7 +128,7 @@ export const MasterDataPage: React.FC = () => {
             onClick={handleOpenAddStudent}
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-[#0F5132] hover:bg-[#0B3D26] rounded-lg transition-colors shadow-xs"
           >
-            <span>➕</span>
+            
             <span>Tambah Siswa</span>
           </button>
         )}
@@ -223,14 +223,14 @@ export const MasterDataPage: React.FC = () => {
                               className="p-1 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded"
                               title="Edit Siswa"
                             >
-                              ✏️
+                              
                             </button>
                             <button
                               onClick={() => handleDeleteStudent(std.id, std.name)}
                               className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded"
                               title="Hapus Siswa"
                             >
-                              🗑️
+                              
                             </button>
                           </div>
                         </td>
@@ -305,7 +305,7 @@ export const MasterDataPage: React.FC = () => {
           {/* Classes */}
           <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
             <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <span>🏫</span> Daftar Rombongan Belajar (Kelas)
+               Daftar Rombongan Belajar (Kelas)
             </h3>
             <p className="text-xs text-slate-500">
               6 rombongan belajar aktif pada tahun ajaran 2026/2027
@@ -328,7 +328,7 @@ export const MasterDataPage: React.FC = () => {
           {/* Subjects */}
           <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
             <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <span>📚</span> Kurikulum & Mata Pelajaran
+               Kurikulum & Mata Pelajaran
             </h3>
             <p className="text-xs text-slate-500">
               Integrasi kurikulum nasional dan kekhasan pendidikan Islam Al-Wasi’

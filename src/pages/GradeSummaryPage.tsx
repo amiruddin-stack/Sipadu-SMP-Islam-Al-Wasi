@@ -120,14 +120,14 @@ export const GradeSummaryPage: React.FC = () => {
               onClick={handleExportCSV}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
             >
-              <span>📥</span>
+              
               <span className="hidden sm:inline">Ekspor Excel</span>
             </button>
             <button
               onClick={handlePrint}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
             >
-              <span>🖨️</span>
+              
               <span className="hidden sm:inline">Cetak Leger</span>
             </button>
           </div>

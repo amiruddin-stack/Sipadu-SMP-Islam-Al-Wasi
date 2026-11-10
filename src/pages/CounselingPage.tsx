@@ -32,7 +32,7 @@ export const CounselingPage: React.FC = () => {
     return (
       <div className="p-8 md:p-12 text-center rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4 max-w-xl mx-auto my-8">
         <div className="w-16 h-16 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-3xl mx-auto">
-          🔒
+          
         </div>
         <div className="space-y-1">
           <h2 className="text-base font-bold text-slate-900">
@@ -127,7 +127,7 @@ export const CounselingPage: React.FC = () => {
                 Layanan Bimbingan Konseling (BK)
               </h2>
               <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                🔒 Konfidensial
+                 Konfidensial
               </span>
             </div>
             <p className="text-xs text-slate-500">
@@ -139,7 +139,7 @@ export const CounselingPage: React.FC = () => {
             onClick={handleOpenAdd}
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-[#0F5132] hover:bg-[#0B3D26] rounded-lg transition-colors shadow-xs"
           >
-            <span>➕</span>
+            
             <span>Tambah Sesi Konseling</span>
           </button>
         </div>
@@ -183,7 +183,7 @@ export const CounselingPage: React.FC = () => {
       <div className="space-y-3">
         {filteredCounselings.length === 0 ? (
           <div className="p-12 text-center rounded-2xl bg-white border border-slate-200 text-slate-400">
-            <span className="text-3xl block mb-2">🤝</span>
+            
             <p className="text-sm font-medium">Belum ada sesi konseling yang tercatat.</p>
           </div>
         ) : (
@@ -203,7 +203,7 @@ export const CounselingPage: React.FC = () => {
                   <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-800 border border-blue-200">
                     Bimbingan {item.serviceType}
                   </span>
-                  <span className="text-xs text-slate-400">📅 {item.date}</span>
+                  <span className="text-xs text-slate-400"> {item.date}</span>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -237,14 +237,14 @@ export const CounselingPage: React.FC = () => {
                     className="p-1.5 text-xs text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-md"
                     title="Edit Sesi"
                   >
-                    ✏️
+                    
                   </button>
                   <button
                     onClick={() => handleDelete(item.id)}
                     className="p-1.5 text-xs text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md"
                     title="Hapus"
                   >
-                    🗑️
+                    
                   </button>
                 </div>
               </div>

@@ -77,40 +77,36 @@ function AppContent() {
           <button
             onClick={() => setActiveTab('dashboard')}
             className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-semibold transition-colors ${
-              activeTab === 'dashboard' ? 'text-[#0F5132] font-bold' : 'text-slate-500'
+              activeTab === 'dashboard' ? 'text-[#168A48] font-bold' : 'text-slate-500'
             }`}
           >
-            <span className="text-base">📊</span>
             <span>Dashboard</span>
           </button>
 
           <button
             onClick={() => setActiveTab('attendance')}
             className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-semibold transition-colors ${
-              activeTab === 'attendance' ? 'text-[#0F5132] font-bold' : 'text-slate-500'
+              activeTab === 'attendance' ? 'text-[#168A48] font-bold' : 'text-slate-500'
             }`}
           >
-            <span className="text-base">📋</span>
             <span>Absensi</span>
           </button>
 
           <button
             onClick={() => setActiveTab('journal')}
             className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-semibold transition-colors ${
-              activeTab === 'journal' ? 'text-[#0F5132] font-bold' : 'text-slate-500'
+              activeTab === 'journal' ? 'text-[#168A48] font-bold' : 'text-slate-500'
             }`}
           >
-            <span className="text-base">📖</span>
             <span>Jurnal</span>
           </button>
 
           <button
             onClick={() => setActiveTab('assessment')}
             className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-semibold transition-colors ${
-              activeTab === 'assessment' ? 'text-[#0F5132] font-bold' : 'text-slate-500'
+              activeTab === 'assessment' ? 'text-[#168A48] font-bold' : 'text-slate-500'
             }`}
           >
-            <span className="text-base">📝</span>
             <span>Nilai</span>
           </button>
 
@@ -118,7 +114,6 @@ function AppContent() {
             onClick={() => setMobileOpen(true)}
             className="flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-semibold text-slate-500"
           >
-            <span className="text-base">☰</span>
             <span>Menu</span>
           </button>
         </nav>

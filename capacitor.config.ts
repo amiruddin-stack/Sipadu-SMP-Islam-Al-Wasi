@@ -10,7 +10,7 @@ export interface CapacitorConfig {
 
 const config: CapacitorConfig = {
   appId: 'id.sch.smpialwasi.sipadu',
-  appName: 'SIPADU AL WASI',
+  appName: 'SIMPATIK AL-WASI’',
   webDir: 'dist',
   bundledWebRuntime: false,
   server: {

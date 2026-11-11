@@ -102,7 +102,7 @@ export const SettingsPage: React.FC = () => {
               <p className="font-bold text-emerald-900">npx cap open android</p>
             </div>
             <p className="text-[11px] text-emerald-800">
-              Konfigurasi <code>capacitor.config.ts</code> dengan ID <code>id.sch.smpialwasi.sipadu</code> sudah terkonfigurasi.
+              Nama aplikasi Android telah diperbarui menjadi SIMPATIK. ID paket Android tetap dipertahankan agar pembaruan tidak dianggap sebagai aplikasi baru.
             </p>
           </div>
         </div>

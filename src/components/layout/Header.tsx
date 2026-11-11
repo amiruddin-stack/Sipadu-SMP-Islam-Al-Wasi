@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { useData } from '../../context/DataContext';
 import { UserRole } from '../../types';
 import { PWAInstallButton } from '../common/PWAInstallButton';
 import { NavTab } from './Sidebar';
@@ -25,7 +24,6 @@ const tabTitles: Record<NavTab, { title: string; subtitle: string }> = {
 
 export const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMobileSidebar }) => {
   const { currentUser, switchRole, loginWithGoogle, logout, firebaseUser } = useAuth();
-  const { settings } = useData();
   const [showRoleMenu, setShowRoleMenu] = useState(false);
 
   const roleOptions: { role: UserRole; label: string; desc: string }[] = [
@@ -48,8 +46,8 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMobileSidebar }
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-[#25D366] border-b border-[#1DB954]">
-      <div className="flex items-center justify-between h-16 px-4 md:px-6 text-[#073B2A]">
+    <header className="sticky top-0 z-30 bg-gradient-to-r from-[#0F9D8A] via-[#0D9488] to-[#0B887A] border-b border-[#0B887A]/70">
+      <div className="flex items-center justify-between h-16 px-4 md:px-6 text-white">
         <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={onOpenMobileSidebar}
@@ -65,11 +63,8 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMobileSidebar }
               <h1 className="text-base md:text-lg font-bold text-[#073B2A]">
                 {currentTabInfo.title}
               </h1>
-              <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-white/90 text-[#075B36] border border-white/70">
-                {settings.activeAcademicYear} {settings.activeSemester}
-              </span>
-            </div>
-            <p className="hidden md:block lg:hidden text-xs text-[#145C3F]">
+</div>
+            <p className="hidden md:block lg:hidden text-xs text-white/85">
               {currentTabInfo.subtitle}
             </p>
           </div>

@@ -95,11 +95,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Sidebar Container */}
       <aside
         className={`fixed top-0 bottom-0 left-0 z-50 flex flex-col bg-white border-r border-slate-200 transition-all duration-200 md:static ${
-          'w-64'
+          'w-[280px] shrink-0'
         } ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
       >
         {/* Brand Header */}
-        <div className="flex items-center justify-between h-16 px-4 border-b border-slate-100">
+        <div className="flex items-center justify-between h-14 px-4 border-b border-slate-100">
           <div className="flex items-center gap-3 overflow-hidden">
             {true && (
               <div className="flex flex-col min-w-0">
@@ -141,7 +141,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         collapsed ? 'justify-center' : 'justify-start'
                       } ${
                         isActive
-                          ? 'bg-[#19B981] text-white shadow-xs'
+                          ? 'bg-[#e7f6f2] text-[#087d70] shadow-xs'
                           : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                       }`}
                       title={collapsed ? item.label : undefined}

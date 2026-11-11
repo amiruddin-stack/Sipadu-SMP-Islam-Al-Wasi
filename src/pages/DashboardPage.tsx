@@ -84,13 +84,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
       </section>
 
       <main className="mx-auto max-w-[1500px] space-y-5 px-3 py-5 md:px-5 md:py-6">
-        <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <article className="overflow-hidden rounded-[20px] border border-[#d8e9e9] bg-white shadow-[0_3px_14px_rgba(20,90,100,.05)]">
+        <section className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+          <article className="min-w-0 overflow-hidden rounded-[20px] border border-[#d8e9e9] bg-white shadow-[0_3px_14px_rgba(20,90,100,.05)]">
             <div className="flex items-center justify-between gap-3 bg-[#f8fcfc] px-4 py-3 md:px-5">
               <div className="flex items-center gap-3"><span className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500 text-white"><Users size={25} fill="currentColor" /></span><div><h2 className="text-lg font-extrabold text-[#14536b] md:text-xl">Kehadiran Siswa</h2><p className="text-[11px] text-slate-500">{attendanceDateLabel}</p></div></div>
               <button onClick={() => onNavigate('attendance')} className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm">Semua kelas⌄</button>
             </div>
-            <div className="flex flex-col items-center gap-5 p-5 sm:flex-row sm:justify-around md:p-6">
+            <div className="flex flex-col items-center gap-5 p-4 xl:flex-row xl:justify-around md:p-6">
               <div className="relative h-48 w-48 shrink-0 rounded-full" style={{ background: attendanceGradient }}>
                 <div className="absolute inset-[19%] flex flex-col items-center justify-center rounded-full bg-white text-center"><strong className="text-3xl text-[#17334b]">{attendancePercent}%</strong><span className="mt-1 text-sm leading-tight text-slate-600">Rata-rata<br />Kehadiran</span></div>
               </div>
@@ -125,10 +125,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
         <section className="rounded-[20px] bg-gradient-to-r from-[#e4f6f3] to-[#eef9f8] p-3 md:p-4">
           <div className="mb-3 flex items-center gap-2"><span className="text-2xl text-[#0b9b82]">ϟ</span><h2 className="text-xl font-extrabold text-[#14536b]">Menu Cepat</h2></div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-            {quickItems.map(item => <button key={item.tab} onClick={() => onNavigate(item.tab)} className="group flex min-h-[82px] items-center gap-3 rounded-2xl border border-[#d6e9e8] bg-white px-3 py-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-              <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-white ${item.color}`}>{item.icon}</span>
-              <span className="min-w-0 flex-1"><strong className="block text-sm leading-tight text-[#173b56]">{item.label}</strong><small className="mt-1 block text-[10px] text-slate-500">{item.description}</small></span><ArrowRight size={18} className="shrink-0 text-[#168b8b] transition group-hover:translate-x-1" />
+          <div className="grid grid-cols-3 gap-x-2 gap-y-4 sm:grid-cols-5">
+            {quickItems.map(item => <button key={item.tab} onClick={() => onNavigate(item.tab)} className="group flex min-w-0 flex-col items-center justify-start gap-2 rounded-xl px-1 py-2 text-center transition hover:bg-white/80">
+              <span className={`flex h-14 w-14 items-center justify-center rounded-full text-white shadow-sm transition group-hover:-translate-y-0.5 group-hover:shadow-md ${item.color}`}>{item.icon}</span>
+              <strong className="max-w-full text-xs font-bold leading-tight text-[#173b56]">{item.label}</strong>
             </button>)}
           </div>
         </section>

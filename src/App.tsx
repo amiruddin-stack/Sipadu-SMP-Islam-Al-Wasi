@@ -23,7 +23,7 @@ function AppContent() {
   const renderCurrentPage = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardPage onNavigate={(tab) => setActiveTab(tab)} />;
+        return <DashboardPage onNavigate={(tab) => setActiveTab(tab)} onOpenMenu={() => setMobileOpen(true)} />;
       case 'attendance':
         return <AttendancePage />;
       case 'journal':
@@ -43,7 +43,7 @@ function AppContent() {
       case 'settings':
         return <SettingsPage />;
       default:
-        return <DashboardPage onNavigate={(tab) => setActiveTab(tab)} />;
+        return <DashboardPage onNavigate={(tab) => setActiveTab(tab)} onOpenMenu={() => setMobileOpen(true)} />;
     }
   };
 

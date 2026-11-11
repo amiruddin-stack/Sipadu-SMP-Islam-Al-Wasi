@@ -17,6 +17,7 @@ const tabTitles: Record<NavTab, { title: string; subtitle: string }> = {
   counseling: { title: 'Bimbingan Konseling (BK)', subtitle: 'Dokumentasi layanan konseling dan tindak lanjut' },
   assessment: { title: 'Penilaian Kelas', subtitle: 'Input nilai tugas, ulangan harian, PTS, dan PAS' },
   exams: { title: 'Modul Ujian', subtitle: 'Bank soal, pelaksanaan ujian, dan hasil siswa' },
+  exams: { title: 'Modul Ujian', subtitle: 'Bank soal, pelaksanaan ujian, dan hasil siswa' },
   grades: { title: 'Rekap Nilai', subtitle: 'Buku leger nilai dan capaian kompetensi siswa' },
   master: { title: 'Data Master', subtitle: 'Pengelolaan data siswa, guru, kelas, dan mapel' },
   reports: { title: 'Pusat Laporan', subtitle: 'Cetak dan ekspor laporan terpadu ke PDF/Excel' },

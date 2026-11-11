@@ -2,7 +2,10 @@ import React from 'react';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import { NavTab } from '../components/layout/Sidebar';
-import { CalendarCheck, PencilLine, Users, BookOpen, ClipboardList, Settings, ArrowRight, FileText, ClipboardCheck } from 'lucide-react';
+import {
+  CalendarCheck, PencilLine, Users, BookOpen, ClipboardList, ClipboardCheck,
+  GraduationCap, MessageCircle, Handshake, ArrowUpRight
+} from 'lucide-react';
 
 interface DashboardPageProps {
   onNavigate: (tab: NavTab) => void;
@@ -18,7 +21,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
     ? todayStr
     : relevantAttendances.reduce((latest, record) => record.date > latest ? record.date : latest, '');
   const latestAttendances = relevantAttendances.filter(record => record.date === attendanceDate);
-  const totals = { Hadir: 0, Izin: 0, Sakit: 0, Alpa: 0 };
+  const totals = { Hadir: 0, Sakit: 0, Izin: 0, Alpa: 0 };
   latestAttendances.forEach(record => Object.values(record.records || {}).forEach(status => {
     if (status in totals) totals[status as keyof typeof totals]++;
   }));
@@ -37,120 +40,112 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
   });
   const maxMonthly = Math.max(1, ...monthItems.map(item => item.count));
   const currentMonthCount = journals.filter(journal => typeof journal.date === 'string' && journal.date.slice(0, 7) === todayStr.slice(0, 7)).length;
-  const attendanceGradient = `conic-gradient(#0ca678 0% ${attendancePercent}%, #f2b705 ${attendancePercent}% ${attendancePercent + (totalRecorded ? totals.Izin / totalRecorded * 100 : 0)}%, #f05b62 ${attendancePercent + (totalRecorded ? totals.Izin / totalRecorded * 100 : 0)}% ${attendancePercent + (totalRecorded ? (totals.Izin + totals.Sakit) / totalRecorded * 100 : 0)}%, #a8b4c0 0 100%)`;
+  const attendanceGradient = `conic-gradient(
+    #05A287 0% ${totalRecorded ? totals.Hadir / totalRecorded * 100 : 0}%,
+    #2B6CB0 ${totalRecorded ? totals.Hadir / totalRecorded * 100 : 0}% ${totalRecorded ? (totals.Hadir + totals.Sakit) / totalRecorded * 100 : 0}%,
+    #D69E2E ${totalRecorded ? (totals.Hadir + totals.Sakit) / totalRecorded * 100 : 0}% ${totalRecorded ? (totals.Hadir + totals.Sakit + totals.Izin) / totalRecorded * 100 : 0}%,
+    #C53030 ${totalRecorded ? (totals.Hadir + totals.Sakit + totals.Izin) / totalRecorded * 100 : 0}% 100%
+  )`;
 
-  const quickItems: { label: string; description: string; tab: NavTab; icon: React.ReactNode; color: string }[] = [
-    { label: 'Presensi Siswa', description: 'Catat kehadiran', tab: 'attendance', icon: <Users size={25} />, color: 'bg-emerald-500' },
-    { label: 'Jurnal Pembelajaran', description: 'Catat kegiatan KBM', tab: 'journal', icon: <BookOpen size={25} />, color: 'bg-blue-600' },
-    { label: 'Input Nilai Kelas', description: 'Kelola penilaian', tab: 'assessment', icon: <ClipboardList size={25} />, color: 'bg-purple-600' },
-    { label: 'Ujian', description: 'Bank soal dan ujian siswa', tab: 'exams', icon: <ClipboardCheck size={25} />, color: 'bg-teal-600' },
-    { label: 'Ujian', description: 'Bank soal dan ujian siswa', tab: 'exams', icon: <ClipboardCheck size={25} />, color: 'bg-teal-600' },
-    { label: 'Catatan Wali Kelas', description: 'Catatan siswa', tab: 'behavior', icon: <FileText size={25} />, color: 'bg-cyan-700' },
-    { label: 'Pengaturan', description: 'Atur aplikasi', tab: 'settings', icon: <Settings size={25} />, color: 'bg-orange-500' },
+  const quickItems: { label: string; description: string; tab: NavTab; icon: React.ReactNode }[] = [
+    { label: 'Presensi siswa', description: 'Catat kehadiran siswa', tab: 'attendance', icon: <Users size={23} /> },
+    { label: 'Jurnal pembelajaran', description: 'Catat kegiatan KBM', tab: 'journal', icon: <BookOpen size={23} /> },
+    { label: 'Input nilai kelas', description: 'Kelola penilaian', tab: 'assessment', icon: <ClipboardList size={23} /> },
+    { label: 'Ujian', description: 'Bank soal dan hasil ujian', tab: 'exams', icon: <ClipboardCheck size={23} /> },
+  ];
+
+  const principles = [
+    { title: 'Terpadu', description: 'Satu data siswa untuk absensi, penilaian, dan rapor.', icon: <GraduationCap size={22} /> },
+    { title: 'Interaktif', description: 'Ujian online, notifikasi, dan hasil langsung tampil.', icon: <MessageCircle size={22} /> },
+    { title: 'Kolaboratif', description: 'Guru, wali kelas, BK, dan kepala sekolah berbagi data.', icon: <Handshake size={22} /> },
   ];
 
   return (
-    <div className="min-h-full bg-[#f5f9f8] text-slate-800">
-      <header className="sticky top-0 z-40 bg-[#1599a8] text-white shadow-md">
-        <div className="flex h-[56px] items-center justify-between gap-3 px-4 md:px-6">
-          <button onClick={() => onNavigate('dashboard')} className="flex items-center gap-3 text-left">
-            <img src={`${import.meta.env.BASE_URL}Helmi%20hawari_20261111_083840_0000.png`} alt="" className="h-8 w-8 object-contain" />
-            <span className="text-base font-extrabold tracking-wide">SIMPATIK</span>
-          </button>
-          <span className="text-xs font-semibold text-white/90 md:text-sm">Dashboard</span>
-        </div>
-        <nav aria-label="Navigasi utama" className="flex items-center gap-1 overflow-x-auto border-t border-white/20 px-3 py-2 md:justify-center md:px-6">
-          {([
-            ['dashboard','Beranda'],['attendance','Presensi'],['journal','Jurnal'],['assessment','Penilaian'],['exams','Ujian'],['behavior','Perilaku'],['counseling','BK'],['grades','Rekap Nilai'],['master','Data Master'],['reports','Laporan'],['settings','Pengaturan']
-          ] as [NavTab,string][]).map(([tab,label]) => <button key={tab} onClick={() => onNavigate(tab)} className={`shrink-0 rounded-lg px-3 py-2 text-xs font-semibold transition ${tab === 'dashboard' ? 'bg-white text-[#087d79]' : 'text-white/95 hover:bg-white/15'}`}>{label}</button>)}
-        </nav>
-      </header>
-
-      <section className="relative overflow-hidden bg-[#1599a8] px-5 py-7 text-white md:px-9 md:py-8">
-        <div className="pointer-events-none absolute -right-12 -top-20 h-64 w-64 rounded-full bg-white/5" />
-        <div className="relative mx-auto flex max-w-[1500px] items-center justify-between gap-5">
+    <div className="min-h-full bg-[#F3F8F7] text-[#0F2A25]">
+      <section className="relative overflow-hidden bg-[#018470] px-5 py-6 text-white lg:px-10 lg:py-7">
+        <div className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full border-[36px] border-white/5" />
+        <div className="relative mx-auto flex max-w-[1500px] items-center justify-between gap-6">
           <div className="min-w-0">
-            <p className="text-sm text-white/85">Selamat datang, <strong>{currentUser?.displayName || firebaseUser?.displayName || 'Pengguna'}</strong></p>
-            <h1 className="mt-1 text-5xl font-black leading-none tracking-tight sm:text-6xl lg:text-7xl">SIMPATIK</h1>
-            <p className="mt-3 max-w-xl text-sm font-semibold leading-relaxed md:text-base">Sistem Informasi Manajemen Pendidikan dan Akademik<br className="hidden sm:block" /> Terpadu, Interaktif dan Kolaboratif</p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <button onClick={() => onNavigate('attendance')} className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-xs font-bold text-[#087d79] shadow-sm transition hover:bg-teal-50"><CalendarCheck size={16} /> Lakukan Presensi</button>
-              <button onClick={() => onNavigate('journal')} className="inline-flex items-center gap-2 rounded-full border border-white/70 px-5 py-2.5 text-xs font-bold text-white transition hover:bg-white/10"><PencilLine size={16} /> Tulis Jurnal</button>
+            <p className="text-sm font-medium text-white/90">Selamat datang, <strong>{currentUser?.displayName || firebaseUser?.displayName || 'Pengguna'}</strong></p>
+            <h1 className="mt-1 text-4xl font-black leading-none tracking-tight sm:text-5xl lg:text-6xl">SIMPATIK</h1>
+            <p className="mt-2 max-w-2xl text-sm font-semibold leading-relaxed text-white/95 md:text-base">Sistem Informasi Manajemen Pendidikan dan Akademik Terpadu, Interaktif dan Kolaboratif</p>
+            <p className="mt-1 text-xs font-medium tracking-wide text-white/85 md:text-sm">Qurani, Ramah Anak dan Berkarakter</p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <button type="button" onClick={() => onNavigate('attendance')} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-[#015E4F] shadow-sm transition hover:bg-[#E3F4F0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                <CalendarCheck size={17} aria-hidden="true" /> Lakukan Presensi
+              </button>
+              <button type="button" onClick={() => onNavigate('journal')} className="inline-flex min-h-11 items-center gap-2 rounded-full border-[1.5px] border-white px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                <PencilLine size={17} aria-hidden="true" /> Tulis Jurnal
+              </button>
             </div>
           </div>
           <div className="hidden shrink-0 flex-col items-center justify-center sm:flex">
-            <img src={`${import.meta.env.BASE_URL}Helmi%20hawari_20261111_083840_0000.png`} alt="Logo SMP Islam Al-Wasi'" className="h-36 w-36 object-contain md:h-44 md:w-44" />
-            <span className="mt-2 text-center text-base font-extrabold tracking-wide">SMP ISLAM AL-WASI'</span>
+            <img src={`${import.meta.env.BASE_URL}Helmi%20hawari_20261111_083840_0000.png`} alt="Logo SMP Islam Al-Wasi'" className="h-24 w-24 object-contain lg:h-28 lg:w-28" />
+            <span className="mt-1 text-center text-sm font-extrabold tracking-wide">SMP ISLAM AL-WASI'</span>
           </div>
         </div>
       </section>
 
-      <main className="mx-auto max-w-[1500px] space-y-5 px-3 py-5 md:px-5 md:py-6">
-        <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <article className="min-w-0 overflow-hidden rounded-[20px] border border-[#d8e9e9] bg-white shadow-[0_3px_14px_rgba(20,90,100,.05)]">
-            <div className="flex items-center justify-between gap-3 bg-[#f8fcfc] px-4 py-3 md:px-5">
-              <div className="flex items-center gap-3"><span className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500 text-white"><Users size={25} fill="currentColor" /></span><div><h2 className="text-lg font-extrabold text-[#14536b] md:text-xl">Kehadiran Siswa</h2><p className="text-[11px] text-slate-500">{attendanceDateLabel}</p></div></div>
-              <button onClick={() => onNavigate('attendance')} className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm">Semua kelas⌄</button>
+      <main className="mx-auto max-w-[1500px] space-y-4 px-3 py-4 md:px-5 lg:px-7 lg:py-5">
+        <section aria-label="Nilai utama SIMPATIK" className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {principles.map((item) => (
+            <article key={item.title} className="flex min-h-[92px] items-start gap-3 rounded-2xl border border-[#DCE8E5] bg-white px-4 py-3 shadow-[0_2px_10px_rgba(15,42,37,.035)]">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E3F4F0] text-[#018470]">{item.icon}</span>
+              <div><h2 className="text-sm font-extrabold text-[#0F2A25]">{item.title}</h2><p className="mt-1 text-xs leading-relaxed text-[#4A5F5A]">{item.description}</p></div>
+            </article>
+          ))}
+        </section>
+
+        <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <article className="min-w-0 overflow-hidden rounded-[18px] border border-[#DCE8E5] bg-white shadow-[0_3px_14px_rgba(15,42,37,.045)]">
+            <div className="flex items-center justify-between gap-3 border-b border-[#DCE8E5] bg-[#FBFDFC] px-4 py-3 md:px-5">
+              <div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E3F4F0] text-[#018470]"><Users size={22} /></span><div><h2 className="text-base font-extrabold text-[#0F2A25] md:text-lg">Kehadiran Siswa</h2><p className="text-xs text-[#4A5F5A]">{attendanceDateLabel}</p></div></div>
+              <button type="button" onClick={() => onNavigate('attendance')} className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-[#DCE8E5] bg-white px-3 text-xs font-semibold text-[#0F2A25] transition hover:bg-[#E3F4F0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#05A287]">
+                Semua kelas <svg aria-hidden="true" viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none"><path d="m4 6 4 4 4-4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </button>
             </div>
-            <div className="flex flex-col items-center gap-5 p-4 xl:flex-row xl:justify-around md:p-6">
-              <div className="relative h-48 w-48 shrink-0 rounded-full" style={{ background: attendanceGradient }}>
-                <div className="absolute inset-[19%] flex flex-col items-center justify-center rounded-full bg-white text-center"><strong className="text-3xl text-[#17334b]">{attendancePercent}%</strong><span className="mt-1 text-sm leading-tight text-slate-600">Rata-rata<br />Kehadiran</span></div>
+            <div className="flex flex-col items-center gap-5 p-4 xl:flex-row xl:justify-around md:p-5">
+              <div className="relative h-44 w-44 shrink-0 rounded-full" style={{ background: attendanceGradient }}>
+                <div className="absolute inset-[19%] flex flex-col items-center justify-center rounded-full bg-white text-center"><strong className="text-3xl text-[#0F2A25]">{attendancePercent}%</strong><span className="mt-1 text-xs leading-tight text-[#4A5F5A]">Rata-rata<br />Kehadiran</span></div>
               </div>
-              <div className="w-full max-w-[270px] space-y-2">
+              <div className="w-full max-w-[270px] space-y-1">
                 {([
-                  ['Hadir', totals.Hadir, '#0ca678'],
-                  ['Izin', totals.Izin, '#f2b705'],
-                  ['Sakit', totals.Sakit, '#f05b62'],
-                  ['Alpa', totals.Alpa, '#a8b4c0'],
-                ] as const).map(([label, value, color]) => <div key={label} className="flex items-center justify-between border-b border-slate-100 py-2 text-sm last:border-0"><span className="flex items-center gap-2 text-slate-700"><i className="h-3 w-3 rounded-full" style={{ backgroundColor: color }} />{label}</span><strong className="text-slate-800">{value}</strong><span className="w-10 text-right font-semibold text-slate-600">{totalRecorded ? Math.round(value / totalRecorded * 100) : 0}%</span></div>)}
-                {!totalRecorded && <p className="text-xs text-slate-400">Belum ada catatan presensi pada periode ini.</p>}
+                  ['Hadir', totals.Hadir, '#05A287'],
+                  ['Sakit', totals.Sakit, '#2B6CB0'],
+                  ['Izin', totals.Izin, '#D69E2E'],
+                  ['Alpa', totals.Alpa, '#C53030'],
+                ] as const).map(([label, value, color]) => <div key={label} className="flex items-center justify-between border-b border-[#DCE8E5] py-2.5 text-sm last:border-0"><span className="flex items-center gap-2 text-[#4A5F5A]"><i className="h-3 w-3 rounded-full" style={{ backgroundColor: color }} />{label}</span><strong className="text-[#0F2A25]">{value}</strong><span className="w-10 text-right text-xs font-semibold text-[#4A5F5A]">{totalRecorded ? Math.round(value / totalRecorded * 100) : 0}%</span></div>)}
+                {!totalRecorded && <p className="pt-2 text-xs text-[#4A5F5A]">Belum ada catatan presensi pada periode ini.</p>}
+                <p className="pt-1 text-[11px] text-[#4A5F5A]">Total siswa aktif: {activeStudents}</p>
               </div>
             </div>
           </article>
 
-          <article className="overflow-hidden rounded-[20px] border border-[#d8e9e9] bg-white shadow-[0_3px_14px_rgba(20,90,100,.05)]">
-            <div className="flex items-center justify-between gap-3 bg-[#f8fcfc] px-4 py-3 md:px-5">
-              <div className="flex items-center gap-3"><BookOpen size={34} className="text-[#087f78]" /><h2 className="text-lg font-extrabold text-[#14536b] md:text-xl">Jurnal Pembelajaran</h2></div>
-              <button onClick={() => onNavigate('journal')} className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm">Semua kelas⌄</button>
+          <article className="min-w-0 overflow-hidden rounded-[18px] border border-[#DCE8E5] bg-white shadow-[0_3px_14px_rgba(15,42,37,.045)]">
+            <div className="flex items-center justify-between gap-3 border-b border-[#DCE8E5] bg-[#FBFDFC] px-4 py-3 md:px-5">
+              <div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E3F4F0] text-[#018470]"><BookOpen size={22} /></span><h2 className="text-base font-extrabold text-[#0F2A25] md:text-lg">Jurnal Pembelajaran</h2></div>
+              <button type="button" onClick={() => onNavigate('journal')} className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-[#DCE8E5] bg-white px-3 text-xs font-semibold text-[#0F2A25] transition hover:bg-[#E3F4F0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#05A287]">
+                Semua jurnal <svg aria-hidden="true" viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none"><path d="m4 6 4 4 4-4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </button>
             </div>
             <div className="grid grid-cols-[1.35fr_1fr] gap-3 p-3 md:p-4">
-              <div className="flex min-h-[104px] items-center justify-center gap-4 rounded-2xl bg-gradient-to-r from-[#0d9ba8] to-[#087c88] px-3 text-white"><BookOpen size={39} /><div className="border-l border-white/70 pl-4 text-center"><strong className="block text-4xl font-black md:text-5xl">{currentMonthCount}</strong><span className="text-xs">Jurnal Bulan Ini</span></div></div>
-              <div className="flex min-h-[104px] flex-col items-center justify-center rounded-2xl bg-[#e0f7f3] px-2 text-center text-[#116a72]"><CalendarCheck size={27} /><strong className="mt-1 text-3xl font-black">{journals.length}</strong><span className="text-[11px]">Sepanjang Tahun</span></div>
+              <div className="flex min-h-[88px] items-center justify-center gap-3 rounded-xl bg-[#018470] px-3 text-white"><BookOpen size={31} /><div className="border-l border-white/60 pl-3 text-center"><strong className="block text-3xl font-black md:text-4xl">{currentMonthCount}</strong><span className="text-xs">Jurnal Bulan Ini</span></div></div>
+              <div className="flex min-h-[88px] flex-col items-center justify-center rounded-xl bg-[#E3F4F0] px-2 text-center text-[#015E4F]"><CalendarCheck size={23} /><strong className="mt-1 text-2xl font-black">{journals.length}</strong><span className="text-[11px]">Sepanjang Tahun</span></div>
             </div>
             <div className="px-4 pb-4 pt-1 md:px-5">
-              <div className="flex h-32 items-end justify-around gap-3 border-b border-l border-slate-200 px-3">
-                {monthItems.map((item, index) => <div key={item.key} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1"><span className="text-[10px] font-semibold text-slate-500">{item.count || ''}</span><div className={`w-full max-w-10 rounded-t-md ${index === 5 ? 'bg-[#f2b20b]' : 'bg-[#0ca78b]'}`} style={{ height: `${item.count ? Math.max(8, item.count / maxMonthly * 78) : 3}%` }} /><span className="pb-1 text-[10px] font-semibold text-slate-600">{item.label}</span></div>)}
+              <div className="flex h-32 items-end justify-around gap-3 border-b border-l border-[#DCE8E5] px-3">
+                {monthItems.map((item, index) => <div key={item.key} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1"><span className="text-[10px] font-semibold text-[#4A5F5A]">{item.count}</span><div className={`w-full max-w-10 rounded-t-md ${index === 5 ? 'bg-[#018470]' : 'bg-[#05A287]'}`} style={{ height: item.count ? `${Math.max(8, item.count / maxMonthly * 76)}%` : '2px', minHeight: item.count ? undefined : '2px' }} /><span className="pb-1 text-[10px] font-semibold text-[#4A5F5A]">{item.label}</span></div>)}
               </div>
             </div>
           </article>
         </section>
 
-        <section className="rounded-[20px] bg-gradient-to-r from-[#e4f6f3] to-[#eef9f8] p-3 md:p-4">
-          <div className="mb-3 flex items-center gap-2"><span className="text-2xl text-[#0b9b82]">ϟ</span><h2 className="text-xl font-extrabold text-[#14536b]">Menu</h2></div>
-          <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain pb-2 touch-pan-x">
-            {quickItems.map(item => <button key={item.tab} onClick={() => onNavigate(item.tab)} className="group flex w-[92px] shrink-0 snap-start flex-col items-center justify-start gap-2 rounded-xl px-1 py-2 text-center transition hover:bg-white/80">
-              <span className={`flex h-14 w-14 items-center justify-center rounded-full text-white shadow-sm transition group-hover:-translate-y-0.5 group-hover:shadow-md ${item.color}`}>{item.icon}</span>
-              <strong className="max-w-full text-xs font-bold leading-tight text-[#173b56]">{item.label}</strong>
-            </button>)}
-          </div>
-        </section>
-
-        <section className="rounded-[20px] border border-[#d8e9e9] bg-white p-4 shadow-[0_3px_14px_rgba(20,90,100,.05)] md:p-5">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <div><h2 className="text-xl font-extrabold text-[#14536b]">Lainnya</h2><p className="mt-1 text-xs text-slate-500">Akses seluruh fitur SIMPATIK lainnya</p></div>
-            <span className="rounded-full bg-[#e4f6f3] px-3 py-1 text-xs font-bold text-[#087f78]">Semua fitur</span>
-          </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {([
-              { label: 'Perilaku Siswa', description: 'Catatan karakter', tab: 'behavior' as NavTab, icon: <Users size={22} /> },
-              { label: 'Bimbingan Konseling', description: 'Layanan BK', tab: 'counseling' as NavTab, icon: <BookOpen size={22} /> },
-              { label: 'Rekap Nilai', description: 'Capaian akademik', tab: 'grades' as NavTab, icon: <ClipboardList size={22} /> },
-              { label: 'Data Master', description: 'Data sekolah', tab: 'master' as NavTab, icon: <Users size={22} /> },
-              { label: 'Laporan', description: 'Rekap dan cetak', tab: 'reports' as NavTab, icon: <FileText size={22} /> },
-              { label: 'Pengaturan', description: 'Konfigurasi aplikasi', tab: 'settings' as NavTab, icon: <Settings size={22} /> },
-            ]).map(item => <button key={item.tab} onClick={() => onNavigate(item.tab)} className="flex min-h-[112px] flex-col items-start justify-between rounded-2xl border border-[#e0eeee] bg-[#f8fcfc] p-3 text-left transition hover:border-[#0ca78b] hover:bg-[#effaf7]">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#dff5ef] text-[#087f78]">{item.icon}</span>
-              <span><strong className="block text-xs leading-tight text-[#173b56]">{item.label}</strong><small className="mt-1 block text-[10px] text-slate-500">{item.description}</small></span>
+        <section className="rounded-[18px] border border-[#DCE8E5] bg-white p-4 shadow-[0_3px_14px_rgba(15,42,37,.035)] md:p-5">
+          <div className="mb-3 flex items-center justify-between gap-3"><div><h2 className="text-base font-extrabold text-[#0F2A25] md:text-lg">Menu cepat</h2><p className="mt-0.5 text-xs text-[#4A5F5A]">Akses fitur utama SIMPATIK</p></div><ArrowUpRight size={18} className="text-[#05A287]" aria-hidden="true" /></div>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {quickItems.map(item => <button key={item.tab} type="button" onClick={() => onNavigate(item.tab)} className="group flex min-h-[92px] items-center gap-3 rounded-xl border border-[#DCE8E5] bg-[#FBFDFC] p-3 text-left transition hover:border-[#05A287] hover:bg-[#E3F4F0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#05A287]">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#E3F4F0] text-[#018470] transition group-hover:bg-white">{item.icon}</span>
+              <span className="min-w-0"><strong className="block text-sm font-bold leading-tight text-[#0F2A25]">{item.label}</strong><small className="mt-1 block text-xs leading-snug text-[#4A5F5A]">{item.description}</small></span>
             </button>)}
           </div>
         </section>

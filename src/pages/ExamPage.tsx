@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { addDoc, collection, doc, onSnapshot, orderBy, query, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, getDocs, onSnapshot, updateDoc } from 'firebase/firestore';
 import { signInAnonymously } from 'firebase/auth';
 import { BookOpen, Clock3, FileUp, Plus, ClipboardList, Trophy, ArrowLeft, CheckCircle2, Link as LinkIcon, Play, Save } from 'lucide-react';
 import { db, auth } from '../firebase/config';
@@ -23,6 +23,7 @@ function scoreAttempt(questions: Question[], answers: Record<string, number>) {
 
 export const ExamPage: React.FC = () => {
   const { students, classes, subjects, settings } = useData();
+  const [examStudents, setExamStudents] = useState(students);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [exams, setExams] = useState<Exam[]>([]);
   const [attempts, setAttempts] = useState<Attempt[]>([]);
@@ -49,14 +50,23 @@ export const ExamPage: React.FC = () => {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
+    let active = true;
+    const prepareStudentAccess = async () => {
+      try {
+        if (!auth.currentUser) await signInAnonymously(auth);
+        const snapshot = await getDocs(collection(db, 'students'));
+        if (active && !snapshot.empty) setExamStudents(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as typeof students[number])));
+      } catch (e) { console.warn('Student exam access:', e); }
+    };
+    void prepareStudentAccess();
     const unQ = onSnapshot(collection(db, 'examQuestions'), snap => setQuestions(snap.docs.map(d => ({ ...d.data(), id: d.id } as Question))), e => setMessage('Bank soal belum dapat dibaca: ' + e.message));
     const unE = onSnapshot(collection(db, 'exams'), snap => setExams(snap.docs.map(d => ({ ...d.data(), id: d.id } as Exam))), e => setMessage('Data ujian belum dapat dibaca: ' + e.message));
     const unA = onSnapshot(collection(db, 'examAttempts'), snap => setAttempts(snap.docs.map(d => ({ ...d.data(), id: d.id } as Attempt))), e => console.warn(e));
-    return () => { unQ(); unE(); unA(); };
+    return () => { active = false; unQ(); unE(); unA(); };
   }, []);
 
   const selectedClassNames = useMemo(() => classes.filter(c => classLevel(c) === level), [classes, level]);
-  const studentsInClass = useMemo(() => students.filter(s => s.status === 'Aktif' && (studentClass ? s.className === studentClass : classLevel(s.className) === level)).sort((a,b) => a.name.localeCompare(b.name)), [students, studentClass, level]);
+  const studentsInClass = useMemo(() => examStudents.filter(s => s.status === 'Aktif' && (studentClass ? s.className === studentClass : classLevel(s.className) === level)).sort((a,b) => a.name.localeCompare(b.name)), [examStudents, studentClass, level]);
   const classQuestions = questions.filter(q => classLevel(q.className) === level && (!subject || q.subject === subject));
   const currentExamQuestions = activeExam ? activeExam.questionIds.map(id => questions.find(q => q.id === id)).filter(Boolean) as Question[] : [];
   const availableExams = exams.filter(e => e.status === 'Aktif' && classLevel(e.className) === classLevel(studentClass || level));
@@ -108,7 +118,7 @@ export const ExamPage: React.FC = () => {
   };
 
   const startExam = async (exam: Exam) => {
-    const student = students.find(s => s.id === studentId);
+    const student = examStudents.find(s => s.id === studentId);
     if (!student) { setMessage('Pilih kelas dan nama siswa terlebih dahulu.'); return; }
     try {
       await signInAnonymously(auth);
@@ -122,7 +132,7 @@ export const ExamPage: React.FC = () => {
     const result = scoreAttempt(currentExamQuestions, answers);
     setSaving(true);
     try {
-      const student = students.find(s => s.id === studentId);
+      const student = examStudents.find(s => s.id === studentId);
       setFinishedResult({ title: activeExam.title, studentName: student?.name || 'Siswa', className: student?.className || '', score: result.score, total: result.total, percent: result.percent });
       await updateDoc(doc(db, 'examAttempts', attemptId), { answers, score: result.score, total: result.total, percent: result.percent, status: 'Selesai', submittedAt: new Date().toISOString(), autoSubmitted: forced });
       setActiveExam(null); setSection('results'); setMessage(forced ? 'Waktu habis. Jawaban tersimpan otomatis.' : 'Jawaban berhasil dikirim.');

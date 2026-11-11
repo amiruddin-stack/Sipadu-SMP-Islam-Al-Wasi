@@ -85,7 +85,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         <section className="py-7 md:py-9 flex items-center gap-4 md:gap-6">
           <img src={`${import.meta.env.BASE_URL}Helmi%20hawari_20261111_083840_0000.png`} alt="Logo SMP Islam Al-Wasi’" className="w-20 h-20 md:w-28 md:h-28 shrink-0 object-contain" />
           <div className="min-w-0">
-            <p className="text-[10px] md:text-xs font-semibold tracking-[0.15em] text-[#20B987] uppercase">Sistem Informasi Manajemen Pendidikan dan Akademik Terpadu, Interaktif dan Kolaboratif</p>
+            <p className="max-w-2xl text-[10px] md:text-xs font-semibold leading-relaxed text-[#20B987]">Sistem Informasi Manajemen Pendidikan dan Akademik Terpadu, Interaktif dan Kolaboratif</p>
             <h2 className="mt-1 text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900">SIMPATIK</h2>
             <p className="text-sm md:text-base font-semibold text-slate-700">SMP Islam Al-Wasi’</p>
             <p className="mt-1 text-xs md:text-sm text-slate-500">Qurani, Ramah Anak dan Berkarakter</p>

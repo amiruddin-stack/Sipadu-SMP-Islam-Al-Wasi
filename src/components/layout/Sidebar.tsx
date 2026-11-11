@@ -9,6 +9,7 @@ export type NavTab =
   | 'counseling'
   | 'assessment'
   | 'exams'
+  | 'exams'
   | 'grades'
   | 'master'
   | 'reports'
@@ -53,6 +54,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { id: 'attendance', label: 'Absensi Digital' },
         { id: 'journal', label: 'Jurnal Guru' },
         { id: 'assessment', label: 'Penilaian' },
+        { id: 'exams', label: 'Ujian' }
         { id: 'exams', label: 'Ujian' }
         { id: 'grades', label: 'Rekap Nilai' },
       ],

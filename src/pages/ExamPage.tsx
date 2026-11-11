@@ -228,6 +228,15 @@ export const ExamPage: React.FC = () => {
     const syncPending = async () => {
       try {
         if (!auth.currentUser) await signInAnonymously(auth);
+        if (section === 'take' && activeExam && attemptId) {
+          const student = examStudents.find(item => item.id === studentId);
+          await setDoc(doc(db, 'examAttempts', attemptId), {
+            examId: activeExam.id, examTitle: activeExam.title, studentId,
+            studentName: student?.name || 'Siswa', className: student?.className || studentClass,
+            answers, status: 'Mengerjakan', startedAt: new Date(deadlineAt - activeExam.duration * 60000).toISOString()
+          }, { merge: true });
+          await updateDoc(doc(db, 'examAttempts', attemptId), { answers, lastSavedAt: new Date().toISOString() });
+        }
         const pending = await readOfflineRecords<any>('pending:');
         for (const item of pending) {
           if (cancelled) return;
@@ -239,7 +248,7 @@ export const ExamPage: React.FC = () => {
     };
     void syncPending();
     return () => { cancelled = true; };
-  }, [isOnline]);
+  }, [isOnline, section, activeExam, attemptId, answers, studentId, studentClass, examStudents, deadlineAt]);
 
   const fmt = (seconds: number) => String(Math.floor(seconds / 60)).padStart(2,'0') + ':' + String(seconds % 60).padStart(2,'0');
   const studentEntry = () => <div className="mx-auto max-w-xl space-y-4">

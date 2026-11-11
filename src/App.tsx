@@ -49,15 +49,17 @@ function AppContent() {
 
   return (
     <div className="flex h-screen w-full bg-[#F4F9F7] text-slate-800 overflow-hidden font-sans">
-      {/* Sidebar for PC and Mobile Drawer */}
-      <Sidebar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        collapsed={collapsed}
-        setCollapsed={setCollapsed}
-        mobileOpen={mobileOpen}
-        setMobileOpen={setMobileOpen}
-      />
+      {/* Sidebar tetap tersedia pada modul selain dashboard */}
+      {activeTab !== 'dashboard' && (
+        <Sidebar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+          mobileOpen={mobileOpen}
+          setMobileOpen={setMobileOpen}
+        />
+      )}
 
       {/* Main View Area */}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
@@ -70,12 +72,12 @@ function AppContent() {
         )}
 
         {/* Scrollable Content Body */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-8">
-          <div className="max-w-7xl mx-auto">{renderCurrentPage()}</div>
+        <main className={activeTab === 'dashboard' ? "flex-1 min-w-0 overflow-y-auto p-0 pb-0" : "flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-8"}>
+          <div className={activeTab === 'dashboard' ? "w-full" : "max-w-7xl mx-auto"}>{renderCurrentPage()}</div>
         </main>
 
         {/* Mobile Bottom Navigation Bar (Android Touch Friendly) */}
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-slate-200 px-2 py-1.5 flex items-center justify-around shadow-lg">
+        {activeTab !== 'dashboard' && <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-slate-200 px-2 py-1.5 flex items-center justify-around shadow-lg">
           <button
             onClick={() => setActiveTab('dashboard')}
             className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-semibold transition-colors ${
@@ -118,7 +120,7 @@ function AppContent() {
           >
             <span>Menu</span>
           </button>
-        </nav>
+        </nav>}
       </div>
 
       {/* Floating Offline Notification */}

@@ -47,7 +47,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate }) => {
   }, []);
 
   const navClass = (tab: NavTab) =>
-    `relative flex min-h-11 shrink-0 items-center px-3 text-sm font-semibold transition-colors hover:text-white ${activeTab === tab ? 'text-white after:absolute after:bottom-0 after:left-3 after:right-3 after:h-[3px] after:rounded-full after:bg-white' : 'text-white/85'}`;
+    `relative flex min-h-11 shrink-0 items-center px-3 text-sm font-semibold transition-colors hover:text-[#078A78] ${activeTab === tab ? 'text-[#078A78] after:absolute after:bottom-0 after:left-3 after:right-3 after:h-[3px] after:rounded-full after:bg-[#078A78]' : 'text-slate-600'}`;
 
   const navigate = (tab: NavTab) => {
     onNavigate(tab);
@@ -65,11 +65,11 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate }) => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[#087D70] bg-[#078A78] text-white shadow-sm">
+    <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white text-slate-800 shadow-sm">
       <div className="mx-auto flex min-h-[68px] w-full flex-nowrap items-center gap-3 overflow-hidden px-3 md:px-5">
         <button onClick={() => navigate('dashboard')} className="flex shrink-0 items-center gap-2.5 rounded-lg text-left" aria-label="SIMPATIK - Beranda">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/35 bg-white text-lg font-black text-[#078A78] shadow-sm">S</span>
-          <span className="whitespace-nowrap text-base font-extrabold tracking-wide md:text-lg">SIMPATIK</span>
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white"><img src="/Helmi%20hawari_20261111_083840_0000.png" alt="Logo SMP Islam Al-Wasi’" className="h-full w-full object-contain" /></span>
+          <span className="whitespace-nowrap text-base font-extrabold tracking-wide text-slate-800 md:text-lg">SIMPATIK</span>
         </button>
 
         <nav aria-label="Navigasi utama" className="ml-1 flex h-[68px] min-w-0 flex-1 flex-nowrap items-center gap-0.5 overflow-x-auto whitespace-nowrap [scrollbar-width:thin] [overscroll-behavior-x:contain]">
@@ -92,7 +92,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate }) => {
           </div>
 
           <div ref={academicRef} className="relative shrink-0">
-            <button onClick={() => { setAcademicOpen(v => !v); setProfileOpen(false); }} aria-expanded={academicOpen} className={`flex min-h-11 items-center gap-1 px-3 text-sm font-semibold transition-colors hover:text-white ${(['attendance','journal','assessment','grades'].includes(activeTab) ? 'text-white' : 'text-white/85')}`}>
+            <button onClick={() => { setAcademicOpen(v => !v); setProfileOpen(false); }} aria-expanded={academicOpen} className={`flex min-h-11 items-center gap-1 px-3 text-sm font-semibold transition-colors hover:text-[#078A78] ${(['attendance','journal','assessment','grades'].includes(activeTab) ? 'text-[#078A78]' : 'text-slate-600')}`}>
               Akademik <svg aria-hidden="true" viewBox="0 0 20 20" className={`h-4 w-4 transition-transform ${academicOpen ? 'rotate-180' : ''}`} fill="currentColor"><path d="m5 7 5 5 5-5H5Z" /></svg>
             </button>
             {academicOpen && <div className="absolute left-0 top-full mt-2 w-56 rounded-xl border border-slate-200 bg-white p-2 text-slate-700 shadow-xl">
@@ -100,7 +100,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate }) => {
             </div>}
           </div>
 
-          <button onClick={() => navigate('ils')} className={navClass('ils')}>ILS <span className="ml-1 rounded-full bg-white/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide">Soon</span></button>
+          <button onClick={() => navigate('ils')} className={navClass('ils')}>ILS <span className="ml-1 rounded-full bg-emerald-50 text-emerald-700 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide">Soon</span></button>
           <button onClick={() => navigate('counseling')} className={navClass('counseling')}>BK</button>
           <button onClick={() => navigate('exams')} className={navClass('exams')}>Ujian</button>
           <button onClick={() => navigate('reports')} className={navClass('reports')}>Laporan</button>

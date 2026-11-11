@@ -55,7 +55,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
     : 'Belum ada data';
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 md:space-y-7">
       <section className="w-full -mt-4 md:-mt-6 mb-5 px-4 md:px-8 py-4 md:py-5 text-white bg-gradient-to-r from-[#0F9D8A] via-[#0D9488] to-[#087F73]">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
@@ -108,13 +108,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
       </section>
 
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <div className="p-5 md:p-6 rounded-2xl md:rounded-3xl bg-white border border-slate-100 shadow-[0_8px_28px_rgba(15,23,42,0.055)]">
           <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-100">
             <div>
               <h3 className="text-sm font-bold text-slate-900">Status Kehadiran Siswa</h3>
               <p className="text-xs text-slate-500 mt-1">Rekap terakhir · {attendanceDateLabel}</p>
             </div>
-            <button onClick={() => onNavigate('attendance')} className="text-xs font-semibold text-[#058D78] hover:underline">Lihat absensi</button>
+            <button onClick={() => onNavigate('attendance')} className="text-xs font-semibold text-[#0D9488] hover:underline">Lihat absensi</button>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
             {([
@@ -123,7 +123,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               ['Izin', totals.Izin, 'text-amber-700'],
               ['Alpa', totals.Alpa, 'text-rose-700'],
             ] as const).map(([label, value, textColor]) => (
-              <div key={label} className="rounded-xl bg-slate-50 p-3">
+              <div key={label} className="rounded-xl bg-[#F7FAF9] p-3">
                 <p className="text-xs text-slate-500">{label}</p>
                 <p className={`text-2xl font-bold mt-1 ${textColor}`}>{value}</p>
                 <p className="text-[10px] text-slate-400">siswa</p>
@@ -142,7 +142,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <div className="p-5 md:p-6 rounded-2xl md:rounded-3xl bg-white border border-slate-100 shadow-[0_8px_28px_rgba(15,23,42,0.055)]">
           <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-100">
             <div>
               <h3 className="text-sm font-bold text-slate-900">Status Peringatan Kehadiran</h3>
@@ -173,14 +173,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
       </section>
 
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm"><p className="text-xs font-semibold text-slate-500">Total Siswa Aktif</p><p className="mt-2 text-2xl font-bold text-slate-900">{activeStudentsCount}</p></div>
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm"><p className="text-xs font-semibold text-slate-500">Guru & Pendidik</p><p className="mt-2 text-2xl font-bold text-slate-900">{activeTeachersCount}</p></div>
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm"><p className="text-xs font-semibold text-slate-500">Kehadiran</p><p className="mt-2 text-2xl font-bold text-[#058D78]">{attendancePercent}%</p></div>
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm"><p className="text-xs font-semibold text-slate-500">Jurnal Pembelajaran</p><p className="mt-2 text-2xl font-bold text-slate-900">{journals.length}</p><p className="text-xs text-slate-400 mt-1">{journals.filter((journal) => journal.status === 'Selesai').length} sesi selesai</p></div>
+        <div className="p-4 md:p-5 rounded-2xl md:rounded-3xl bg-white border border-slate-100 shadow-[0_8px_28px_rgba(15,23,42,0.055)]"><p className="text-xs font-semibold text-slate-500">Total Siswa Aktif</p><p className="mt-2 text-2xl font-bold text-slate-900">{activeStudentsCount}</p></div>
+        <div className="p-4 md:p-5 rounded-2xl md:rounded-3xl bg-white border border-slate-100 shadow-[0_8px_28px_rgba(15,23,42,0.055)]"><p className="text-xs font-semibold text-slate-500">Guru & Pendidik</p><p className="mt-2 text-2xl font-bold text-slate-900">{activeTeachersCount}</p></div>
+        <div className="p-4 md:p-5 rounded-2xl md:rounded-3xl bg-white border border-slate-100 shadow-[0_8px_28px_rgba(15,23,42,0.055)]"><p className="text-xs font-semibold text-slate-500">Kehadiran</p><p className="mt-2 text-2xl font-bold text-[#058D78]">{attendancePercent}%</p></div>
+        <div className="p-4 md:p-5 rounded-2xl md:rounded-3xl bg-white border border-slate-100 shadow-[0_8px_28px_rgba(15,23,42,0.055)]"><p className="text-xs font-semibold text-slate-500">Jurnal Pembelajaran</p><p className="mt-2 text-2xl font-bold text-slate-900">{journals.length}</p><p className="text-xs text-slate-400 mt-1">{journals.filter((journal) => journal.status === 'Selesai').length} sesi selesai</p></div>
       </section>
 
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <div className="p-5 md:p-6 rounded-2xl md:rounded-3xl bg-white border border-slate-100 shadow-[0_8px_28px_rgba(15,23,42,0.055)]">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100"><h3 className="text-sm font-bold text-slate-900">Aktivitas Jurnal KBM Terbaru</h3><button onClick={() => onNavigate('journal')} className="text-xs font-semibold text-[#058D78] hover:underline">Semua jurnal</button></div>
           <div className="mt-3 divide-y divide-slate-100">
             {recentJournals.length ? recentJournals.map((journal) => (
@@ -193,11 +193,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <div className="p-5 md:p-6 rounded-2xl md:rounded-3xl bg-white border border-slate-100 shadow-[0_8px_28px_rgba(15,23,42,0.055)]">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100"><h3 className="text-sm font-bold text-slate-900">Catatan Karakter & Perilaku Siswa</h3><button onClick={() => onNavigate('behavior')} className="text-xs font-semibold text-[#058D78] hover:underline">Kelola perilaku</button></div>
           <div className="mt-3 space-y-2">
             {recentBehaviors.length ? recentBehaviors.map((behavior) => (
-              <div key={behavior.id} className="rounded-xl bg-slate-50 border border-slate-100 p-3">
+              <div key={behavior.id} className="rounded-xl bg-[#F7FAF9] border border-slate-100 p-3">
                 <div className="flex items-center justify-between gap-2"><span className="text-xs font-bold text-slate-900">{behavior.studentName} ({behavior.className})</span><span className="text-[10px] text-slate-500">{behavior.status}</span></div>
                 <p className="text-xs text-slate-600 mt-1">{behavior.description}</p>
                 <p className="text-[11px] text-slate-400 mt-1">Pembinaan: {behavior.coachingAction}</p>
@@ -207,7 +207,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      <section className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+      <section className="p-5 md:p-6 rounded-2xl md:rounded-3xl bg-white border border-slate-100 shadow-[0_8px_28px_rgba(15,23,42,0.055)]">
         <div className="flex items-center justify-between"><h3 className="text-sm font-bold text-slate-900">Informasi Akademik</h3><span className="text-xs text-slate-500">TA {settings.activeAcademicYear} · Semester {settings.activeSemester}</span></div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4 text-xs">
           <div className="rounded-xl bg-slate-50 p-3"><p className="text-slate-500">Hari Efektif Semester</p><p className="text-lg font-bold text-slate-900 mt-1">{settings.effectiveDays} Hari</p></div>

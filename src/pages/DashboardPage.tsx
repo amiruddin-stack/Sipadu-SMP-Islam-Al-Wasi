@@ -56,42 +56,51 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
   return (
     <div className="min-h-full -mx-4 md:-mx-8 -mt-4 md:-mt-6 bg-[#F3F7F5] pb-11">
-      <section className="bg-gradient-to-r from-[#12A878] via-[#20B987] to-[#72DDB1] px-5 md:px-8 py-6 md:py-7 text-white shadow-[0_8px_28px_rgba(16,185,129,0.12)]">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-12 h-12 md:w-14 md:h-14 shrink-0 rounded-full overflow-hidden bg-white/20 ring-2 ring-white/70 flex items-center justify-center text-base font-bold">
-              {firebaseUser?.photoURL ? <img src={firebaseUser.photoURL} alt="Foto profil" className="w-full h-full object-cover" /> : (currentUser?.displayName || 'G').split(' ').filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase()}
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs text-white/80">Selamat datang kembali</p>
-              <h1 className="text-base md:text-lg font-bold truncate">{currentUser?.displayName || firebaseUser?.displayName || 'Guru'}</h1>
-              <p className="text-xs text-white/80">Guru & Tenaga Kependidikan</p>
+      <section className="simpatik-enter relative isolate min-h-[40vh] overflow-hidden bg-gradient-to-br from-[#017C68] via-[#05A287] to-[#84C6BC] px-5 py-9 text-white md:px-8 md:py-12 lg:py-14">
+        <div className="pointer-events-none absolute -right-20 -top-24 h-80 w-80 rounded-full bg-white/10 blur-2xl" />
+        <div className="pointer-events-none absolute -bottom-28 left-[38%] h-72 w-72 rounded-full bg-[#B9E5DC]/20 blur-3xl" />
+        <div className="relative mx-auto flex min-h-[32vh] max-w-7xl items-center justify-between gap-8">
+          <div className="max-w-3xl">
+            <p className="text-sm font-medium text-white/85 md:text-base">Selamat datang, {currentUser?.displayName || firebaseUser?.displayName || 'Pengguna'}</p>
+            <h1 className="mt-2 text-5xl font-black tracking-tight md:text-7xl lg:text-8xl">SIMPATIK</h1>
+            <p className="mt-2 text-lg font-semibold md:text-2xl">SMP Islam Al-Wasi'</p>
+            <p className="mt-1 text-sm text-white/90 md:text-base">Qurani, Ramah Anak dan Berkarakter</p>
+            <p className="mt-4 max-w-2xl text-xs leading-relaxed text-white/80 md:text-sm">Sistem Informasi Manajemen Pendidikan dan Akademik Terpadu, Interaktif dan Kolaboratif.</p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <button type="button" onClick={() => onNavigate('attendance')} className="rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#017C68] shadow-lg shadow-[#005D4F]/15 transition hover:-translate-y-0.5 hover:bg-[#F0FAF7]">Lakukan Presensi</button>
+              <button type="button" onClick={() => onNavigate('journal')} className="rounded-xl border border-white/75 bg-white/10 px-5 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-white/20">Tulis Jurnal</button>
             </div>
           </div>
-          <div className="relative shrink-0">
-            <button type="button" onClick={() => setShowNotifications(!showNotifications)} aria-label="Notifikasi" className="relative w-10 h-10 rounded-full flex items-center justify-center text-white hover:bg-white/15 border border-white/40">
-              <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" /><path d="M10 21h4" /></svg>
-              {warnings.length > 0 && <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center">{warnings.length > 9 ? '9+' : warnings.length}</span>}
-            </button>
-            {showNotifications && <div className="absolute right-0 top-12 z-40 w-72 max-w-[calc(100vw-2rem)] rounded-2xl bg-white border border-slate-200 shadow-xl p-4 text-slate-800">
-              <div className="flex items-center justify-between mb-2"><p className="text-sm font-bold">Notifikasi</p><button onClick={() => setShowNotifications(false)} className="text-xs text-slate-400">Tutup</button></div>
-              {warnings.length ? <button onClick={() => { onNavigate('attendance'); setShowNotifications(false); }} className="w-full text-left rounded-xl bg-rose-50 p-3 hover:bg-rose-100"><p className="text-xs font-semibold text-rose-800">{warnings.length} siswa perlu perhatian kehadiran</p><p className="text-[11px] text-rose-600 mt-1">Tekan untuk melihat rekap absensi</p></button> : <p className="text-xs text-slate-500 py-3">Belum ada notifikasi baru.</p>}
-            </div>}
+          <div className="hidden shrink-0 items-center justify-center rounded-[2rem] border border-white/25 bg-white/10 p-5 shadow-2xl shadow-[#005D4F]/15 backdrop-blur-sm lg:flex">
+            <img src={`${import.meta.env.BASE_URL}Helmi%20hawari_20261111_083840_0000.png`} alt="Logo SMP Islam Al-Wasi'" className="h-52 w-52 object-contain xl:h-64 xl:w-64" />
           </div>
         </div>
       </section>
 
       <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <section className="py-7 md:py-9 flex items-center gap-4 md:gap-6">
-          <img src={`${import.meta.env.BASE_URL}Helmi%20hawari_20261111_083840_0000.png`} alt="Logo SMP Islam Al-Wasi’" className="w-20 h-20 md:w-28 md:h-28 shrink-0 object-contain" />
-          <div className="min-w-0">
-            <p className="max-w-2xl text-[10px] md:text-xs font-semibold leading-relaxed text-[#20B987]">Sistem Informasi Manajemen Pendidikan dan Akademik Terpadu, Interaktif dan Kolaboratif</p>
-            <h2 className="mt-1 text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900">SIMPATIK</h2>
-            <p className="text-sm md:text-base font-semibold text-slate-700">SMP Islam Al-Wasi’</p>
-            <p className="mt-1 text-xs md:text-sm text-slate-500">Qurani, Ramah Anak dan Berkarakter</p>
-          </div>
+        <section className="simpatik-enter mb-7 grid grid-cols-1 gap-4 pt-7 md:grid-cols-3" style={{ animationDelay: '90ms' }}>
+          <button type="button" onClick={() => onNavigate('master')} className="group min-h-[190px] rounded-2xl border border-[#DCECE7] bg-white p-5 text-left shadow-[0_8px_24px_rgba(1,124,104,0.06)] transition duration-300 hover:-translate-y-1 hover:border-[#84C6BC] hover:shadow-lg">
+            <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E6F5F1] text-[#017C68]">
+              <svg viewBox="0 0 24 24" className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>
+            </span>
+            <span className="block text-xl font-bold text-slate-900">Terpadu</span>
+            <span className="mt-2 block text-sm leading-relaxed text-slate-600">Satu data siswa untuk absensi, penilaian, dan rapor.</span>
+          </button>
+          <button type="button" onClick={() => onNavigate('assessment')} className="group min-h-[190px] rounded-2xl border border-[#DCECE7] bg-white p-5 text-left shadow-[0_8px_24px_rgba(1,124,104,0.06)] transition duration-300 hover:-translate-y-1 hover:border-[#84C6BC] hover:shadow-lg">
+            <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E6F5F1] text-[#017C68]">
+              <svg viewBox="0 0 24 24" className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M8 5h8M8 9h8M8 13h5"/><rect x="4" y="3" width="16" height="18" rx="2"/><path d="m14 17 2 2 4-4"/></svg>
+            </span>
+            <span className="block text-xl font-bold text-slate-900">Interaktif</span>
+            <span className="mt-2 block text-sm leading-relaxed text-slate-600">Ujian online, notifikasi, dan hasil yang dapat langsung dilihat.</span>
+          </button>
+          <button type="button" onClick={() => onNavigate('counseling')} className="group min-h-[190px] rounded-2xl border border-[#DCECE7] bg-white p-5 text-left shadow-[0_8px_24px_rgba(1,124,104,0.06)] transition duration-300 hover:-translate-y-1 hover:border-[#84C6BC] hover:shadow-lg">
+            <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E6F5F1] text-[#017C68]">
+              <svg viewBox="0 0 24 24" className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 19c0-3 2.7-5 6-5s6 2 6 5M15 15c3.5-.2 6 1.3 6 4"/></svg>
+            </span>
+            <span className="block text-xl font-bold text-slate-900">Kolaboratif</span>
+            <span className="mt-2 block text-sm leading-relaxed text-slate-600">Guru, wali kelas, BK, dan kepala sekolah berbagi data yang sama.</span>
+          </button>
         </section>
-
         <section className="mb-7">
           <div className="flex items-center justify-between mb-3">
             <div><h3 className="text-base font-bold text-slate-900">Menu Cepat</h3><p className="text-xs text-slate-500 mt-0.5">Akses pekerjaan harian Anda</p></div>

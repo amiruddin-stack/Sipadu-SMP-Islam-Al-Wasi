@@ -68,7 +68,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate }) => {
     <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white text-slate-800 shadow-sm">
       <div className="mx-auto flex min-h-[68px] w-full flex-nowrap items-center gap-3 overflow-hidden px-3 md:px-5">
         <button onClick={() => navigate('dashboard')} className="flex shrink-0 items-center gap-2.5 rounded-lg text-left" aria-label="SIMPATIK - Beranda">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white"><img src="/Helmi%20hawari_20261111_083840_0000.png" alt="Logo SMP Islam Al-Wasi’" className="h-full w-full object-contain" /></span>
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white"><img src={`${import.meta.env.BASE_URL}Helmi%20hawari_20261111_083840_0000.png?v=2`} alt="Logo SMP Islam Al-Wasi’" className="h-full w-full object-contain" /></span>
           <span className="whitespace-nowrap text-base font-extrabold tracking-wide text-slate-800 md:text-lg">SIMPATIK</span>
         </button>
 

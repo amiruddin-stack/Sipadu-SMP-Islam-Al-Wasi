@@ -128,9 +128,11 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate }) => {
           </div>
         </div>
       </div>
-      <div className="flex items-center justify-between border-t border-[#DCE8E5] px-4 py-2 lg:hidden">
-        <span className="text-xs font-semibold text-[#4A5F5A]">{activeTab === 'dashboard' ? 'Beranda' : activeTab === 'attendance' ? 'Presensi' : activeTab === 'journal' ? 'Jurnal' : activeTab === 'assessment' ? 'Penilaian' : activeTab === 'exams' ? 'Ujian' : 'SIMPATIK AL-WASI’'}</span>
-        <span className="text-[10px] font-medium text-[#4A5F5A]">SMP Islam Al-Wasi’</span>
+      <div className="border-t border-[#DCE8E5] px-3 py-1.5 lg:hidden">
+        <nav aria-label="Navigasi utama seluler" className="flex items-center gap-1 overflow-x-auto">
+          <button type="button" onClick={() => select('dashboard')} className={`min-h-11 shrink-0 rounded-lg px-3 text-xs font-semibold ${activeTab === 'dashboard' ? 'bg-[#E3F4F0] text-[#015E4F]' : 'text-[#4A5F5A]'}`}>Beranda</button>
+          {groups.flatMap(group => group.items).map(item => <button key={item.id} type="button" onClick={() => select(item.id)} className={`min-h-11 shrink-0 rounded-lg px-3 text-xs font-semibold ${activeTab === item.id ? 'bg-[#E3F4F0] text-[#015E4F]' : 'text-[#4A5F5A]'}`}>{item.label}</button>)}
+        </nav>
       </div>
     </header>
   );

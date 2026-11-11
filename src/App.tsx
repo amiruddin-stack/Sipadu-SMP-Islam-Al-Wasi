@@ -15,6 +15,7 @@ import { MasterDataPage } from './pages/MasterDataPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { ExamPage } from './pages/ExamPage';
+import { ExamPage } from './pages/ExamPage';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
@@ -41,6 +42,8 @@ function AppContent() {
         return <ReportsPage />;
       case 'settings':
         return <SettingsPage />;
+      case 'exams':
+        return <ExamPage />;
       case 'exams':
         return <ExamPage />;
       default:

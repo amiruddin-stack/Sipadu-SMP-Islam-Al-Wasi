@@ -55,8 +55,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
     : 'Belum ada data';
 
   return (
-    <div className="min-h-full -mx-4 md:-mx-8 -mt-4 md:-mt-6 bg-[#F5F8F7] pb-8">
-      <section className="bg-gradient-to-r from-[#087F73] via-[#0D9488] to-[#35B6A5] px-5 md:px-8 py-5 md:py-6 text-white">
+    <div className="min-h-full -mx-4 md:-mx-8 -mt-4 md:-mt-6 bg-[#F3F7F5] pb-10">
+      <section className="bg-gradient-to-r from-[#12A878] via-[#20B987] to-[#72DDB1] px-5 md:px-8 py-6 md:py-7 text-white shadow-[0_8px_28px_rgba(16,185,129,0.12)]">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-12 h-12 md:w-14 md:h-14 shrink-0 rounded-full overflow-hidden bg-white/20 ring-2 ring-white/70 flex items-center justify-center text-base font-bold">
@@ -82,10 +82,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
       </section>
 
       <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <section className="py-6 md:py-8 flex items-center gap-4 md:gap-6">
+        <section className="py-7 md:py-9 flex items-center gap-4 md:gap-6">
           <img src={`${import.meta.env.BASE_URL}Helmi%20hawari_20261111_083840_0000.png`} alt="Logo SMP Islam Al-Wasi’" className="w-20 h-20 md:w-28 md:h-28 shrink-0 object-contain" />
           <div className="min-w-0">
-            <p className="text-[10px] md:text-xs font-semibold tracking-[0.15em] text-teal-700 uppercase">Sistem Informasi Akademik Terpadu</p>
+            <p className="text-[10px] md:text-xs font-semibold tracking-[0.15em] text-[#20B987] uppercase">Sistem Informasi Akademik Terpadu</p>
             <h2 className="mt-1 text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900">SIPADU</h2>
             <p className="text-sm md:text-base font-semibold text-slate-700">SMP Islam Al-Wasi’</p>
             <p className="mt-1 text-xs md:text-sm text-slate-500">Qurani, Ramah Anak dan Berkarakter</p>
@@ -97,12 +97,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             <div><h3 className="text-base font-bold text-slate-900">Menu Cepat</h3><p className="text-xs text-slate-500 mt-0.5">Akses pekerjaan harian Anda</p></div>
           </div>
           <div className="grid grid-cols-2 gap-3 md:gap-4">
-            <button type="button" onClick={() => onNavigate('attendance')} className="group min-h-[104px] rounded-2xl bg-[#0D9488] hover:bg-[#0B8177] text-white p-4 md:p-5 text-left shadow-[0_8px_20px_rgba(13,148,136,0.16)] transition-all">
+            <button type="button" onClick={() => onNavigate('attendance')} className="group min-h-[104px] rounded-2xl bg-gradient-to-br from-[#19B981] to-[#0D9F78] hover:from-[#12A878] hover:to-[#0B8F6C] text-white p-4 md:p-5 text-left shadow-[0_8px_20px_rgba(13,148,136,0.16)] transition-all">
               <span className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center mb-3"><svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3v3m8-3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v13H4V6a1 1 0 0 1 1-1Z"/><path d="m8 14 2 2 5-5"/></svg></span>
               <span className="block text-sm md:text-base font-bold">Lakukan Presensi</span><span className="block text-[11px] text-white/75 mt-1">Catat kehadiran siswa</span>
             </button>
             <button type="button" onClick={() => onNavigate('journal')} className="group min-h-[104px] rounded-2xl bg-white hover:bg-teal-50 border border-slate-200 p-4 md:p-5 text-left shadow-[0_5px_18px_rgba(15,23,42,0.035)] transition-all">
-              <span className="w-9 h-9 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center mb-3"><svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></span>
+              <span className="w-9 h-9 rounded-xl bg-[#E8FBF2] text-[#159B6D] flex items-center justify-center mb-3"><svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></span>
               <span className="block text-sm md:text-base font-bold text-slate-900">Tulis Jurnal</span><span className="block text-[11px] text-slate-500 mt-1">Isi kegiatan pembelajaran</span>
             </button>
           </div>
@@ -110,21 +110,21 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
         <section className="mb-7">
           <div className="flex items-end justify-between mb-3"><div><h3 className="text-base font-bold text-slate-900">Ringkasan Akademik</h3><p className="text-xs text-slate-500 mt-0.5">Gambaran data sekolah saat ini</p></div><span className="text-[10px] md:text-xs text-slate-500">TA {settings.activeAcademicYear}</span></div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="rounded-2xl bg-white border border-slate-100 p-4 shadow-[0_5px_18px_rgba(15,23,42,0.035)]"><p className="text-xs text-slate-500">Siswa Aktif</p><p className="mt-2 text-2xl md:text-3xl font-bold text-slate-900">{activeStudentsCount}</p><p className="text-[10px] text-slate-400 mt-1">Peserta didik</p></div>
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+            <div className="rounded-2xl bg-white border border-[#EAF1ED] p-4 md:p-5 shadow-[0_8px_26px_rgba(28,66,48,0.055)]"><p className="text-xs text-slate-500">Siswa Aktif</p><p className="mt-2 text-2xl md:text-3xl font-bold text-slate-900">{activeStudentsCount}</p><p className="text-[10px] text-slate-400 mt-1">Peserta didik</p></div>
             <div className="rounded-2xl bg-white border border-slate-100 p-4 shadow-[0_5px_18px_rgba(15,23,42,0.035)]"><p className="text-xs text-slate-500">Guru & Pendidik</p><p className="mt-2 text-2xl md:text-3xl font-bold text-slate-900">{activeTeachersCount}</p><p className="text-[10px] text-slate-400 mt-1">Tenaga pendidik</p></div>
-            <div className="rounded-2xl bg-white border border-slate-100 p-4 shadow-[0_5px_18px_rgba(15,23,42,0.035)]"><p className="text-xs text-slate-500">Kehadiran</p><p className="mt-2 text-2xl md:text-3xl font-bold text-teal-700">{attendancePercent}%</p><p className="text-[10px] text-slate-400 mt-1">Rekap terakhir</p></div>
+            <div className="rounded-2xl bg-white border border-slate-100 p-4 shadow-[0_5px_18px_rgba(15,23,42,0.035)]"><p className="text-xs text-slate-500">Kehadiran</p><p className="mt-2 text-2xl md:text-3xl font-bold text-[#159B6D]">{attendancePercent}%</p><p className="text-[10px] text-slate-400 mt-1">Rekap terakhir</p></div>
             <div className="rounded-2xl bg-white border border-slate-100 p-4 shadow-[0_5px_18px_rgba(15,23,42,0.035)]"><p className="text-xs text-slate-500">Jurnal KBM</p><p className="mt-2 text-2xl md:text-3xl font-bold text-slate-900">{journals.length}</p><p className="text-[10px] text-slate-400 mt-1">{journals.filter(journal => journal.status === 'Selesai').length} sesi selesai</p></div>
           </div>
         </section>
 
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-          <div className="rounded-2xl bg-white border border-slate-100 p-4 md:p-5 shadow-[0_5px_18px_rgba(15,23,42,0.035)]">
+          <div className="rounded-2xl bg-white border border-[#EAF1ED] p-4 md:p-5 shadow-[0_8px_26px_rgba(28,66,48,0.055)]">
             <div className="flex items-start justify-between gap-3"><div><h3 className="text-sm font-bold text-slate-900">Kehadiran Siswa</h3><p className="text-xs text-slate-500 mt-1">{attendanceDateLabel}</p></div><button onClick={() => onNavigate('attendance')} className="text-xs font-semibold text-teal-700 hover:underline">Lihat detail</button></div>
             <div className="grid grid-cols-4 gap-2 mt-4">
               {([['Hadir',totals.Hadir,'text-emerald-700','bg-emerald-50'],['Sakit',totals.Sakit,'text-blue-700','bg-blue-50'],['Izin',totals.Izin,'text-amber-700','bg-amber-50'],['Alpa',totals.Alpa,'text-rose-700','bg-rose-50']] as const).map(([label,value,color,bg]) => <div key={label} className={`rounded-xl ${bg} p-2.5 text-center`}><p className="text-[10px] text-slate-500">{label}</p><p className={`text-xl font-bold mt-1 ${color}`}>{value}</p></div>)}
             </div>
-            <div className="mt-4"><div className="flex justify-between text-xs mb-1"><span className="text-slate-500">Persentase hadir</span><strong className="text-teal-700">{attendancePercent}%</strong></div><div className="h-2 rounded-full bg-slate-100 overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-teal-600 to-teal-300" style={{width:`${attendancePercent}%`}} /></div><p className="text-[10px] text-slate-400 mt-2">{totalRecorded} catatan kehadiran</p></div>
+            <div className="mt-4"><div className="flex justify-between text-xs mb-1"><span className="text-slate-500">Persentase hadir</span><strong className="text-teal-700">{attendancePercent}%</strong></div><div className="h-2 rounded-full bg-slate-100 overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-[#16B981] to-[#8BE6BC]" style={{width:`${attendancePercent}%`}} /></div><p className="text-[10px] text-slate-400 mt-2">{totalRecorded} catatan kehadiran</p></div>
           </div>
           <div className="rounded-2xl bg-white border border-slate-100 p-4 md:p-5 shadow-[0_5px_18px_rgba(15,23,42,0.035)]">
             <div className="flex items-start justify-between gap-3"><div><h3 className="text-sm font-bold text-slate-900">Perlu Perhatian</h3><p className="text-xs text-slate-500 mt-1">Pemantauan kehadiran siswa</p></div><span className="rounded-full bg-rose-50 text-rose-700 px-2.5 py-1 text-xs font-bold">{warnings.length}</span></div>

@@ -6,7 +6,7 @@ import { NavTab } from './Sidebar';
 
 interface HeaderProps {
   activeTab: NavTab;
-  onOpenMobileSidebar: () => void;
+  onNavigate: (tab: NavTab) => void;
 }
 
 const tabTitles: Record<NavTab, { title: string; subtitle: string }> = {
@@ -22,7 +22,7 @@ const tabTitles: Record<NavTab, { title: string; subtitle: string }> = {
   settings: { title: 'Pengaturan', subtitle: 'Profil sekolah, hak akses, dan panduan APK' },
 };
 
-export const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMobileSidebar }) => {
+export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate }) => {
   const { currentUser, switchRole, loginWithGoogle, logout, firebaseUser } = useAuth();
   const [showRoleMenu, setShowRoleMenu] = useState(false);
 
@@ -49,14 +49,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMobileSidebar }
     <header className="sticky top-0 z-30 bg-gradient-to-r from-[#0F9D8A] via-[#0D9488] to-[#0B887A] border-b border-[#0B887A]/70">
       <div className="flex items-center justify-between h-16 px-4 md:px-6 text-white">
         <div className="flex items-center gap-3 min-w-0">
-          <button
-            onClick={onOpenMobileSidebar}
-            className="md:hidden flex items-center justify-center min-h-9 px-2 text-xs font-semibold text-[#073B2A] hover:bg-white/20 rounded-lg"
-            title="Buka Menu"
-            aria-label="Buka Menu"
-          >
-            Menu
-          </button>
+          <button onClick={() => onNavigate('dashboard')} className="shrink-0 text-sm font-extrabold tracking-wide text-white">SIMPATIK</button>
 
           <div className="min-w-0">
             <div className="flex items-center gap-2">
@@ -149,6 +142,11 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onOpenMobileSidebar }
           )}
         </div>
       </div>
+      <nav className="flex items-center gap-1 overflow-x-auto border-t border-white/15 px-3 py-2 text-white md:px-6">
+        {([
+          ['dashboard','Dashboard'],['attendance','Presensi'],['journal','Jurnal'],['assessment','Penilaian'],['behavior','Perilaku'],['counseling','BK'],['grades','Rekap Nilai'],['master','Data Master'],['reports','Laporan'],['settings','Pengaturan']
+        ] as [NavTab,string][]).map(([tab,label]) => <button key={tab} onClick={() => onNavigate(tab)} className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${activeTab === tab ? 'bg-white text-[#087d79]' : 'text-white/90 hover:bg-white/15'}`}>{label}</button>)}
+      </nav>
     </header>
   );
 };

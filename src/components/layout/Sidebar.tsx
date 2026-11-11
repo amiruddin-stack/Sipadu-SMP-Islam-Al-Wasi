@@ -104,7 +104,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {true && (
               <div className="flex flex-col min-w-0">
                 <span className="text-sm font-bold tracking-tight text-slate-900 truncate">
-                  SIPADU AL WASI
+                  SIMPATIK AL-WASI’
                 </span>
                 <span className="text-[11px] font-medium text-slate-500 truncate">
                   SMP Islam Al-Wasi’

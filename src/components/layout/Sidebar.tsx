@@ -141,7 +141,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         collapsed ? 'justify-center' : 'justify-start'
                       } ${
                         isActive
-                          ? 'bg-[#25D366] text-white shadow-xs'
+                          ? 'bg-[#19B981] text-white shadow-xs'
                           : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                       }`}
                       title={collapsed ? item.label : undefined}

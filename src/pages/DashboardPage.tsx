@@ -51,21 +51,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
   return (
     <div className="min-h-full bg-[#f5f9f8] text-slate-800">
-      <header className="sticky top-0 z-40 bg-[#1599a8] text-white shadow-md">
-        <div className="flex h-[56px] items-center justify-between gap-3 px-4 md:px-6">
-          <button onClick={() => onNavigate('dashboard')} className="flex items-center gap-3 text-left">
-            <img src={`${import.meta.env.BASE_URL}Helmi%20hawari_20261111_083840_0000.png`} alt="" className="h-8 w-8 object-contain" />
-            <span className="text-base font-extrabold tracking-wide">SIMPATIK</span>
-          </button>
-          <span className="text-xs font-semibold text-white/90 md:text-sm">Dashboard</span>
-        </div>
-        <nav aria-label="Navigasi utama" className="flex items-center gap-1 overflow-x-auto border-t border-white/20 px-3 py-2 md:justify-center md:px-6">
-          {([
-            ['dashboard','Beranda'],['attendance','Presensi'],['journal','Jurnal'],['assessment','Penilaian'],['exams','Ujian'],['behavior','Perilaku'],['counseling','BK'],['grades','Rekap Nilai'],['master','Data Master'],['reports','Laporan'],['settings','Pengaturan']
-          ] as [NavTab,string][]).map(([tab,label]) => <button key={tab} onClick={() => onNavigate(tab)} className={`shrink-0 rounded-lg px-3 py-2 text-xs font-semibold transition ${tab === 'dashboard' ? 'bg-white text-[#087d79]' : 'text-white/95 hover:bg-white/15'}`}>{label}</button>)}
-        </nav>
-      </header>
-
       <section className="relative overflow-hidden bg-[#1599a8] px-5 py-7 text-white md:px-9 md:py-8">
         <div className="pointer-events-none absolute -right-12 -top-20 h-64 w-64 rounded-full bg-white/5" />
         <div className="relative mx-auto flex max-w-[1500px] items-center justify-between gap-5">

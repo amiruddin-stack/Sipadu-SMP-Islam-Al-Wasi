@@ -16,100 +16,47 @@ import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { ExamPage } from './pages/ExamPage';
 
+function ComingSoonPage() {
+  return (
+    <section className="mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center px-6 text-center">
+      <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-emerald-50 text-3xl font-black text-emerald-700">ILS</div>
+      <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-emerald-700">SIMPATIK AL-WASI’</p>
+      <h1 className="text-3xl font-bold text-slate-800">ILS</h1>
+      <p className="mt-3 max-w-md text-sm leading-6 text-slate-500">Fitur ini sedang dalam tahap persiapan dan akan segera tersedia.</p>
+      <span className="mt-6 rounded-full bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700">Coming Soon</span>
+    </section>
+  );
+}
+
 function AppContent() {
   const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
 
   const renderCurrentPage = () => {
     switch (activeTab) {
-      case 'dashboard':
-        return <DashboardPage onNavigate={(tab) => setActiveTab(tab)} />;
-      case 'attendance':
-        return <AttendancePage />;
-      case 'journal':
-        return <JournalPage />;
-      case 'behavior':
-        return <BehaviorPage />;
-      case 'counseling':
-        return <CounselingPage />;
-      case 'assessment':
-        return <AssessmentPage />;
-      case 'grades':
-        return <GradeSummaryPage />;
-      case 'master':
-        return <MasterDataPage />;
-      case 'reports':
-        return <ReportsPage />;
-      case 'settings':
-        return <SettingsPage />;
-      case 'exams':
-        return <ExamPage />;
-      default:
-        return <DashboardPage onNavigate={(tab) => setActiveTab(tab)} />;
+      case 'dashboard': return <DashboardPage onNavigate={(tab) => setActiveTab(tab)} />;
+      case 'attendance': return <AttendancePage />;
+      case 'journal': return <JournalPage />;
+      case 'behavior': return <BehaviorPage />;
+      case 'counseling': return <CounselingPage />;
+      case 'assessment': return <AssessmentPage />;
+      case 'grades': return <GradeSummaryPage />;
+      case 'master': return <MasterDataPage />;
+      case 'reports': return <ReportsPage />;
+      case 'settings': return <SettingsPage />;
+      case 'exams': return <ExamPage />;
+      case 'ils': return <ComingSoonPage />;
+      default: return <DashboardPage onNavigate={(tab) => setActiveTab(tab)} />;
     }
   };
 
   return (
-    <div className="flex h-screen w-full bg-[#F4F9F7] text-slate-800 overflow-hidden font-sans">
-      {/* Main View Area */}
-      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        {/* Sticky Header */}
-        {activeTab !== 'dashboard' && (
-          <Header activeTab={activeTab} onNavigate={setActiveTab} />
-        )}
-
-        {/* Scrollable Content Body */}
-        <main className={activeTab === 'dashboard' ? "flex-1 min-w-0 overflow-y-auto p-0 pb-0" : "flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-8"}>
-          <div className={activeTab === 'dashboard' ? "w-full" : "max-w-7xl mx-auto"}>{renderCurrentPage()}</div>
-        </main>
-
-        {/* Mobile Bottom Navigation Bar (Android Touch Friendly) */}
-        {activeTab !== 'dashboard' && <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-slate-200 px-2 py-1.5 flex items-center justify-around shadow-lg">
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-semibold transition-colors ${
-              activeTab === 'dashboard' ? 'text-[#168A48] font-bold' : 'text-slate-500'
-            }`}
-          >
-            <span>Dashboard</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('attendance')}
-            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-semibold transition-colors ${
-              activeTab === 'attendance' ? 'text-[#168A48] font-bold' : 'text-slate-500'
-            }`}
-          >
-            <span>Absensi</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('journal')}
-            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-semibold transition-colors ${
-              activeTab === 'journal' ? 'text-[#168A48] font-bold' : 'text-slate-500'
-            }`}
-          >
-            <span>Jurnal</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('assessment')}
-            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-semibold transition-colors ${
-              activeTab === 'assessment' ? 'text-[#168A48] font-bold' : 'text-slate-500'
-            }`}
-          >
-            <span>Nilai</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('master')}
-            className="flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-semibold text-slate-500"
-          >
-            <span>Menu</span>
-          </button>
-        </nav>}
-      </div>
-
-      {/* Floating Offline Notification */}
+    <div className="flex h-screen w-full flex-col overflow-hidden bg-[#F4F9F7] font-sans text-slate-800">
+      <Header activeTab={activeTab} onNavigate={setActiveTab} />
+      <main className="min-h-0 flex-1 overflow-y-auto p-0">
+        <div className={activeTab === 'dashboard' ? 'w-full' : 'mx-auto w-full max-w-7xl px-4 py-5 md:px-6 md:py-6'}>
+          {renderCurrentPage()}
+        </div>
+      </main>
       <OfflineIndicator />
     </div>
   );

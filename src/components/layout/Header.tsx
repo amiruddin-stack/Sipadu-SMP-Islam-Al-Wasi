@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { UserRole } from '../../types';
 import { PWAInstallButton } from '../common/PWAInstallButton';
@@ -9,146 +9,108 @@ interface HeaderProps {
   onNavigate: (tab: NavTab) => void;
 }
 
-const tabTitles: Record<NavTab, { title: string; subtitle: string }> = {
-  dashboard: { title: 'Dashboard', subtitle: 'Ringkasan operasional dan statistik akademik' },
-  attendance: { title: 'Absensi Digital', subtitle: 'Pencatatan dan rekap kehadiran harian kelas' },
-  journal: { title: 'Jurnal Guru', subtitle: 'Dokumentasi kegiatan belajar mengajar (KBM)' },
-  behavior: { title: 'Perilaku Siswa', subtitle: 'Pencatatan perkembangan karakter dan pembinaan' },
-  counseling: { title: 'Bimbingan Konseling (BK)', subtitle: 'Dokumentasi layanan konseling dan tindak lanjut' },
-  assessment: { title: 'Penilaian Kelas', subtitle: 'Input nilai tugas, ulangan harian, PTS, dan PAS' },
-  exams: { title: 'Modul Ujian', subtitle: 'Bank soal, pelaksanaan ujian, dan hasil siswa' },
-  exams: { title: 'Modul Ujian', subtitle: 'Bank soal, pelaksanaan ujian, dan hasil siswa' },
-  grades: { title: 'Rekap Nilai', subtitle: 'Buku leger nilai dan capaian kompetensi siswa' },
-  master: { title: 'Data Master', subtitle: 'Pengelolaan data siswa, guru, kelas, dan mapel' },
-  reports: { title: 'Pusat Laporan', subtitle: 'Cetak dan ekspor laporan terpadu ke PDF/Excel' },
-  settings: { title: 'Pengaturan', subtitle: 'Profil sekolah, hak akses, dan panduan APK' },
+const roleLabels: Record<UserRole, string> = {
+  super_admin: 'Super Admin',
+  kepala_sekolah: 'Kepala Sekolah',
+  operator: 'Operator',
+  guru: 'Guru Mapel',
+  wali_kelas: 'Wali Kelas',
+  guru_bk: 'Guru BK',
 };
 
 export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate }) => {
   const { currentUser, switchRole, loginWithGoogle, logout, firebaseUser } = useAuth();
-  const [showRoleMenu, setShowRoleMenu] = useState(false);
+  const [academicOpen, setAcademicOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [roleOpen, setRoleOpen] = useState(false);
+  const academicRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
 
-  const roleOptions: { role: UserRole; label: string; desc: string }[] = [
-    { role: 'super_admin', label: 'Super Admin', desc: 'Akses penuh seluruh sistem' },
-    { role: 'kepala_sekolah', label: 'Kepala Sekolah', desc: 'Pemantauan & laporan pimpinan' },
-    { role: 'operator', label: 'Operator Sekolah', desc: 'Pengelolaan data master & administrasi' },
-    { role: 'guru', label: 'Guru Mapel', desc: 'Pengisian jurnal, absensi & nilai' },
-    { role: 'wali_kelas', label: 'Wali Kelas VII-A', desc: 'Bina kelas, absensi & rekap nilai' },
-    { role: 'guru_bk', label: 'Guru BK', desc: 'Layanan bimbingan & konseling' },
-  ];
+  useEffect(() => {
+    const closeMenus = (event: MouseEvent) => {
+      if (academicRef.current && !academicRef.current.contains(event.target as Node)) setAcademicOpen(false);
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) setProfileOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setAcademicOpen(false);
+        setProfileOpen(false);
+        setRoleOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', closeMenus);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('mousedown', closeMenus);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, []);
 
-  const currentTabInfo = tabTitles[activeTab] || tabTitles.dashboard;
-  const roleLabels: Record<UserRole, string> = {
-    super_admin: 'Super Admin',
-    kepala_sekolah: 'Kepala Sekolah',
-    operator: 'Operator',
-    guru: 'Guru Mapel',
-    wali_kelas: 'Wali Kelas',
-    guru_bk: 'Guru BK',
+  const navClass = (tab: NavTab) =>
+    `relative flex min-h-11 shrink-0 items-center px-3 text-sm font-semibold transition-colors hover:text-white ${activeTab === tab ? 'text-white after:absolute after:bottom-0 after:left-3 after:right-3 after:h-[3px] after:rounded-full after:bg-white' : 'text-white/85'}`;
+
+  const navigate = (tab: NavTab) => {
+    onNavigate(tab);
+    setAcademicOpen(false);
+    setProfileOpen(false);
   };
 
+  const roleOptions: { role: UserRole; label: string }[] = [
+    { role: 'super_admin', label: 'Super Admin' },
+    { role: 'kepala_sekolah', label: 'Kepala Sekolah' },
+    { role: 'operator', label: 'Operator Sekolah' },
+    { role: 'guru', label: 'Guru Mapel' },
+    { role: 'wali_kelas', label: 'Wali Kelas' },
+    { role: 'guru_bk', label: 'Guru BK' },
+  ];
+
   return (
-    <header className="sticky top-0 z-30 bg-gradient-to-r from-[#0F9D8A] via-[#0D9488] to-[#0B887A] border-b border-[#0B887A]/70">
-      <div className="flex items-center justify-between h-16 px-4 md:px-6 text-white">
-        <div className="flex items-center gap-3 min-w-0">
-          <button onClick={() => onNavigate('dashboard')} className="shrink-0 text-sm font-extrabold tracking-wide text-white">SIMPATIK</button>
+    <header className="sticky top-0 z-50 w-full border-b border-[#087D70] bg-[#078A78] text-white shadow-sm">
+      <div className="mx-auto flex min-h-[68px] w-full items-center gap-3 px-3 md:px-5">
+        <button onClick={() => navigate('dashboard')} className="flex shrink-0 items-center gap-2.5 rounded-lg text-left" aria-label="SIMPATIK - Beranda">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/35 bg-white text-lg font-black text-[#078A78] shadow-sm">S</span>
+          <span className="whitespace-nowrap text-base font-extrabold tracking-wide md:text-lg">SIMPATIK</span>
+        </button>
 
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <h1 className="text-base md:text-lg font-bold text-[#073B2A]">
-                {currentTabInfo.title}
-              </h1>
-</div>
-            <p className="hidden md:block lg:hidden text-xs text-white/85">
-              {currentTabInfo.subtitle}
-            </p>
+        <nav aria-label="Navigasi utama" className="ml-1 flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto [scrollbar-width:thin]">
+          <button onClick={() => navigate('dashboard')} className={navClass('dashboard')}>Beranda</button>
+
+          <div ref={profileRef} className="relative shrink-0">
+            <button onClick={() => { setProfileOpen(v => !v); setAcademicOpen(false); }} aria-expanded={profileOpen} className={navClass('settings')}>Profil</button>
+            {profileOpen && <div className="absolute left-0 top-full mt-2 w-64 rounded-xl border border-slate-200 bg-white p-2 text-slate-700 shadow-xl">
+              <div className="border-b border-slate-100 px-3 py-2">
+                <p className="text-sm font-bold">{currentUser?.displayName || firebaseUser?.displayName || 'Pengguna'}</p>
+                <p className="text-xs text-slate-500">{currentUser ? roleLabels[currentUser.role] : 'Belum masuk'}</p>
+              </div>
+              <button onClick={() => navigate('settings')} className="w-full rounded-lg px-3 py-2.5 text-left text-sm hover:bg-emerald-50">Pengaturan Profil</button>
+              {firebaseUser ? <button onClick={logout} className="w-full rounded-lg px-3 py-2.5 text-left text-sm text-rose-700 hover:bg-rose-50">Keluar</button> : <button onClick={loginWithGoogle} className="w-full rounded-lg px-3 py-2.5 text-left text-sm hover:bg-emerald-50">Masuk dengan Google</button>}
+              <div className="mt-1 border-t border-slate-100 px-3 pt-2">
+                <button onClick={() => setRoleOpen(v => !v)} className="text-xs font-semibold text-slate-500">Ganti peran demo {roleOpen ? '−' : '+'}</button>
+                {roleOpen && <div className="mt-1 space-y-1">{roleOptions.map(option => <button key={option.role} onClick={() => { switchRole(option.role); setRoleOpen(false); }} className="block w-full rounded-md px-2 py-1.5 text-left text-xs hover:bg-emerald-50">{option.label}</button>)}</div>}
+              </div>
+            </div>}
           </div>
-        </div>
 
-        <div className="hidden lg:flex items-center gap-4">
-          <div className="text-right leading-tight">
-            <p className="text-sm font-semibold text-[#073B2A]">
-              {currentUser?.displayName || firebaseUser?.displayName || 'Pengguna'}
-            </p>
-            <p className="text-[11px] font-medium text-[#145C3F]">
-              {currentUser ? roleLabels[currentUser.role] : 'Pengguna'}
-            </p>
+          <div ref={academicRef} className="relative shrink-0">
+            <button onClick={() => { setAcademicOpen(v => !v); setProfileOpen(false); }} aria-expanded={academicOpen} className={`flex min-h-11 items-center gap-1 px-3 text-sm font-semibold transition-colors hover:text-white ${(['attendance','journal','assessment','grades'].includes(activeTab) ? 'text-white' : 'text-white/85')}`}>
+              Akademik <svg aria-hidden="true" viewBox="0 0 20 20" className={`h-4 w-4 transition-transform ${academicOpen ? 'rotate-180' : ''}`} fill="currentColor"><path d="m5 7 5 5 5-5H5Z" /></svg>
+            </button>
+            {academicOpen && <div className="absolute left-0 top-full mt-2 w-56 rounded-xl border border-slate-200 bg-white p-2 text-slate-700 shadow-xl">
+              {([['attendance','Presensi'],['journal','Jurnal'],['assessment','Penilaian'],['grades','Guru Wali']] as [NavTab,string][]).map(([tab,label]) => <button key={tab} onClick={() => navigate(tab)} className={`block w-full rounded-lg px-3 py-2.5 text-left text-sm hover:bg-emerald-50 ${activeTab === tab ? 'bg-emerald-50 font-bold text-emerald-800' : ''}`}>{label}</button>)}
+            </div>}
           </div>
-          <button
-            onClick={logout}
-            className="inline-flex items-center justify-center rounded-lg border border-white/70 bg-white/90 px-4 py-2 text-xs font-semibold text-[#075B36] shadow-sm transition-colors hover:bg-white hover:text-rose-700"
-            title="Keluar dari aplikasi"
-          >
-            Keluar
-          </button>
-        </div>
 
-        <div className="flex items-center gap-2 md:gap-3 lg:hidden">
+          <button onClick={() => navigate('ils')} className={navClass('ils')}>ILS <span className="ml-1 rounded-full bg-white/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide">Soon</span></button>
+          <button onClick={() => navigate('counseling')} className={navClass('counseling')}>BK</button>
+          <button onClick={() => navigate('exams')} className={navClass('exams')}>Ujian</button>
+          <button onClick={() => navigate('reports')} className={navClass('reports')}>Laporan</button>
+        </nav>
+
+        <div className="ml-auto flex shrink-0 items-center gap-2">
           <PWAInstallButton />
-          <div className="relative">
-            <button
-              onClick={() => setShowRoleMenu(!showRoleMenu)}
-              className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg border border-white/70 bg-white/80 text-[#075B36] transition-colors"
-              title="Ganti Peran Hak Akses (RBAC)"
-            >
-              <span className="hidden sm:inline">Peran:</span>
-              <span>{currentUser ? roleLabels[currentUser.role] : 'Admin'}</span>
-              <span className="text-[10px]">▼</span>
-            </button>
-
-            {showRoleMenu && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setShowRoleMenu(false)} />
-                <div className="absolute right-0 mt-2 w-64 rounded-xl bg-white border border-slate-200 shadow-xl z-50 p-2 space-y-1">
-                  <div className="px-2.5 py-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
-                    Pilih Hak Akses (RBAC)
-                  </div>
-                  {roleOptions.map((opt) => (
-                    <button
-                      key={opt.role}
-                      onClick={() => {
-                        switchRole(opt.role);
-                        setShowRoleMenu(false);
-                      }}
-                      className={`w-full text-left px-2.5 py-2 rounded-lg text-xs transition-colors flex flex-col ${
-                        currentUser?.role === opt.role
-                          ? 'bg-emerald-50 text-emerald-900 font-semibold'
-                          : 'hover:bg-slate-50 text-slate-700'
-                      }`}
-                    >
-                      <span className="font-medium text-slate-900">{opt.label}</span>
-                      <span className="text-[11px] text-slate-400 font-normal">{opt.desc}</span>
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-
-          {firebaseUser ? (
-            <button
-              onClick={logout}
-              className="px-2.5 py-1.5 text-xs font-medium text-[#075B36] bg-white/80 hover:bg-white rounded-lg border border-white/70"
-              title="Keluar / Logout"
-            >
-              <span className="hidden md:inline">Keluar</span>
-            </button>
-          ) : (
-            <button
-              onClick={loginWithGoogle}
-              className="px-3 py-1.5 text-xs font-semibold text-[#075B36] bg-white/80 hover:bg-white rounded-lg border border-white/70"
-              title="Masuk dengan Akun Google Sekolah"
-            >
-              <span className="hidden sm:inline">Google Auth</span>
-            </button>
-          )}
+          <span className="hidden max-w-36 truncate text-right text-xs font-semibold xl:block">{currentUser?.displayName || firebaseUser?.displayName || ''}</span>
         </div>
       </div>
-      <nav className="flex items-center gap-1 overflow-x-auto border-t border-white/15 px-3 py-2 text-white md:px-6">
-        {([
-          ['dashboard','Dashboard'],['attendance','Presensi'],['journal','Jurnal'],['assessment','Penilaian'],['exams','Ujian'],['behavior','Perilaku'],['counseling','BK'],['grades','Rekap Nilai'],['master','Data Master'],['reports','Laporan'],['settings','Pengaturan']
-        ] as [NavTab,string][]).map(([tab,label]) => <button key={tab} onClick={() => onNavigate(tab)} className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${activeTab === tab ? 'bg-white text-[#087d79]' : 'text-white/90 hover:bg-white/15'}`}>{label}</button>)}
-      </nav>
     </header>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { addDoc, collection, doc, getDocs, onSnapshot, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, getDocs, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
+import { deleteOfflineRecord, readOfflineRecord, readOfflineRecords, saveOfflineRecord } from '../lib/examOffline';
 import { signInAnonymously } from 'firebase/auth';
 import { BookOpen, Clock3, FileUp, Plus, ClipboardList, Trophy, ArrowLeft, CheckCircle2, Link as LinkIcon, Play, Save } from 'lucide-react';
 import { db, auth } from '../firebase/config';
@@ -45,24 +46,62 @@ export const ExamPage: React.FC = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [attemptId, setAttemptId] = useState('');
   const [secondsLeft, setSecondsLeft] = useState(0);
+  const [deadlineAt, setDeadlineAt] = useState(0);
+  const [isOnline, setIsOnline] = useState(typeof navigator === 'undefined' ? true : navigator.onLine);
+  const [offlineReady, setOfflineReady] = useState(false);
   const [saving, setSaving] = useState(false);
   const [finishedResult, setFinishedResult] = useState<{ title: string; studentName: string; className: string; score: number; total: number; percent: number } | null>(null);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
     let active = true;
+    const setNetwork = () => setIsOnline(navigator.onLine);
+    window.addEventListener('online', setNetwork);
+    window.addEventListener('offline', setNetwork);
+    const restoreOfflineData = async () => {
+      try {
+        const [cachedQuestions, cachedExams, session] = await Promise.all([
+          readOfflineRecord<Question[]>('cache:questions'),
+          readOfflineRecord<Exam[]>('cache:exams'),
+          readOfflineRecord<any>('session:active')
+        ]);
+        if (!active) return;
+        if (cachedQuestions) setQuestions(cachedQuestions);
+        if (cachedExams) setExams(cachedExams);
+        if (session?.exam && session?.attemptId && session?.deadlineAt) {
+          setActiveExam(session.exam);
+          setAnswers(session.answers || {});
+          setAttemptId(session.attemptId);
+          setStudentId(session.studentId || '');
+          setStudentClass(session.className || '');
+          setDeadlineAt(session.deadlineAt);
+          setSecondsLeft(Math.max(0, Math.ceil((session.deadlineAt - Date.now()) / 1000)));
+          setSection('take');
+          setMessage('Ujian sebelumnya dipulihkan dari penyimpanan perangkat.');
+        }
+        setOfflineReady(Boolean(cachedQuestions?.length && cachedExams?.length));
+      } catch (e) { console.warn('Offline cache:', e); }
+    };
+    void restoreOfflineData();
     const prepareStudentAccess = async () => {
       try {
-        if (!auth.currentUser) await signInAnonymously(auth);
+        if (navigator.onLine && !auth.currentUser) await signInAnonymously(auth);
+        if (!navigator.onLine) return;
         const snapshot = await getDocs(collection(db, 'students'));
         if (active && !snapshot.empty) setExamStudents(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as typeof students[number])));
       } catch (e) { console.warn('Student exam access:', e); }
     };
     void prepareStudentAccess();
-    const unQ = onSnapshot(collection(db, 'examQuestions'), snap => setQuestions(snap.docs.map(d => ({ ...d.data(), id: d.id } as Question))), e => setMessage('Bank soal belum dapat dibaca: ' + e.message));
-    const unE = onSnapshot(collection(db, 'exams'), snap => setExams(snap.docs.map(d => ({ ...d.data(), id: d.id } as Exam))), e => setMessage('Data ujian belum dapat dibaca: ' + e.message));
+    const unQ = onSnapshot(collection(db, 'examQuestions'), snap => {
+      const rows = snap.docs.map(d => ({ ...d.data(), id: d.id } as Question));
+      setQuestions(rows); setOfflineReady(true); void saveOfflineRecord('cache:questions', rows);
+    }, e => setMessage('Bank soal belum dapat dibaca: ' + e.message));
+    const unE = onSnapshot(collection(db, 'exams'), snap => {
+      const rows = snap.docs.map(d => ({ ...d.data(), id: d.id } as Exam));
+      setExams(rows); setOfflineReady(true); void saveOfflineRecord('cache:exams', rows);
+    }, e => setMessage('Data ujian belum dapat dibaca: ' + e.message));
     const unA = onSnapshot(collection(db, 'examAttempts'), snap => setAttempts(snap.docs.map(d => ({ ...d.data(), id: d.id } as Attempt))), e => console.warn(e));
-    return () => { active = false; unQ(); unE(); unA(); };
+    return () => { active = false; window.removeEventListener('online', setNetwork); window.removeEventListener('offline', setNetwork); unQ(); unE(); unA(); };
   }, []);
 
   const selectedClassNames = useMemo(() => classes.filter(c => classLevel(c) === level), [classes, level]);
@@ -120,38 +159,87 @@ export const ExamPage: React.FC = () => {
   const startExam = async (exam: Exam) => {
     const student = examStudents.find(s => s.id === studentId);
     if (!student) { setMessage('Pilih kelas dan nama siswa terlebih dahulu.'); return; }
+    const examQuestions = exam.questionIds.map(id => questions.find(q => q.id === id)).filter(Boolean) as Question[];
+    if (!examQuestions.length) { setMessage('Soal belum tersimpan di perangkat. Buka halaman ini saat online untuk memuat soal terlebih dahulu.'); return; }
     try {
-      await signInAnonymously(auth);
-      const ref = await addDoc(collection(db, 'examAttempts'), { examId: exam.id, examTitle: exam.title, studentId: student.id, studentName: student.name, className: student.className, answers: {}, score: 0, total: 0, status: 'Mengerjakan', startedAt: new Date().toISOString() });
-      setAttemptId(ref.id); setAnswers({}); setCurrentQuestion(0); setActiveExam(exam); setSecondsLeft(exam.duration * 60); setSection('take'); setMessage('');
-    } catch (e) { setMessage('Tidak dapat memulai ujian. Aktifkan metode Anonymous pada Firebase Authentication, lalu coba lagi.'); }
+      if (navigator.onLine && !auth.currentUser) await signInAnonymously(auth);
+      const id = crypto.randomUUID();
+      const startedAt = new Date().toISOString();
+      const endAt = Date.now() + exam.duration * 60 * 1000;
+      const attempt = { examId: exam.id, examTitle: exam.title, studentId: student.id, studentName: student.name, className: student.className, answers: {}, score: 0, total: 0, status: 'Mengerjakan', startedAt };
+      if (navigator.onLine) await setDoc(doc(db, 'examAttempts', id), attempt);
+      await saveOfflineRecord('session:active', { exam, attemptId: id, studentId: student.id, className: student.className, answers: {}, deadlineAt: endAt, studentName: student.name });
+      setAttemptId(id); setAnswers({}); setCurrentQuestion(0); setActiveExam(exam); setDeadlineAt(endAt); setSecondsLeft(exam.duration * 60); setSection('take'); setMessage(navigator.onLine ? '' : 'Mode offline aktif. Jawaban disimpan pada perangkat dan akan disinkronkan saat internet kembali.');
+    } catch (e) { setMessage('Tidak dapat memulai ujian. Pastikan data ujian sudah tersimpan di perangkat.'); }
   };
 
   const finishExam = async (forced = false) => {
-    if (!activeExam || !attemptId) return;
+    if (!activeExam || !attemptId || saving) return;
     const result = scoreAttempt(currentExamQuestions, answers);
     setSaving(true);
+    const student = examStudents.find(s => s.id === studentId);
+    const submittedAt = new Date().toISOString();
+    const payload = { examId: activeExam.id, examTitle: activeExam.title, studentId, studentName: student?.name || 'Siswa', className: student?.className || studentClass, answers, score: result.score, total: result.total, percent: result.percent, status: 'Selesai', startedAt: new Date(deadlineAt - activeExam.duration * 60 * 1000).toISOString(), submittedAt, autoSubmitted: forced };
     try {
-      const student = examStudents.find(s => s.id === studentId);
-      setFinishedResult({ title: activeExam.title, studentName: student?.name || 'Siswa', className: student?.className || '', score: result.score, total: result.total, percent: result.percent });
-      await updateDoc(doc(db, 'examAttempts', attemptId), { answers, score: result.score, total: result.total, percent: result.percent, status: 'Selesai', submittedAt: new Date().toISOString(), autoSubmitted: forced });
-      setActiveExam(null); setSection('results'); setMessage(forced ? 'Waktu habis. Jawaban tersimpan otomatis.' : 'Jawaban berhasil dikirim.');
-    } catch (e) { setMessage('Jawaban belum tersinkron. Periksa koneksi internet, lalu coba kirim kembali.'); }
-    finally { setSaving(false); }
+      await saveOfflineRecord('pending:' + attemptId, { id: attemptId, ...payload });
+      setFinishedResult({ title: activeExam.title, studentName: payload.studentName, className: payload.className, score: result.score, total: result.total, percent: result.percent });
+      if (navigator.onLine) {
+        if (!auth.currentUser) await signInAnonymously(auth);
+        await setDoc(doc(db, 'examAttempts', attemptId), payload, { merge: true });
+        await deleteOfflineRecord('pending:' + attemptId);
+        setMessage(forced ? 'Waktu habis. Jawaban terkirim otomatis.' : 'Jawaban berhasil dikirim.');
+      } else {
+        setMessage('Ujian selesai secara offline. Hasil tersimpan di perangkat dan akan dikirim otomatis saat internet kembali.');
+      }
+      await deleteOfflineRecord('session:active');
+      setActiveExam(null); setSection('results');
+    } catch (e) {
+      setMessage('Hasil tetap tersimpan di perangkat. Sinkronisasi akan dicoba kembali saat internet tersedia.');
+      await deleteOfflineRecord('session:active');
+      setActiveExam(null); setSection('results');
+    } finally { setSaving(false); }
   };
 
   useEffect(() => {
-    if (section !== 'take' || !activeExam) return;
-    if (secondsLeft <= 0) { if (attemptId) void finishExam(true); return; }
-    const timer = window.setTimeout(() => setSecondsLeft(s => s - 1), 1000);
-    return () => window.clearTimeout(timer);
-  }, [section, activeExam, secondsLeft]);
+    if (section !== 'take' || !activeExam || !deadlineAt) return;
+    const tick = () => {
+      const remaining = Math.max(0, Math.ceil((deadlineAt - Date.now()) / 1000));
+      setSecondsLeft(remaining);
+      if (remaining <= 0 && attemptId) void finishExam(true);
+    };
+    tick();
+    const timer = window.setInterval(tick, 1000);
+    return () => window.clearInterval(timer);
+  }, [section, activeExam, deadlineAt, attemptId]);
 
   useEffect(() => {
-    if (section !== 'take' || !attemptId) return;
-    const timer = window.setTimeout(() => updateDoc(doc(db, 'examAttempts', attemptId), { answers, lastSavedAt: new Date().toISOString() }).catch(() => {}), 700);
+    if (section !== 'take' || !attemptId || !activeExam) return;
+    const session = { exam: activeExam, attemptId, studentId, className: studentClass, answers, deadlineAt };
+    void saveOfflineRecord('session:active', session);
+    const timer = window.setTimeout(() => {
+      if (navigator.onLine) updateDoc(doc(db, 'examAttempts', attemptId), { answers, lastSavedAt: new Date().toISOString() }).catch(() => {});
+    }, 500);
     return () => window.clearTimeout(timer);
-  }, [answers, section, attemptId]);
+  }, [answers, section, attemptId, activeExam, studentId, studentClass, deadlineAt]);
+
+  useEffect(() => {
+    if (!isOnline) return;
+    let cancelled = false;
+    const syncPending = async () => {
+      try {
+        if (!auth.currentUser) await signInAnonymously(auth);
+        const pending = await readOfflineRecords<any>('pending:');
+        for (const item of pending) {
+          if (cancelled) return;
+          await setDoc(doc(db, 'examAttempts', item.id), item, { merge: true });
+          await deleteOfflineRecord('pending:' + item.id);
+        }
+        if (pending.length) setMessage(pending.length + ' hasil ujian offline berhasil disinkronkan ke server.');
+      } catch (e) { console.warn('Sinkronisasi ujian offline tertunda:', e); }
+    };
+    void syncPending();
+    return () => { cancelled = true; };
+  }, [isOnline]);
 
   const fmt = (seconds: number) => String(Math.floor(seconds / 60)).padStart(2,'0') + ':' + String(seconds % 60).padStart(2,'0');
   const studentEntry = () => <div className="mx-auto max-w-xl space-y-4">
@@ -178,6 +266,10 @@ export const ExamPage: React.FC = () => {
 
   return <div className="space-y-5">
     <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-wider text-teal-700">SIMPATIK · AKADEMIK</p><h2 className="text-2xl font-black text-slate-800">Modul Ujian</h2><p className="mt-1 text-sm text-slate-500">Kelola bank soal, susun ujian, dan pantau hasil siswa.</p></div><button className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700" onClick={()=>setSection('student')}>Halaman siswa</button></div>
+    <div className={`flex flex-wrap items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold ${isOnline ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-800'}`}>
+      <span className={`h-2 w-2 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+      {isOnline ? (offlineReady ? 'Online · Soal dan ujian tersimpan untuk akses offline' : 'Online · Memuat data ujian untuk disimpan di perangkat') : 'Offline · Jawaban disimpan di perangkat dan disinkronkan otomatis'}
+    </div>
     {message&&<div className="rounded-xl bg-teal-50 p-3 text-sm text-teal-800">{message}</div>}
     {section==='student'&&<div><button className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>setSection('home')}><ArrowLeft size={16}/> Kembali ke pengelolaan ujian</button>{studentEntry()}</div>}
     {section==='home'&&<><div className="grid gap-3 sm:grid-cols-3"><button className={panel+' text-left hover:border-teal-400'} onClick={()=>setSection('upload')}><FileUp className="text-teal-600"/><h3 className="mt-3 font-extrabold">Unggah File</h3><p className="mt-1 text-xs text-slate-500">Impor soal JSON/CSV atau simpan tautan Google Form.</p></button><button className={panel+' text-left hover:border-teal-400'} onClick={()=>setSection('create')}><Plus className="text-teal-600"/><h3 className="mt-3 font-extrabold">Buat Ujian</h3><p className="mt-1 text-xs text-slate-500">Pilih tahun ajaran, semester, kelas, dan soal.</p></button><button className={panel+' text-left hover:border-teal-400'} onClick={()=>setSection('results')}><Trophy className="text-teal-600"/><h3 className="mt-3 font-extrabold">Hasil Ujian</h3><p className="mt-1 text-xs text-slate-500">Lihat nilai dan status pengerjaan.</p></button></div><div className={panel}><h3 className="mb-3 font-extrabold">Pilih Kelas</h3><div className="grid grid-cols-3 gap-3">{cls.map(c=><button key={c} onClick={()=>{setLevel(c);setSection('create');}} className={`rounded-xl border p-5 text-center font-black ${level===c?'border-teal-500 bg-teal-50 text-teal-700':'border-slate-200'}`}>Kelas {c}</button>)}</div></div><div className={panel}><h3 className="mb-3 font-extrabold">Daftar Ujian</h3>{exams.map(ex=><div key={ex.id} className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 py-3"><div><p className="font-bold">{ex.title}</p><p className="text-xs text-slate-500">{ex.className} · {ex.subject} · {ex.duration} menit</p></div><span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">{ex.status}</span></div>)}{!exams.length&&<p className="text-sm text-slate-500">Belum ada ujian dibuat.</p>}</div></>}

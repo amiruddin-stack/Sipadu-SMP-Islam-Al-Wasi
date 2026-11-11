@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
 import { Header } from './components/layout/Header';
-import { NavTab, Sidebar } from './components/layout/Sidebar';
+import { NavTab } from './components/layout/Sidebar';
 import { OfflineIndicator } from './components/common/OfflineIndicator';
 import { DashboardPage } from './pages/DashboardPage';
 import { AttendancePage } from './pages/AttendancePage';
@@ -17,13 +17,11 @@ import { SettingsPage } from './pages/SettingsPage';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
-  const [collapsed, setCollapsed] = useState<boolean>(false);
-  const [mobileOpen, setMobileOpen] = useState<boolean>(false);
 
   const renderCurrentPage = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardPage onNavigate={(tab) => setActiveTab(tab)} onOpenMenu={() => setMobileOpen(true)} />;
+        return <DashboardPage onNavigate={(tab) => setActiveTab(tab)} />;
       case 'attendance':
         return <AttendancePage />;
       case 'journal':
@@ -49,26 +47,11 @@ function AppContent() {
 
   return (
     <div className="flex h-screen w-full bg-[#F4F9F7] text-slate-800 overflow-hidden font-sans">
-      {/* Sidebar tetap tersedia pada modul selain dashboard */}
-      {(
-        <Sidebar
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          collapsed={collapsed}
-          setCollapsed={setCollapsed}
-          mobileOpen={mobileOpen}
-          setMobileOpen={setMobileOpen}
-        />
-      )}
-
       {/* Main View Area */}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         {/* Sticky Header */}
         {activeTab !== 'dashboard' && (
-          <Header
-            activeTab={activeTab}
-            onOpenMobileSidebar={() => setMobileOpen(true)}
-          />
+          <Header activeTab={activeTab} onNavigate={setActiveTab} />
         )}
 
         {/* Scrollable Content Body */}
@@ -115,7 +98,7 @@ function AppContent() {
           </button>
 
           <button
-            onClick={() => setMobileOpen(true)}
+            onClick={() => setActiveTab('master')}
             className="flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-semibold text-slate-500"
           >
             <span>Menu</span>

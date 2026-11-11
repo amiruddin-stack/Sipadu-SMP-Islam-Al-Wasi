@@ -2,7 +2,7 @@ import React from 'react';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import { NavTab } from '../components/layout/Sidebar';
-import { CalendarCheck, PencilLine, Users, BookOpen, ClipboardList, Settings, ArrowRight, FileText } from 'lucide-react';
+import { CalendarCheck, PencilLine, Users, BookOpen, ClipboardList, Settings, ArrowRight, FileText, ClipboardCheck } from 'lucide-react';
 
 interface DashboardPageProps {
   onNavigate: (tab: NavTab) => void;
@@ -43,6 +43,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
     { label: 'Presensi Siswa', description: 'Catat kehadiran', tab: 'attendance', icon: <Users size={25} />, color: 'bg-emerald-500' },
     { label: 'Jurnal Pembelajaran', description: 'Catat kegiatan KBM', tab: 'journal', icon: <BookOpen size={25} />, color: 'bg-blue-600' },
     { label: 'Input Nilai Kelas', description: 'Kelola penilaian', tab: 'assessment', icon: <ClipboardList size={25} />, color: 'bg-purple-600' },
+    { label: 'Ujian', description: 'Bank soal dan ujian siswa', tab: 'exams', icon: <ClipboardCheck size={25} />, color: 'bg-teal-600' },
     { label: 'Catatan Wali Kelas', description: 'Catatan siswa', tab: 'behavior', icon: <FileText size={25} />, color: 'bg-cyan-700' },
     { label: 'Pengaturan', description: 'Atur aplikasi', tab: 'settings', icon: <Settings size={25} />, color: 'bg-orange-500' },
   ];
@@ -59,7 +60,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         </div>
         <nav aria-label="Navigasi utama" className="flex items-center gap-1 overflow-x-auto border-t border-white/20 px-3 py-2 md:justify-center md:px-6">
           {([
-            ['dashboard','Beranda'],['attendance','Presensi'],['journal','Jurnal'],['assessment','Penilaian'],['behavior','Perilaku'],['counseling','BK'],['grades','Rekap Nilai'],['master','Data Master'],['reports','Laporan'],['settings','Pengaturan']
+            ['dashboard','Beranda'],['attendance','Presensi'],['journal','Jurnal'],['assessment','Penilaian'],['exams','Ujian'],['behavior','Perilaku'],['counseling','BK'],['grades','Rekap Nilai'],['master','Data Master'],['reports','Laporan'],['settings','Pengaturan']
           ] as [NavTab,string][]).map(([tab,label]) => <button key={tab} onClick={() => onNavigate(tab)} className={`shrink-0 rounded-lg px-3 py-2 text-xs font-semibold transition ${tab === 'dashboard' ? 'bg-white text-[#087d79]' : 'text-white/95 hover:bg-white/15'}`}>{label}</button>)}
         </nav>
       </header>

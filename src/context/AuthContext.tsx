@@ -65,6 +65,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
+      if (user?.isAnonymous) {
+        setLoading(false);
+        return;
+      }
       if (user) {
         try {
           const userDocRef = doc(db, 'users', user.uid);

@@ -60,7 +60,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         <nav aria-label="Navigasi utama" className="flex items-center gap-1 overflow-x-auto border-t border-white/20 px-3 py-2 md:justify-center md:px-6">
           {([
             ['dashboard','Beranda'],['attendance','Presensi'],['journal','Jurnal'],['assessment','Penilaian'],['behavior','Perilaku'],['counseling','BK'],['grades','Rekap Nilai'],['master','Data Master'],['reports','Laporan'],['settings','Pengaturan']
-          ] as [NavTab,string][]).map(([tab,label]) => <button key={tab} onClick={() => onNavigate(tab)} className={`shrink-0 rounded-lg px-3 py-2 text-xs font-semibold transition ${activeTab === tab ? 'bg-white text-[#087d79]' : 'text-white/95 hover:bg-white/15'}`}>{label}</button>)}
+          ] as [NavTab,string][]).map(([tab,label]) => <button key={tab} onClick={() => onNavigate(tab)} className={`shrink-0 rounded-lg px-3 py-2 text-xs font-semibold transition ${tab === 'dashboard' ? 'bg-white text-[#087d79]' : 'text-white/95 hover:bg-white/15'}`}>{label}</button>)}
         </nav>
       </header>
 

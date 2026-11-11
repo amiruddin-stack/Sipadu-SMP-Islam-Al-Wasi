@@ -53,9 +53,52 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
   const attendanceDateLabel = attendanceDate
     ? new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(attendanceDate + 'T00:00:00'))
     : 'Belum ada data';
+  const attendanceTrend = [...new Set(relevantAttendances.map((record) => record.date))]
+    .sort()
+    .slice(-7)
+    .map((date) => {
+      const records = relevantAttendances.filter((record) => record.date === date);
+      let hadir = 0;
+      let total = 0;
+      records.forEach((record) => Object.values(record.records || {}).forEach((status) => {
+        total++;
+        if (status === 'Hadir') hadir++;
+      }));
+      return {
+        date,
+        label: new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short' }).format(new Date(date + 'T00:00:00')),
+        percent: total ? Math.round((hadir / total) * 100) : 0,
+      };
+    });
+  const classDistribution = Object.entries(
+    students.filter((student) => student.status === 'Aktif').reduce<Record<string, number>>((result, student) => {
+      const className = student.className || 'Lainnya';
+      result[className] = (result[className] || 0) + 1;
+      return result;
+    }, {})
+  ).sort(([a], [b]) => a.localeCompare(b, 'id'));
 
   return (
     <div className="min-h-full -mx-4 md:-mx-8 -mt-4 md:-mt-6 bg-[#F3F7F5] pb-11">
+      <nav className="sticky top-0 z-40 border-b border-white/15 bg-white/95 shadow-sm backdrop-blur-xl">
+        <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between gap-4 px-4 md:px-8">
+          <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex shrink-0 items-center gap-3 text-left">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E5F5F1] text-sm font-black tracking-tight text-[#017C68]">S</span>
+            <span className="leading-tight"><span className="block text-sm font-black tracking-wide text-slate-900">SIMPATIK</span><span className="block text-[10px] font-medium text-slate-500">SMP Islam Al-Wasi’</span></span>
+          </button>
+          <div className="flex min-w-0 items-center gap-1 overflow-x-auto whitespace-nowrap text-xs font-semibold text-slate-600 [scrollbar-width:none]">
+            <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="rounded-lg px-3 py-2 text-[#017C68] hover:bg-[#EAF7F3]">Beranda</button>
+            <button onClick={() => document.getElementById('menu-cepat')?.scrollIntoView({ behavior: 'smooth' })} className="rounded-lg px-3 py-2 hover:bg-slate-100">Menu</button>
+            <button onClick={() => document.getElementById('ringkasan')?.scrollIntoView({ behavior: 'smooth' })} className="rounded-lg px-3 py-2 hover:bg-slate-100">Akademik</button>
+            <button onClick={() => document.getElementById('visualisasi')?.scrollIntoView({ behavior: 'smooth' })} className="rounded-lg px-3 py-2 hover:bg-slate-100">Grafik</button>
+            <button onClick={() => onNavigate('reports')} className="rounded-lg px-3 py-2 hover:bg-slate-100">Laporan</button>
+          </div>
+          <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            <span className="max-w-[150px] truncate text-xs font-semibold text-slate-700">{currentUser?.displayName || firebaseUser?.displayName || 'Pengguna'}</span>
+            <button onClick={() => onNavigate('settings')} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:border-[#84C6BC] hover:text-[#017C68]">Akun</button>
+          </div>
+        </div>
+      </nav>
       <section className="simpatik-enter relative isolate min-h-[40vh] overflow-hidden bg-gradient-to-br from-[#017C68] via-[#05A287] to-[#84C6BC] px-5 py-9 text-white md:px-8 md:py-12 lg:py-14">
         <div className="pointer-events-none absolute -right-20 -top-24 h-80 w-80 rounded-full bg-white/10 blur-2xl" />
         <div className="pointer-events-none absolute -bottom-28 left-[38%] h-72 w-72 rounded-full bg-[#B9E5DC]/20 blur-3xl" />
@@ -78,7 +121,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
       </section>
 
       <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <section className="simpatik-enter mb-7 grid grid-cols-1 gap-4 pt-7 md:grid-cols-3" style={{ animationDelay: '90ms' }}>
+        <section id="identitas" className="simpatik-enter mb-7 grid grid-cols-1 gap-4 pt-7 md:grid-cols-3" style={{ animationDelay: '90ms' }}>
           <button type="button" onClick={() => onNavigate('master')} className="group min-h-[190px] rounded-2xl border border-[#DCECE7] bg-white p-5 text-left shadow-[0_8px_24px_rgba(1,124,104,0.06)] transition duration-300 hover:-translate-y-1 hover:border-[#84C6BC] hover:shadow-lg">
             <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E6F5F1] text-[#017C68]">
               <svg viewBox="0 0 24 24" className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>
@@ -101,7 +144,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             <span className="mt-2 block text-sm leading-relaxed text-slate-600">Guru, wali kelas, BK, dan kepala sekolah berbagi data yang sama.</span>
           </button>
         </section>
-        <section className="mb-7">
+        <section id="menu-cepat" className="mb-7 scroll-mt-24">
           <div className="flex items-center justify-between mb-3">
             <div><h3 className="text-base font-bold text-slate-900">Menu Cepat</h3><p className="text-xs text-slate-500 mt-0.5">Akses pekerjaan harian Anda</p></div>
           </div>
@@ -117,13 +160,34 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           </div>
         </section>
 
-        <section className="mb-7">
+        <section id="ringkasan" className="mb-7 scroll-mt-24">
           <div className="flex items-end justify-between mb-3"><div><h3 className="text-base font-bold text-slate-900">Ringkasan Akademik</h3><p className="text-xs text-slate-500 mt-0.5">Gambaran data sekolah saat ini</p></div><span className="text-[10px] md:text-xs text-slate-500">TA {settings.activeAcademicYear}</span></div>
           <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
             <div className="rounded-2xl bg-white border border-[#EAF1ED] p-4 md:p-5 shadow-[0_8px_26px_rgba(28,66,48,0.055)]"><p className="text-xs text-slate-500">Siswa Aktif</p><p className="mt-2 text-2xl md:text-3xl font-bold text-slate-900">{activeStudentsCount}</p><p className="text-[10px] text-slate-400 mt-1">Peserta didik</p></div>
             <div className="rounded-2xl bg-white border border-slate-100 p-4 shadow-[0_5px_18px_rgba(15,23,42,0.035)]"><p className="text-xs text-slate-500">Guru & Pendidik</p><p className="mt-2 text-2xl md:text-3xl font-bold text-slate-900">{activeTeachersCount}</p><p className="text-[10px] text-slate-400 mt-1">Tenaga pendidik</p></div>
             <div className="rounded-2xl bg-white border border-slate-100 p-4 shadow-[0_5px_18px_rgba(15,23,42,0.035)]"><p className="text-xs text-slate-500">Kehadiran</p><p className="mt-2 text-2xl md:text-3xl font-bold text-[#159B6D]">{attendancePercent}%</p><p className="text-[10px] text-slate-400 mt-1">Rekap terakhir</p></div>
             <div className="rounded-2xl bg-white border border-slate-100 p-4 shadow-[0_5px_18px_rgba(15,23,42,0.035)]"><p className="text-xs text-slate-500">Jurnal KBM</p><p className="mt-2 text-2xl md:text-3xl font-bold text-slate-900">{journals.length}</p><p className="text-[10px] text-slate-400 mt-1">{journals.filter(journal => journal.status === 'Selesai').length} sesi selesai</p></div>
+          </div>
+        </section>
+
+
+        <section id="visualisasi" className="mb-7 scroll-mt-24">
+          <div className="mb-4"><h3 className="text-base font-bold text-slate-900">Visualisasi Data Sekolah</h3><p className="mt-1 text-xs text-slate-500">Grafik dan bagan berdasarkan data SIMPATIK yang tersimpan</p></div>
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+            <div className="rounded-2xl border border-[#EAF1ED] bg-white p-5 shadow-[0_8px_26px_rgba(28,66,48,0.055)]">
+              <div className="flex items-start justify-between gap-3"><div><h4 className="text-sm font-bold text-slate-900">Grafik Kehadiran</h4><p className="mt-1 text-xs text-slate-500">Persentase hadir dalam 7 tanggal terakhir yang memiliki data</p></div><span className="rounded-full bg-[#E7F6F1] px-2.5 py-1 text-[10px] font-bold text-[#017C68]">Harian</span></div>
+              <div className="mt-6 flex h-44 items-end gap-2 border-b border-l border-slate-200 px-2 pb-0">
+                {attendanceTrend.length ? attendanceTrend.map((item) => <div key={item.date} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2"><span className="text-[10px] font-bold text-slate-600">{item.percent}%</span><div className="flex w-full flex-1 items-end"><div className="w-full rounded-t-lg bg-gradient-to-t from-[#017C68] to-[#49C6A8] transition-all" style={{ height: `${Math.max(item.percent, 3)}%` }} /></div><span className="mb-2 text-[9px] text-slate-400">{item.label}</span></div>) : <p className="m-auto pb-8 text-xs text-slate-400">Belum ada data kehadiran.</p>}
+              </div>
+              <div className="mt-3 flex items-center gap-2 text-[10px] text-slate-500"><span className="h-2 w-2 rounded-full bg-[#18A783]" /> Persentase siswa hadir</div>
+            </div>
+            <div className="rounded-2xl border border-[#EAF1ED] bg-white p-5 shadow-[0_8px_26px_rgba(28,66,48,0.055)]">
+              <div className="flex items-start justify-between gap-3"><div><h4 className="text-sm font-bold text-slate-900">Bagan Sebaran Siswa</h4><p className="mt-1 text-xs text-slate-500">Jumlah siswa aktif berdasarkan kelas</p></div><span className="rounded-full bg-[#E7F6F1] px-2.5 py-1 text-[10px] font-bold text-[#017C68]">Per kelas</span></div>
+              <div className="mt-5 space-y-4">
+                {classDistribution.length ? classDistribution.map(([className, count]) => <div key={className}><div className="mb-1.5 flex items-center justify-between text-xs"><span className="font-semibold text-slate-700">{className}</span><span className="font-bold tabular-nums text-slate-800">{count} siswa</span></div><div className="h-3 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-gradient-to-r from-[#017C68] to-[#69CBB2]" style={{ width: `${activeStudentsCount ? (count / activeStudentsCount) * 100 : 0}%` }} /></div></div>) : <p className="py-10 text-center text-xs text-slate-400">Belum ada data siswa aktif.</p>}
+              </div>
+              <div className="mt-5 border-t border-slate-100 pt-3 text-xs text-slate-500">Total <strong className="text-slate-800">{activeStudentsCount}</strong> siswa aktif</div>
+            </div>
           </div>
         </section>
 

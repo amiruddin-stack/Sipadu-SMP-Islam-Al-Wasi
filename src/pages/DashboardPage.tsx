@@ -53,7 +53,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
   return (
     <div className="space-y-6">
-      <section className="block lg:hidden rounded-2xl p-5 md:p-6 text-[#073B2A] shadow-sm bg-[#25D366]">
+      <section className="block lg:hidden rounded-2xl p-5 md:p-6 text-white shadow-sm bg-gradient-to-r from-[#0F9D8A] via-[#0D9488] to-[#0B887A]">
         <h2 className="text-xl md:text-2xl font-bold">Dashboard</h2>
       </section>
 
@@ -86,7 +86,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               <strong className="text-[#058D78]">{attendancePercent}%</strong>
             </div>
             <div className="h-2.5 rounded-full bg-slate-100 overflow-hidden">
-              <div className="h-full rounded-full bg-[#25D366]" style={{ width: `${attendancePercent}%` }} />
+              <div className="h-full rounded-full bg-gradient-to-r from-[#0F9D8A] to-[#62C9B9]" style={{ width: `${attendancePercent}%` }} />
             </div>
             <p className="text-[11px] text-slate-400 mt-2">{totalRecorded} catatan kehadiran dari seluruh kelas</p>
           </div>

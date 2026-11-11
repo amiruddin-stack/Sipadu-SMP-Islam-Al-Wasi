@@ -56,24 +56,24 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
   return (
     <div className="space-y-6">
-      <section className="w-full -mt-4 md:-mt-6 mb-5 px-4 md:px-8 py-3 bg-white border-b border-slate-100">
+      <section className="w-full -mt-4 md:-mt-6 mb-5 px-4 md:px-8 py-4 md:py-5 text-white bg-gradient-to-r from-[#0F9D8A] via-[#0D9488] to-[#087F73]">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 md:w-11 md:h-11 shrink-0 rounded-full overflow-hidden bg-teal-100 border-2 border-teal-100 flex items-center justify-center text-sm font-bold text-teal-800">
+            <div className="w-11 h-11 md:w-12 md:h-12 shrink-0 rounded-full overflow-hidden bg-white/20 border-2 border-white/70 flex items-center justify-center text-sm font-bold text-white">
               {firebaseUser?.photoURL ? <img src={firebaseUser.photoURL} alt="Foto profil" className="w-full h-full object-cover" /> : (currentUser?.displayName || 'G').split(' ').filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] md:text-xs text-slate-500">Selamat datang,</p>
-              <p className="text-sm md:text-base font-bold text-slate-800 truncate">{currentUser?.displayName || firebaseUser?.displayName || 'Guru'}</p>
-              <p className="text-[10px] md:text-xs text-teal-700">Guru & Tenaga Kependidikan</p>
+              <p className="text-[10px] md:text-xs text-white/80">Selamat datang,</p>
+              <p className="text-sm md:text-base font-bold text-white truncate">{currentUser?.displayName || firebaseUser?.displayName || 'Guru'}</p>
+              <p className="text-[10px] md:text-xs text-white/80">Guru & Tenaga Kependidikan</p>
             </div>
           </div>
           <div className="relative shrink-0">
-            <button type="button" onClick={() => setShowNotifications(!showNotifications)} aria-label="Notifikasi" className="relative w-10 h-10 rounded-full flex items-center justify-center text-slate-600 hover:bg-teal-50 border border-slate-200">
+            <button type="button" onClick={() => setShowNotifications(!showNotifications)} aria-label="Notifikasi" className="relative w-10 h-10 rounded-full flex items-center justify-center text-white hover:bg-white/15 border border-white/40">
               <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" /><path d="M10 21h4" /></svg>
               {warnings.length > 0 && <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center">{warnings.length > 9 ? '9+' : warnings.length}</span>}
             </button>
-            {showNotifications && <div className="absolute right-0 top-12 z-40 w-72 max-w-[calc(100vw-2rem)] rounded-2xl bg-white border border-slate-200 shadow-xl p-4">
+            {showNotifications && <div className="absolute right-0 top-12 z-40 w-72 max-w-[calc(100vw-2rem)] rounded-2xl bg-white border border-slate-200 shadow-xl p-4 text-slate-800">
               <div className="flex items-center justify-between mb-2"><p className="text-sm font-bold text-slate-800">Notifikasi</p><button onClick={() => setShowNotifications(false)} className="text-xs text-slate-400">Tutup</button></div>
               {warnings.length ? <button onClick={() => { onNavigate('attendance'); setShowNotifications(false); }} className="w-full text-left rounded-xl bg-rose-50 p-3 hover:bg-rose-100"><p className="text-xs font-semibold text-rose-800">{warnings.length} siswa perlu perhatian kehadiran</p><p className="text-[11px] text-rose-600 mt-1">Tekan untuk melihat rekap absensi</p></button> : <p className="text-xs text-slate-500 py-3">Belum ada notifikasi baru.</p>}
             </div>}
@@ -81,16 +81,28 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      <section className="w-full mb-6 overflow-hidden rounded-2xl md:rounded-3xl px-5 md:px-8 py-6 md:py-8 text-white shadow-sm bg-gradient-to-r from-[#0F9D8A] via-[#0D9488] to-[#0B887A]">
-        <div className="flex items-center justify-between gap-5 max-w-7xl mx-auto">
+      <section className="w-full mb-5 px-4 md:px-8 py-4 md:py-5 bg-white">
+        <div className="max-w-7xl mx-auto flex items-center gap-4 md:gap-6">
+          <img src={`${import.meta.env.BASE_URL}Helmi%20hawari_20261111_083840_0000.png`} alt="Logo SMP Islam Al-Wasi’" className="w-20 h-20 md:w-28 md:h-28 shrink-0 object-contain" />
           <div className="min-w-0">
-            <p className="text-[10px] md:text-sm font-semibold tracking-[0.16em] text-white/80 uppercase">Sistem Informasi Akademik Terpadu</p>
-            <h2 className="mt-2 text-2xl md:text-4xl font-extrabold tracking-tight">SIPADU</h2>
-            <p className="mt-1 text-sm md:text-lg text-white/95">SMP Islam Al-Wasi’</p>
-            <p className="mt-3 text-xs md:text-sm text-white/80">Qurani, Ramah Anak dan Berkarakter</p>
+            <p className="text-[10px] md:text-xs font-semibold tracking-[0.14em] text-teal-700 uppercase">Sistem Informasi Akademik Terpadu</p>
+            <h2 className="mt-1 text-2xl md:text-4xl font-extrabold tracking-tight text-slate-900">SIPADU</h2>
+            <p className="text-sm md:text-lg font-semibold text-slate-700">SMP Islam Al-Wasi’</p>
+            <p className="mt-1 text-xs md:text-sm text-slate-500">Qurani, Ramah Anak dan Berkarakter</p>
           </div>
-          <div className="shrink-0 rounded-2xl bg-white/95 p-2 md:p-3 shadow-lg">
-            <img src={`${import.meta.env.BASE_URL}Helmi%20hawari_20261111_083840_0000.png`} alt="Logo SMP Islam Al-Wasi’" className="w-20 h-20 md:w-28 md:h-28 object-contain" />
+        </div>
+      </section>
+
+      <section className="mb-6 px-4 md:px-8">
+        <div className="max-w-7xl mx-auto">
+          <h3 className="mb-3 text-sm font-bold text-slate-800">Menu Cepat</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <button type="button" onClick={() => onNavigate('attendance')} className="flex items-center justify-center gap-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white px-4 py-4 text-sm font-semibold shadow-sm transition-colors">
+              <span>Lakukan Presensi</span>
+            </button>
+            <button type="button" onClick={() => onNavigate('journal')} className="flex items-center justify-center gap-2 rounded-xl border border-teal-200 bg-white hover:bg-teal-50 text-teal-800 px-4 py-4 text-sm font-semibold transition-colors">
+              <span>Tulis Jurnal</span>
+            </button>
           </div>
         </div>
       </section>

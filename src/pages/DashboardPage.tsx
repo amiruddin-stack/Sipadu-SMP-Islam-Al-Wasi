@@ -62,7 +62,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             <p className="mt-3 text-xs md:text-sm text-white/80">Qurani, Ramah Anak dan Berkarakter</p>
           </div>
           <div className="shrink-0 rounded-2xl bg-white/95 p-2 md:p-3 shadow-lg">
-            <img src="/Sipadu-SMP-Islam-Al-Wasi-/Helmi%20hawari_20261111_083840_0000.png" alt="Logo SMP Islam Al-Wasi’" className="w-20 h-20 md:w-28 md:h-28 object-contain" />
+            <img src={`${import.meta.env.BASE_URL}Helmi%20hawari_20261111_083840_0000.png`} alt="Logo SMP Islam Al-Wasi’" className="w-20 h-20 md:w-28 md:h-28 object-contain" />
           </div>
         </div>
       </section>

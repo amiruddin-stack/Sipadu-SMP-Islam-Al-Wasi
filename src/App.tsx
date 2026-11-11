@@ -50,7 +50,7 @@ function AppContent() {
   return (
     <div className="flex h-screen w-full bg-[#F4F9F7] text-slate-800 overflow-hidden font-sans">
       {/* Sidebar tetap tersedia pada modul selain dashboard */}
-      {activeTab !== 'dashboard' && (
+      {(
         <Sidebar
           activeTab={activeTab}
           setActiveTab={setActiveTab}

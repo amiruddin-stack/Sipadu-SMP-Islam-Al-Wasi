@@ -44,6 +44,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
     { label: 'Jurnal Pembelajaran', description: 'Catat kegiatan KBM', tab: 'journal', icon: <BookOpen size={25} />, color: 'bg-blue-600' },
     { label: 'Input Nilai Kelas', description: 'Kelola penilaian', tab: 'assessment', icon: <ClipboardList size={25} />, color: 'bg-purple-600' },
     { label: 'Ujian', description: 'Bank soal dan ujian siswa', tab: 'exams', icon: <ClipboardCheck size={25} />, color: 'bg-teal-600' },
+    { label: 'Ujian', description: 'Bank soal dan ujian siswa', tab: 'exams', icon: <ClipboardCheck size={25} />, color: 'bg-teal-600' },
     { label: 'Catatan Wali Kelas', description: 'Catatan siswa', tab: 'behavior', icon: <FileText size={25} />, color: 'bg-cyan-700' },
     { label: 'Pengaturan', description: 'Atur aplikasi', tab: 'settings', icon: <Settings size={25} />, color: 'bg-orange-500' },
   ];

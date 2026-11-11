@@ -15,9 +15,9 @@ export default defineConfig(() => {
         includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icon.svg'],
         manifest: {
           id: '/',
-          name: 'SIPADU SMP Islam Al Wasi',
-          short_name: 'SIPADU',
-          description: 'Sistem Informasi Akademik Terpadu SMP Islam Al-Wasi’',
+          name: 'SIMPATIK | SMP Islam Al-Wasi’',
+          short_name: 'SIMPATIK',
+          description: 'Sistem Informasi Manajemen Pendidikan dan Akademik Terpadu, Interaktif dan Kolaboratif SMP Islam Al-Wasi’.',
           theme_color: '#25D366',
           background_color: '#F8FAF9',
           display: 'standalone',

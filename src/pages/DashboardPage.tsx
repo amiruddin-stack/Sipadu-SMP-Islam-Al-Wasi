@@ -2,14 +2,13 @@ import React from 'react';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import { NavTab } from '../components/layout/Sidebar';
-import { Menu, CalendarCheck, PencilLine, Users, BookOpen, ClipboardList, Settings, ArrowRight, FileText } from 'lucide-react';
+import { CalendarCheck, PencilLine, Users, BookOpen, ClipboardList, Settings, ArrowRight, FileText } from 'lucide-react';
 
 interface DashboardPageProps {
   onNavigate: (tab: NavTab) => void;
-  onOpenMenu: () => void;
 }
 
-export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, onOpenMenu }) => {
+export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
   const { currentUser, firebaseUser } = useAuth();
   const { students, attendances, journals, settings } = useData();
   const today = new Date();
@@ -51,7 +50,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, onOpen
   return (
     <div className="min-h-full bg-[#f5f9f8] text-slate-800">
       <div className="flex h-[56px] items-center gap-3 bg-[#1599a8] px-4 text-white shadow-sm md:px-6">
-        <button type="button" onClick={onOpenMenu} className="rounded-lg p-2 hover:bg-white/10 md:hidden" aria-label="Buka menu"><Menu size={21} /></button>
         <img src={`${import.meta.env.BASE_URL}Helmi%20hawari_20261111_083840_0000.png`} alt="" className="h-8 w-8 object-contain" />
         <span className="text-base font-extrabold tracking-wide">DASHBOARD</span>
       </div>
@@ -76,7 +74,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, onOpen
       </section>
 
       <main className="mx-auto max-w-[1500px] space-y-5 px-3 py-5 md:px-5 md:py-6">
-        <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <article className="overflow-hidden rounded-[20px] border border-[#d8e9e9] bg-white shadow-[0_3px_14px_rgba(20,90,100,.05)]">
             <div className="flex items-center justify-between gap-3 bg-[#f8fcfc] px-4 py-3 md:px-5">
               <div className="flex items-center gap-3"><span className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500 text-white"><Users size={25} fill="currentColor" /></span><div><h2 className="text-lg font-extrabold text-[#14536b] md:text-xl">Kehadiran Siswa</h2><p className="text-[11px] text-slate-500">{attendanceDateLabel}</p></div></div>
@@ -117,10 +115,30 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, onOpen
 
         <section className="rounded-[20px] bg-gradient-to-r from-[#e4f6f3] to-[#eef9f8] p-3 md:p-4">
           <div className="mb-3 flex items-center gap-2"><span className="text-2xl text-[#0b9b82]">ϟ</span><h2 className="text-xl font-extrabold text-[#14536b]">Menu Cepat</h2></div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
             {quickItems.map(item => <button key={item.tab} onClick={() => onNavigate(item.tab)} className="group flex min-h-[82px] items-center gap-3 rounded-2xl border border-[#d6e9e8] bg-white px-3 py-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
               <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-white ${item.color}`}>{item.icon}</span>
               <span className="min-w-0 flex-1"><strong className="block text-sm leading-tight text-[#173b56]">{item.label}</strong><small className="mt-1 block text-[10px] text-slate-500">{item.description}</small></span><ArrowRight size={18} className="shrink-0 text-[#168b8b] transition group-hover:translate-x-1" />
+            </button>)}
+          </div>
+        </section>
+
+        <section className="rounded-[20px] border border-[#d8e9e9] bg-white p-4 shadow-[0_3px_14px_rgba(20,90,100,.05)] md:p-5">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div><h2 className="text-xl font-extrabold text-[#14536b]">Lainnya</h2><p className="mt-1 text-xs text-slate-500">Akses seluruh fitur SIMPATIK lainnya</p></div>
+            <span className="rounded-full bg-[#e4f6f3] px-3 py-1 text-xs font-bold text-[#087f78]">Semua fitur</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            {([
+              { label: 'Perilaku Siswa', description: 'Catatan karakter', tab: 'behavior' as NavTab, icon: <Users size={22} /> },
+              { label: 'Bimbingan Konseling', description: 'Layanan BK', tab: 'counseling' as NavTab, icon: <BookOpen size={22} /> },
+              { label: 'Rekap Nilai', description: 'Capaian akademik', tab: 'grades' as NavTab, icon: <ClipboardList size={22} /> },
+              { label: 'Data Master', description: 'Data sekolah', tab: 'master' as NavTab, icon: <Users size={22} /> },
+              { label: 'Laporan', description: 'Rekap dan cetak', tab: 'reports' as NavTab, icon: <FileText size={22} /> },
+              { label: 'Pengaturan', description: 'Konfigurasi aplikasi', tab: 'settings' as NavTab, icon: <Settings size={22} /> },
+            ]).map(item => <button key={item.tab} onClick={() => onNavigate(item.tab)} className="flex min-h-[112px] flex-col items-start justify-between rounded-2xl border border-[#e0eeee] bg-[#f8fcfc] p-3 text-left transition hover:border-[#0ca78b] hover:bg-[#effaf7]">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#dff5ef] text-[#087f78]">{item.icon}</span>
+              <span><strong className="block text-xs leading-tight text-[#173b56]">{item.label}</strong><small className="mt-1 block text-[10px] text-slate-500">{item.description}</small></span>
             </button>)}
           </div>
         </section>

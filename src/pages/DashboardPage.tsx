@@ -53,8 +53,18 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
   return (
     <div className="space-y-6">
-      <section className="w-full -mt-4 md:-mt-6 mb-6 px-5 md:px-6 py-4 md:py-5 text-white shadow-sm bg-gradient-to-r from-[#0F9D8A] via-[#0D9488] to-[#0B887A]">
-        <h2 className="text-lg md:text-xl font-bold">Dashboard</h2>
+      <section className="w-full -mt-4 md:-mt-6 mb-6 px-5 md:px-8 py-6 md:py-8 text-white shadow-sm bg-gradient-to-r from-[#0F9D8A] via-[#0D9488] to-[#0B887A]">
+        <div className="flex items-center justify-between gap-5 max-w-7xl mx-auto">
+          <div className="min-w-0">
+            <p className="text-xs md:text-sm font-semibold tracking-[0.18em] text-white/80 uppercase">Sistem Informasi Akademik Terpadu</p>
+            <h2 className="mt-2 text-2xl md:text-3xl font-extrabold tracking-tight">SIPADU</h2>
+            <p className="mt-1 text-sm md:text-base text-white/90">SMP Islam Al-Wasi’</p>
+            <p className="mt-3 text-xs md:text-sm text-white/80">Qurani, Ramah Anak dan Berkarakter</p>
+          </div>
+          <div className="shrink-0 rounded-2xl bg-white/95 p-2 md:p-3 shadow-lg">
+            <img src="/Sipadu-SMP-Islam-Al-Wasi-/Helmi%20hawari_20261111_083840_0000.png" alt="Logo SMP Islam Al-Wasi’" className="w-20 h-20 md:w-28 md:h-28 object-contain" />
+          </div>
+        </div>
       </section>
 
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-5">

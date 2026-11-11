@@ -55,7 +55,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
     : 'Belum ada data';
 
   return (
-    <div className="min-h-full -mx-4 md:-mx-8 -mt-4 md:-mt-6 bg-[#F3F7F5] pb-10">
+    <div className="min-h-full -mx-4 md:-mx-8 -mt-4 md:-mt-6 bg-[#F3F7F5] pb-11">
       <section className="bg-gradient-to-r from-[#12A878] via-[#20B987] to-[#72DDB1] px-5 md:px-8 py-6 md:py-7 text-white shadow-[0_8px_28px_rgba(16,185,129,0.12)]">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">

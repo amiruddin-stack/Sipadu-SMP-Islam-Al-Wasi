@@ -41,7 +41,7 @@ function AppContent() {
       case 'settings':
         return <SettingsPage />;
       default:
-        return <DashboardPage onNavigate={(tab) => setActiveTab(tab)} onOpenMenu={() => setMobileOpen(true)} />;
+        return <DashboardPage onNavigate={(tab) => setActiveTab(tab)} />;
     }
   };
 

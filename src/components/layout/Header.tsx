@@ -16,6 +16,7 @@ const tabTitles: Record<NavTab, { title: string; subtitle: string }> = {
   behavior: { title: 'Perilaku Siswa', subtitle: 'Pencatatan perkembangan karakter dan pembinaan' },
   counseling: { title: 'Bimbingan Konseling (BK)', subtitle: 'Dokumentasi layanan konseling dan tindak lanjut' },
   assessment: { title: 'Penilaian Kelas', subtitle: 'Input nilai tugas, ulangan harian, PTS, dan PAS' },
+  exams: { title: 'Modul Ujian', subtitle: 'Bank soal, pelaksanaan ujian, dan hasil siswa' },
   grades: { title: 'Rekap Nilai', subtitle: 'Buku leger nilai dan capaian kompetensi siswa' },
   master: { title: 'Data Master', subtitle: 'Pengelolaan data siswa, guru, kelas, dan mapel' },
   reports: { title: 'Pusat Laporan', subtitle: 'Cetak dan ekspor laporan terpadu ke PDF/Excel' },
@@ -144,7 +145,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate }) => {
       </div>
       <nav className="flex items-center gap-1 overflow-x-auto border-t border-white/15 px-3 py-2 text-white md:px-6">
         {([
-          ['dashboard','Dashboard'],['attendance','Presensi'],['journal','Jurnal'],['assessment','Penilaian'],['behavior','Perilaku'],['counseling','BK'],['grades','Rekap Nilai'],['master','Data Master'],['reports','Laporan'],['settings','Pengaturan']
+          ['dashboard','Dashboard'],['attendance','Presensi'],['journal','Jurnal'],['assessment','Penilaian'],['exams','Ujian'],['behavior','Perilaku'],['counseling','BK'],['grades','Rekap Nilai'],['master','Data Master'],['reports','Laporan'],['settings','Pengaturan']
         ] as [NavTab,string][]).map(([tab,label]) => <button key={tab} onClick={() => onNavigate(tab)} className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${activeTab === tab ? 'bg-white text-[#087d79]' : 'text-white/90 hover:bg-white/15'}`}>{label}</button>)}
       </nav>
     </header>

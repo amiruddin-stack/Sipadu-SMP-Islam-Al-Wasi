@@ -66,13 +66,13 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate }) => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[#087D70] bg-[#078A78] text-white shadow-sm">
-      <div className="mx-auto flex min-h-[68px] w-full items-center gap-3 px-3 md:px-5">
+      <div className="mx-auto flex min-h-[68px] w-full flex-nowrap items-center gap-3 overflow-hidden px-3 md:px-5">
         <button onClick={() => navigate('dashboard')} className="flex shrink-0 items-center gap-2.5 rounded-lg text-left" aria-label="SIMPATIK - Beranda">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/35 bg-white text-lg font-black text-[#078A78] shadow-sm">S</span>
           <span className="whitespace-nowrap text-base font-extrabold tracking-wide md:text-lg">SIMPATIK</span>
         </button>
 
-        <nav aria-label="Navigasi utama" className="ml-1 flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto [scrollbar-width:thin]">
+        <nav aria-label="Navigasi utama" className="ml-1 flex h-[68px] min-w-0 flex-1 flex-nowrap items-center gap-0.5 overflow-x-auto whitespace-nowrap [scrollbar-width:thin] [overscroll-behavior-x:contain]">
           <button onClick={() => navigate('dashboard')} className={navClass('dashboard')}>Beranda</button>
 
           <div ref={profileRef} className="relative shrink-0">
@@ -106,7 +106,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate }) => {
           <button onClick={() => navigate('reports')} className={navClass('reports')}>Laporan</button>
         </nav>
 
-        <div className="ml-auto flex shrink-0 items-center gap-2">
+        <div className="ml-auto flex shrink-0 flex-nowrap items-center gap-2">
           <PWAInstallButton />
           <span className="hidden max-w-36 truncate text-right text-xs font-semibold xl:block">{currentUser?.displayName || firebaseUser?.displayName || ''}</span>
         </div>

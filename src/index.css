@@ -2,8 +2,8 @@
 
 :root {
   color-scheme: light;
-  --sipadu-primary: #0D9488;
-  --sipadu-primary-dark: #0B6F66;
+  --sipadu-primary: #19B981;
+  --sipadu-primary-dark: #0D8F68;
 }
 
 html, body, #root {
@@ -11,13 +11,10 @@ html, body, #root {
 }
 
 body {
-  background: #F8FAF9;
+  background: #F3F7F5;
   color: #172B22;
 }
 
-svg {
-  display: none !important;
-}
 
 @layer base {
   body {

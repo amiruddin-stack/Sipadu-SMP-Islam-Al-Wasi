@@ -84,7 +84,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
       </section>
 
       <main className="mx-auto max-w-[1500px] space-y-5 px-3 py-5 md:px-5 md:py-6">
-        <section className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <article className="min-w-0 overflow-hidden rounded-[20px] border border-[#d8e9e9] bg-white shadow-[0_3px_14px_rgba(20,90,100,.05)]">
             <div className="flex items-center justify-between gap-3 bg-[#f8fcfc] px-4 py-3 md:px-5">
               <div className="flex items-center gap-3"><span className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500 text-white"><Users size={25} fill="currentColor" /></span><div><h2 className="text-lg font-extrabold text-[#14536b] md:text-xl">Kehadiran Siswa</h2><p className="text-[11px] text-slate-500">{attendanceDateLabel}</p></div></div>
@@ -124,9 +124,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         </section>
 
         <section className="rounded-[20px] bg-gradient-to-r from-[#e4f6f3] to-[#eef9f8] p-3 md:p-4">
-          <div className="mb-3 flex items-center gap-2"><span className="text-2xl text-[#0b9b82]">ϟ</span><h2 className="text-xl font-extrabold text-[#14536b]">Menu Cepat</h2></div>
-          <div className="grid grid-cols-3 gap-x-2 gap-y-4 sm:grid-cols-5">
-            {quickItems.map(item => <button key={item.tab} onClick={() => onNavigate(item.tab)} className="group flex min-w-0 flex-col items-center justify-start gap-2 rounded-xl px-1 py-2 text-center transition hover:bg-white/80">
+          <div className="mb-3 flex items-center gap-2"><span className="text-2xl text-[#0b9b82]">ϟ</span><h2 className="text-xl font-extrabold text-[#14536b]">Menu</h2></div>
+          <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain pb-2 touch-pan-x">
+            {quickItems.map(item => <button key={item.tab} onClick={() => onNavigate(item.tab)} className="group flex w-[92px] shrink-0 snap-start flex-col items-center justify-start gap-2 rounded-xl px-1 py-2 text-center transition hover:bg-white/80">
               <span className={`flex h-14 w-14 items-center justify-center rounded-full text-white shadow-sm transition group-hover:-translate-y-0.5 group-hover:shadow-md ${item.color}`}>{item.icon}</span>
               <strong className="max-w-full text-xs font-bold leading-tight text-[#173b56]">{item.label}</strong>
             </button>)}

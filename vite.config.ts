@@ -18,7 +18,7 @@ export default defineConfig(() => {
           name: 'SIMPATIK | SMP Islam Al-Wasi’',
           short_name: 'SIMPATIK',
           description: 'Sistem Informasi Manajemen Pendidikan dan Akademik Terpadu, Interaktif dan Kolaboratif SMP Islam Al-Wasi’.',
-          theme_color: '#25D366',
+          theme_color: '#1599a8',
           background_color: '#F8FAF9',
           display: 'standalone',
           orientation: 'any',

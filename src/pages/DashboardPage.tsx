@@ -53,8 +53,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
   return (
     <div className="space-y-6">
-      <section className="block lg:hidden rounded-2xl p-5 md:p-6 text-white shadow-sm bg-gradient-to-r from-[#0F9D8A] via-[#0D9488] to-[#0B887A]">
-        <h2 className="text-xl md:text-2xl font-bold">Dashboard</h2>
+      <section className="w-full -mt-4 md:-mt-6 mb-6 px-5 md:px-6 py-4 md:py-5 text-white shadow-sm bg-gradient-to-r from-[#0F9D8A] via-[#0D9488] to-[#0B887A]">
+        <h2 className="text-lg md:text-xl font-bold">Dashboard</h2>
       </section>
 
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-5">

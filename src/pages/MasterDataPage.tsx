@@ -13,7 +13,7 @@ type Pending = {id:string;type:'guru'|'siswa';name:string;email:string;phone:str
 const CLASSES=['VII (Tujuh)','VIII (Delapan)','IX (Sembilan)'];
 const SUBJECTS=SCHOOL_SUBJECTS;
 const classLevel=(value:string)=>value.toUpperCase().replace(/[^A-Z]/g,'').slice(0,3);
-const groupQuestionPackages=(items:any[])=>{const groups=new Map<string,{key:string;title:string;questions:any[]}>();items.forEach(q=>{const title=q.title||'Paket Soal';const key=[q.subject||'',classLevel(q.className||''),title].join('::');const group=groups.get(key)||{key,title,questions:[]};group.questions.push(q);groups.set(key,group)});return Array.from(groups.values())};
+const groupQuestionPackages=(items:any[])=>{const groups=new Map<string,{key:string;title:string;questions:any[]}>();items.forEach(q=>{const title=q.title||'Paket Soal';const key=[q.subject||'',classLevel(q.className||''),q.sourceFormId||title].join('::');const group=groups.get(key)||{key,title,questions:[]};group.questions.push(q);groups.set(key,group)});return Array.from(groups.values())};
 const getPending=():Pending[]=>{try{return JSON.parse(localStorage.getItem('sipadu_pending_registrations')||'[]')}catch{return []}};
 const putPending=(v:Pending[])=>localStorage.setItem('sipadu_pending_registrations',JSON.stringify(v));
 export const RegistrationPage:React.FC<{type:'guru'|'siswa'}>=({type})=>{

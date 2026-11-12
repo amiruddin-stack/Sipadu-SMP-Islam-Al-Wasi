@@ -51,19 +51,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
   return (
     <div className="min-h-full bg-[#f5f9f8] text-slate-800">
-      <section className="simpatik-hero relative overflow-hidden px-5 py-7 text-white md:px-9 md:py-8">
-        <svg className="simpatik-hero-shapes pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 1200 360" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-          <defs><pattern id="simpatik-dot-grid" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="white" opacity=".24" /></pattern></defs>
-          <rect x="0" y="0" width="250" height="180" fill="url(#simpatik-dot-grid)" opacity=".55" />
-          <circle className="geo geo-one" cx="980" cy="60" r="92" fill="white" opacity=".09" />
-          <circle className="geo geo-two" cx="840" cy="270" r="58" fill="none" stroke="#d9ffc8" strokeWidth="2" opacity=".2" />
-          <path className="geo geo-three" d="M520 35 L590 155 L450 155 Z" fill="#d9ffc8" opacity=".12" />
-          <path className="geo geo-four" d="M1080 180 L1140 240 L1080 300 L1020 240 Z" fill="white" opacity=".1" />
-          <path className="geo geo-five" d="M720 55 L770 83 L770 139 L720 167 L670 139 L670 83 Z" fill="none" stroke="white" strokeWidth="2" opacity=".2" />
-          <circle className="geo geo-six" cx="390" cy="280" r="38" fill="#d9ffc8" opacity=".1" />
-          <path className="geo geo-seven" d="M250 205 L310 240 L250 275 L190 240 Z" fill="none" stroke="#e8ffdc" strokeWidth="2" opacity=".2" />
-        </svg>
-        <div className="simpatik-hero-shine pointer-events-none absolute inset-y-0 -left-1/2 w-1/3" />
+      <section className="simpatik-hero mx-3 my-4 max-w-[1460px] overflow-hidden rounded-[26px] px-5 py-7 text-white shadow-sm md:mx-auto md:my-6 md:px-9 md:py-8">
         <div className="relative z-10 mx-auto flex max-w-[1500px] items-center justify-between gap-5">
           <div className="min-w-0">
             <p className="text-sm text-white/85">Selamat datang, <strong>{currentUser?.displayName || firebaseUser?.displayName || 'Pengguna'}</strong></p>

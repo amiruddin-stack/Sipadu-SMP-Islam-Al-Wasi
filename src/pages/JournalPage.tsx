@@ -150,7 +150,7 @@ export const JournalPage: React.FC = () => {
             </button>
             <button
               onClick={handleOpenAdd}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-[#0F5132] hover:bg-[#0B3D26] rounded-lg transition-colors shadow-xs"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-[#076B3A] hover:bg-[#076B3A] rounded-lg transition-colors shadow-xs"
             >
               
               <span>Tambah Jurnal</span>
@@ -167,7 +167,7 @@ export const JournalPage: React.FC = () => {
             <select
               value={filterClass}
               onChange={(e) => setFilterClass(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
             >
               <option value="Semua">Semua Kelas</option>
               {classes.map((cls) => (
@@ -185,7 +185,7 @@ export const JournalPage: React.FC = () => {
             <select
               value={filterSubject}
               onChange={(e) => setFilterSubject(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
             >
               <option value="Semua">Semua Mapel</option>
               {subjects.map((sub) => (
@@ -205,7 +205,7 @@ export const JournalPage: React.FC = () => {
               placeholder="Cari materi, guru, kegiatan..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
             />
           </div>
         </div>
@@ -229,7 +229,7 @@ export const JournalPage: React.FC = () => {
                   <span className="text-xs font-bold text-slate-900">
                     {journal.subject}
                   </span>
-                  <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                  <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-bg-[#E3F7EC] text-#076B3A border border-border-[#B7E8CD]">
                     {journal.className}
                   </span>
                   <span className="text-xs text-slate-500 font-medium">
@@ -241,7 +241,7 @@ export const JournalPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-bg-[#E3F7EC] text-#076B3A">
                     {journal.status}
                   </span>
                   <button
@@ -318,7 +318,7 @@ export const JournalPage: React.FC = () => {
                     required
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
                   />
                 </div>
                 <div>
@@ -328,7 +328,7 @@ export const JournalPage: React.FC = () => {
                   <select
                     value={formData.className}
                     onChange={(e) => setFormData({ ...formData, className: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
                   >
                     {classes.map((cls) => (
                       <option key={cls} value={cls}>
@@ -346,7 +346,7 @@ export const JournalPage: React.FC = () => {
                 <select
                   value={formData.subject}
                   onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
                 >
                   {subjects.map((sub) => (
                     <option key={sub} value={sub}>
@@ -366,7 +366,7 @@ export const JournalPage: React.FC = () => {
                     placeholder="Contoh: Jam 1-2 (07:30 - 09:00)"
                     value={formData.lessonHours}
                     onChange={(e) => setFormData({ ...formData, lessonHours: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
                   />
                 </div>
                 <div>
@@ -378,7 +378,7 @@ export const JournalPage: React.FC = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, status: e.target.value as 'Selesai' | 'Berlangsung' })
                     }
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
                   >
                     <option value="Selesai">Selesai</option>
                     <option value="Berlangsung">Sedang Berlangsung</option>
@@ -396,7 +396,7 @@ export const JournalPage: React.FC = () => {
                   placeholder="Misal: Makharijul Huruf, Hukum Tajwid, atau Aljabar Dasar"
                   value={formData.topic}
                   onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
                 />
               </div>
 
@@ -410,7 +410,7 @@ export const JournalPage: React.FC = () => {
                   placeholder="Jelaskan ringkas metode, apersepsi, latihan, dan evaluasi KBM..."
                   value={formData.activity}
                   onChange={(e) => setFormData({ ...formData, activity: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
                 />
               </div>
 
@@ -423,7 +423,7 @@ export const JournalPage: React.FC = () => {
                   placeholder="Catatan siswa yang membutuhkan bimbingan khusus atau capaian kelas..."
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
                 />
               </div>
 
@@ -437,7 +437,7 @@ export const JournalPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 text-xs font-bold text-white bg-[#0F5132] hover:bg-[#0B3D26] rounded-xl shadow-xs"
+                  className="px-5 py-2 text-xs font-bold text-white bg-[#076B3A] hover:bg-[#076B3A] rounded-xl shadow-xs"
                 >
                   {editingJournal ? 'Simpan Perubahan' : 'Terbitkan Jurnal'}
                 </button>

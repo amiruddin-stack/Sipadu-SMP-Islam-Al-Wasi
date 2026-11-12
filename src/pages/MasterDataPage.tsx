@@ -3,11 +3,13 @@ import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { Student } from '../types';
 
-export const MasterDataPage: React.FC = () => {
+interface MasterDataPageProps { initialSubTab?: 'siswa' | 'guru' | 'akademik'; }
+
+export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 'siswa' }) => {
   const { canManageMasterData } = useAuth();
   const { students, teachers, classes, subjects, addStudent, updateStudent, deleteStudent } = useData();
 
-  const [activeSubTab, setActiveSubTab] = useState<'siswa' | 'guru' | 'akademik'>('siswa');
+  const [activeSubTab, setActiveSubTab] = useState<'siswa' | 'guru' | 'akademik'>(initialSubTab);
   const [selectedClass, setSelectedClass] = useState<string>('Semua');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showStudentModal, setShowStudentModal] = useState<boolean>(false);

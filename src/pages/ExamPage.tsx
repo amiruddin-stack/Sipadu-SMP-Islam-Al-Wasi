@@ -1,14 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { addDoc, collection, doc, getDocs, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 import { deleteOfflineRecord, readOfflineRecord, readOfflineRecords, saveOfflineRecord } from '../lib/examOffline';
 import { signInAnonymously } from 'firebase/auth';
 import { BookOpen, Clock3, FileUp, Plus, ClipboardList, Trophy, ArrowLeft, CheckCircle2, Link as LinkIcon, Play, Save } from 'lucide-react';
 import { db, auth } from '../firebase/config';
 import { useData } from '../context/DataContext';
+import { useAuth } from '../context/AuthContext';
+import { authorizeGoogleForms, hasGoogleFormsAccess, readGoogleForm, type ImportedGoogleQuestion } from '../lib/googleForms';
+import { GOOGLE_FORMS_CLIENT_ID } from '../lib/googleFormsConfig';
 
-type Question = { id: string; title: string; subject: string; className: string; academicYear: string; semester: string; prompt: string; options: string[]; answer: number; points: number };
+type Question = { id: string; title: string; subject: string; className: string; academicYear: string; semester: string; prompt: string; options: string[]; answer?: number; points: number };
 type Exam = { id: string; title: string; subject: string; className: string; academicYear: string; semester: string; duration: number; questionIds: string[]; formUrl?: string; status: 'Aktif' | 'Draft'; createdAt: string };
-type Attempt = { id: string; examId: string; examTitle: string; studentId: string; studentName: string; className: string; answers: Record<string, number>; score: number; total: number; status: 'Mengerjakan' | 'Selesai'; startedAt: string; submittedAt?: string };
+type Attempt = { id: string; examId: string; examTitle: string; studentId: string; studentName: string; className: string; answers: Record<string, number>; score?: number; total?: number; status: 'Mengerjakan' | 'Selesai'; startedAt: string; submittedAt?: string };
 
 const cls = ['VII', 'VIII', 'IX'];
 const panel = 'rounded-2xl border border-slate-200 bg-white p-4 shadow-sm';
@@ -16,14 +19,17 @@ const field = 'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 te
 const btn = 'inline-flex items-center justify-center gap-2 rounded-xl bg-[#16B364] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#0B8F4D] disabled:cursor-not-allowed disabled:opacity-50';
 
 function classLevel(value: string) { return value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3); }
-function scoreAttempt(questions: Question[], answers: Record<string, number>) {
-  const total = questions.reduce((sum, q) => sum + q.points, 0);
-  const score = questions.reduce((sum, q) => sum + (answers[q.id] === q.answer ? q.points : 0), 0);
-  return { score, total, percent: total ? Math.round(score / total * 100) : 0 };
+function makeStudentExamCode() {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const bytes = new Uint8Array(10);
+  crypto.getRandomValues(bytes);
+  const raw = Array.from(bytes, value => alphabet[value % alphabet.length]).join('');
+  return `SW-${raw.slice(0, 4)}-${raw.slice(4, 8)}`;
 }
-
 export const ExamPage: React.FC = () => {
   const { students, classes, subjects, settings } = useData();
+  const { firebaseUser } = useAuth();
+  const isVerifiedExamAdmin = firebaseUser?.email?.toLowerCase() === 'amiruddin@smpialwasi-maros.sch.id';
   const [examStudents, setExamStudents] = useState(students);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [exams, setExams] = useState<Exam[]>([]);
@@ -33,6 +39,9 @@ export const ExamPage: React.FC = () => {
   const [subject, setSubject] = useState('');
   const [title, setTitle] = useState('');
   const [formUrl, setFormUrl] = useState('');
+  const [googleConnected, setGoogleConnected] = useState(hasGoogleFormsAccess());
+  const [googleBusy, setGoogleBusy] = useState(false);
+  const [googlePreview, setGooglePreview] = useState<{ title: string; isQuiz: boolean; questions: ImportedGoogleQuestion[] } | null>(null);
   const [duration, setDuration] = useState(60);
   const [questionText, setQuestionText] = useState('');
   const [options, setOptions] = useState(['', '', '', '']);
@@ -45,25 +54,35 @@ export const ExamPage: React.FC = () => {
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [attemptId, setAttemptId] = useState('');
+  const [ownerUid, setOwnerUid] = useState('');
+  const [studentCode, setStudentCode] = useState('');
+  const [verifiedStudentName, setVerifiedStudentName] = useState('');
+  const [studentCodes, setStudentCodes] = useState<any[]>([]);
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [deadlineAt, setDeadlineAt] = useState(0);
   const [isOnline, setIsOnline] = useState(typeof navigator === 'undefined' ? true : navigator.onLine);
   const [offlineReady, setOfflineReady] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [finishedResult, setFinishedResult] = useState<{ title: string; studentName: string; className: string; score: number; total: number; percent: number } | null>(null);
+  const [finishedResult, setFinishedResult] = useState<{ title: string; studentName: string; className: string } | null>(null);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
     let active = true;
+    let unQ = () => {};
+    let unE = () => {};
+    let unA = () => {};
+    let unCodes = () => {};
     const setNetwork = () => setIsOnline(navigator.onLine);
     window.addEventListener('online', setNetwork);
     window.addEventListener('offline', setNetwork);
-    const restoreOfflineData = async () => {
+
+    const initialize = async () => {
       try {
-        const [cachedQuestions, cachedExams, session] = await Promise.all([
+        const [cachedQuestions, cachedExams, session, cachedIdentity] = await Promise.all([
           readOfflineRecord<Question[]>('cache:questions'),
           readOfflineRecord<Exam[]>('cache:exams'),
-          readOfflineRecord<any>('session:active')
+          readOfflineRecord<any>('session:active'),
+          readOfflineRecord<any>('student:identity')
         ]);
         if (!active) return;
         if (cachedQuestions) setQuestions(cachedQuestions);
@@ -72,7 +91,9 @@ export const ExamPage: React.FC = () => {
           setActiveExam(session.exam);
           setAnswers(session.answers || {});
           setAttemptId(session.attemptId);
+          setOwnerUid(session.ownerUid || '');
           setStudentId(session.studentId || '');
+          setVerifiedStudentName(session.studentName || '');
           setStudentClass(session.className || '');
           setDeadlineAt(session.deadlineAt);
           setSecondsLeft(Math.max(0, Math.ceil((session.deadlineAt - Date.now()) / 1000)));
@@ -80,41 +101,77 @@ export const ExamPage: React.FC = () => {
           setMessage('Ujian sebelumnya dipulihkan dari penyimpanan perangkat.');
         }
         setOfflineReady(Boolean(cachedQuestions?.length && cachedExams?.length));
-      } catch (e) { console.warn('Offline cache:', e); }
-    };
-    void restoreOfflineData();
-    const prepareStudentAccess = async () => {
-      try {
-        if (navigator.onLine && !auth.currentUser) await signInAnonymously(auth);
+        await auth.authStateReady();
+        if (cachedIdentity && auth.currentUser?.uid === cachedIdentity.ownerUid) {
+          setStudentId(cachedIdentity.studentId || '');
+          setStudentClass(cachedIdentity.className || '');
+          setVerifiedStudentName(cachedIdentity.studentName || '');
+          setStudentCode(cachedIdentity.code || '');
+        }
         if (!navigator.onLine) return;
+
+        if (!isVerifiedExamAdmin && !auth.currentUser) await signInAnonymously(auth);
+        if (!active || !auth.currentUser) return;
+
         const snapshot = await getDocs(collection(db, 'students'));
-        if (active && !snapshot.empty) setExamStudents(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as typeof students[number])));
-      } catch (e) { console.warn('Student exam access:', e); }
+        if (active && !snapshot.empty) {
+          setExamStudents(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as typeof students[number])));
+        }
+        if (!active) return;
+
+        unQ = onSnapshot(collection(db, 'examPublicQuestions'), snap => {
+          const rows = snap.docs.map(d => ({ ...d.data(), id: d.id, answer: undefined } as Question));
+          setQuestions(rows);
+          setOfflineReady(true);
+          void saveOfflineRecord('cache:questions', rows);
+        }, e => setMessage('Bank soal belum dapat dibaca: ' + e.message));
+
+        unE = onSnapshot(collection(db, 'exams'), snap => {
+          const rows = snap.docs.map(d => ({ ...d.data(), id: d.id } as Exam));
+          setExams(rows);
+          setOfflineReady(true);
+          void saveOfflineRecord('cache:exams', rows);
+        }, e => setMessage('Data ujian belum dapat dibaca: ' + e.message));
+
+        if (isVerifiedExamAdmin) {
+          unA = onSnapshot(collection(db, 'examAttempts'), snap => {
+            setAttempts(snap.docs.map(d => ({ ...d.data(), id: d.id } as Attempt)));
+          }, e => console.warn(e));
+          unCodes = onSnapshot(collection(db, 'examStudentCodes'), snap => {
+            setStudentCodes(snap.docs.map(d => ({ ...d.data(), id: d.id })));
+          }, e => setMessage('Daftar ID siswa belum dapat dibaca: ' + e.message));
+        }
+      } catch (e) {
+        console.warn('Persiapan akses ujian:', e);
+        if (active) setMessage('Akses ujian belum siap. Periksa koneksi dan akun Firebase.');
+      }
     };
-    void prepareStudentAccess();
-    const unQ = onSnapshot(collection(db, 'examQuestions'), snap => {
-      const rows = snap.docs.map(d => ({ ...d.data(), id: d.id } as Question));
-      setQuestions(rows); setOfflineReady(true); void saveOfflineRecord('cache:questions', rows);
-    }, e => setMessage('Bank soal belum dapat dibaca: ' + e.message));
-    const unE = onSnapshot(collection(db, 'exams'), snap => {
-      const rows = snap.docs.map(d => ({ ...d.data(), id: d.id } as Exam));
-      setExams(rows); setOfflineReady(true); void saveOfflineRecord('cache:exams', rows);
-    }, e => setMessage('Data ujian belum dapat dibaca: ' + e.message));
-    const unA = onSnapshot(collection(db, 'examAttempts'), snap => setAttempts(snap.docs.map(d => ({ ...d.data(), id: d.id } as Attempt))), e => console.warn(e));
-    return () => { active = false; window.removeEventListener('online', setNetwork); window.removeEventListener('offline', setNetwork); unQ(); unE(); unA(); };
-  }, []);
+
+    void initialize();
+    return () => {
+      active = false;
+      window.removeEventListener('online', setNetwork);
+      window.removeEventListener('offline', setNetwork);
+      unQ();
+      unE();
+      unA();
+      unCodes();
+    };
+  }, [isVerifiedExamAdmin]);
 
   const selectedClassNames = useMemo(() => classes.filter(c => classLevel(c) === level), [classes, level]);
-  const studentsInClass = useMemo(() => examStudents.filter(s => s.status === 'Aktif' && (studentClass ? s.className === studentClass : classLevel(s.className) === level)).sort((a,b) => a.name.localeCompare(b.name)), [examStudents, studentClass, level]);
   const classQuestions = questions.filter(q => classLevel(q.className) === level && (!subject || q.subject === subject));
   const currentExamQuestions = activeExam ? activeExam.questionIds.map(id => questions.find(q => q.id === id)).filter(Boolean) as Question[] : [];
   const availableExams = exams.filter(e => e.status === 'Aktif' && classLevel(e.className) === classLevel(studentClass || level));
 
   const addQuestion = async () => {
+    if (!isVerifiedExamAdmin) { setMessage('Hanya admin sekolah yang dapat menambahkan soal dan kunci jawaban.'); return; }
     if (!questionText.trim() || options.some(o => !o.trim()) || !subject) { setMessage('Lengkapi mapel, pertanyaan, dan semua pilihan jawaban.'); return; }
     setSaving(true);
     try {
-      await addDoc(collection(db, 'examQuestions'), { title: title.trim() || 'Bank Soal ' + subject, subject, className: selectedClassNames[0] || level, academicYear: settings.activeAcademicYear, semester: settings.activeSemester, prompt: questionText.trim(), options, answer: correct, points: 1, createdAt: new Date().toISOString() });
+      const questionRef = doc(collection(db, 'examPublicQuestions'));
+      await setDoc(questionRef, { title: title.trim() || 'Bank Soal ' + subject, subject, className: selectedClassNames[0] || level, academicYear: settings.activeAcademicYear, semester: settings.activeSemester, prompt: questionText.trim(), options, points: 1, createdAt: new Date().toISOString() });
+      await setDoc(doc(db, 'examAnswerKeys', questionRef.id), { answer: correct, points: 1, createdAt: new Date().toISOString() });
       setQuestionText(''); setOptions(['','','','']); setCorrect(0); setMessage('Soal berhasil disimpan ke bank soal.');
     } catch (e) { setMessage('Gagal menyimpan soal. Pastikan login Firebase aktif.'); }
     finally { setSaving(false); }
@@ -122,6 +179,7 @@ export const ExamPage: React.FC = () => {
 
   const importFile = async (file?: File) => {
     if (!file) return;
+    if (!isVerifiedExamAdmin) { setMessage('Hanya admin sekolah yang dapat mengimpor soal dan kunci jawaban.'); return; }
     setQuestionFileName(file.name);
     try {
       const raw = await file.text();
@@ -140,12 +198,84 @@ export const ExamPage: React.FC = () => {
         points: Number(q.points || 1), createdAt: new Date().toISOString()
       })).filter(q => q.prompt && q.options.length >= 2 && q.options.every(Boolean));
       if (!batch.length) throw new Error('Tidak ada soal valid');
-      await Promise.all(batch.map(q => addDoc(collection(db, 'examQuestions'), q)));
+      await Promise.all(batch.map(async q => { const { answer, ...publicQuestion } = q; const questionRef = doc(collection(db, 'examPublicQuestions')); await setDoc(questionRef, publicQuestion); await setDoc(doc(db, 'examAnswerKeys', questionRef.id), { answer, points: q.points, createdAt: q.createdAt }); }));
       setMessage(batch.length + ' soal berhasil diimpor.');
     } catch (e) { setMessage('File tidak terbaca. Gunakan JSON atau CSV titik koma dengan kolom pertanyaan;A;B;C;D;kunci (1-4).'); }
   };
 
+  const connectGoogle = async () => {
+    setGoogleBusy(true);
+    setMessage('');
+    try {
+      await authorizeGoogleForms(GOOGLE_FORMS_CLIENT_ID);
+      setGoogleConnected(true);
+      setMessage('Akun Google berhasil dihubungkan. Tempel tautan Google Form untuk mengambil soal.');
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : 'Gagal menghubungkan akun Google.');
+    } finally {
+      setGoogleBusy(false);
+    }
+  };
+
+  const fetchGoogleQuestions = async () => {
+    if (!formUrl.trim()) { setMessage('Masukkan tautan Google Form terlebih dahulu.'); return; }
+    if (!googleConnected || !hasGoogleFormsAccess()) { setMessage('Hubungkan akun Google terlebih dahulu.'); return; }
+    setGoogleBusy(true);
+    setGooglePreview(null);
+    setMessage('');
+    try {
+      const result = await readGoogleForm(formUrl);
+      setGooglePreview(result);
+      setTitle(current => current.trim() ? current : result.title);
+      setMessage(result.questions.length + ' soal pilihan ganda ditemukan. Periksa pratinjau sebelum menyimpan.');
+    } catch (e) {
+      if (e instanceof Error && e.message.includes('Hubungkan ulang')) setGoogleConnected(false);
+      setMessage(e instanceof Error ? e.message : 'Gagal mengambil soal dari Google Form.');
+    } finally {
+      setGoogleBusy(false);
+    }
+  };
+
+  const saveGoogleQuestions = async () => {
+    if (!isVerifiedExamAdmin) { setMessage('Hanya admin sekolah yang dapat menyimpan soal.'); return; }
+    if (!googlePreview || !subject) { setMessage('Pilih mata pelajaran terlebih dahulu.'); return; }
+    setGoogleBusy(true);
+    try {
+      const rows = googlePreview.questions.map(q => ({
+        title: title.trim() || googlePreview.title,
+        subject,
+        className: selectedClassNames[0] || level,
+        academicYear: settings.activeAcademicYear,
+        semester: settings.activeSemester,
+        prompt: q.prompt,
+        options: q.options,
+        points: q.points,
+        source: 'google_forms',
+        sourceFormId: formUrl.trim(),
+        createdAt: new Date().toISOString()
+      }));
+      for (let i = 0; i < rows.length; i++) {
+        const questionRef = doc(collection(db, 'examPublicQuestions'));
+        await setDoc(questionRef, rows[i]);
+        const answer = googlePreview.questions[i].answer;
+        if (typeof answer === 'number') {
+          await setDoc(doc(db, 'examAnswerKeys', questionRef.id), { answer, points: rows[i].points, createdAt: rows[i].createdAt });
+        }
+      }
+      const keyed = googlePreview.questions.filter(q => typeof q.answer === 'number').length;
+      setMessage(rows.length + ' soal berhasil disimpan. Kunci jawaban tersedia untuk ' + keyed + ' soal.');
+      setGooglePreview(null);
+      setFormUrl('');
+      setSection('home');
+    } catch (e) {
+      setMessage('Penyimpanan soal belum selesai. Periksa koneksi dan hak akses Firebase.');
+    } finally {
+      setGoogleBusy(false);
+    }
+  };
+
   const createExam = async () => {
+    if (!isVerifiedExamAdmin) { setMessage('Hanya admin sekolah yang dapat menerbitkan ujian.'); return; }
     if (!title.trim() || !subject || !selectedQuestions.length) { setMessage('Isi nama ujian, mapel, dan pilih minimal satu soal.'); return; }
     setSaving(true);
     try {
@@ -156,35 +286,88 @@ export const ExamPage: React.FC = () => {
     finally { setSaving(false); }
   };
 
+  const verifyStudentCode = async () => {
+    const code = studentCode.trim().toUpperCase();
+    if (!code) { setMessage('Masukkan ID Ujian siswa.'); return; }
+    try {
+      await auth.authStateReady();
+      if (!auth.currentUser) await signInAnonymously(auth);
+      const uid = auth.currentUser?.uid;
+      if (!uid) throw new Error('Sesi perangkat belum siap.');
+      const codeRef = doc(db, 'examStudentCodes', code);
+      const codeSnap = await getDoc(codeRef);
+      if (!codeSnap.exists()) throw new Error('ID Ujian tidak ditemukan. Periksa kembali kode yang diberikan sekolah.');
+      const data = codeSnap.data();
+      if (data.active !== true) throw new Error('ID Ujian ini sudah dinonaktifkan. Hubungi admin sekolah.');
+      if (!data.studentId || !data.studentName || !data.className) throw new Error('Data ID Ujian tidak lengkap. Hubungi admin sekolah.');
+      if (data.ownerUid && data.ownerUid !== uid) throw new Error('ID Ujian sudah terikat pada perangkat lain. Hubungi admin untuk memperbarui ID.');
+      if (!data.ownerUid) await updateDoc(codeRef, { ownerUid: uid });
+      await saveOfflineRecord('student:identity', { studentId: data.studentId, studentName: data.studentName, className: data.className, code, ownerUid: uid });
+      setStudentId(data.studentId);
+      setStudentClass(data.className);
+      setVerifiedStudentName(data.studentName);
+      setMessage('Identitas berhasil diverifikasi.');
+    } catch (e) { setStudentId(''); setVerifiedStudentName(''); setMessage(e instanceof Error ? e.message : 'Verifikasi ID Ujian gagal.'); }
+  };
+
+  const generateStudentCode = async (student: typeof students[number]) => {
+    if (!isVerifiedExamAdmin) return;
+    const previous = studentCodes.filter(item => item.studentId === student.id && item.active);
+    await Promise.all(previous.map(item => updateDoc(doc(db, 'examStudentCodes', item.id), { active: false })));
+    let code = makeStudentExamCode();
+    while (studentCodes.some(item => item.id === code)) code = makeStudentExamCode();
+    await setDoc(doc(db, 'examStudentCodes', code), { studentId: student.id, studentName: student.name, className: student.className, active: true, ownerUid: null, createdAt: new Date().toISOString() });
+  };
+
+  const generateAllStudentCodes = async () => {
+    if (!isVerifiedExamAdmin || !examStudents.length) { setMessage('Data siswa belum tersedia. Pastikan daftar siswa sudah tersinkron.'); return; }
+    setSaving(true);
+    try {
+      for (const student of examStudents.filter(item => item.status === 'Aktif')) await generateStudentCode(student);
+      setMessage('ID Ujian seluruh siswa aktif berhasil diperbarui. ID lama dinonaktifkan.');
+    } catch (e) { setMessage('Pembaruan ID belum selesai. Periksa koneksi lalu coba lagi.'); }
+    finally { setSaving(false); }
+  };
+
   const startExam = async (exam: Exam) => {
     const student = examStudents.find(s => s.id === studentId);
-    if (!student) { setMessage('Pilih kelas dan nama siswa terlebih dahulu.'); return; }
+    if (!studentId || !verifiedStudentName) { setMessage('Verifikasi ID Ujian siswa terlebih dahulu.'); return; }
     const examQuestions = exam.questionIds.map(id => questions.find(q => q.id === id)).filter(Boolean) as Question[];
     if (!examQuestions.length) { setMessage('Soal belum tersimpan di perangkat. Buka halaman ini saat online untuk memuat soal terlebih dahulu.'); return; }
     try {
+      await auth.authStateReady();
       if (navigator.onLine && !auth.currentUser) await signInAnonymously(auth);
+      const sessionOwnerUid = auth.currentUser?.uid || '';
       const id = crypto.randomUUID();
       const startedAt = new Date().toISOString();
       const endAt = Date.now() + exam.duration * 60 * 1000;
-      const attempt = { examId: exam.id, examTitle: exam.title, studentId: student.id, studentName: student.name, className: student.className, answers: {}, score: 0, total: 0, status: 'Mengerjakan', startedAt };
+      const attempt = { examId: exam.id, examTitle: exam.title, studentId, studentName: student?.name || verifiedStudentName, className: student?.className || studentClass, answers: {}, ownerUid: sessionOwnerUid, status: 'Mengerjakan', startedAt };
       if (navigator.onLine) await setDoc(doc(db, 'examAttempts', id), attempt);
-      await saveOfflineRecord('session:active', { exam, attemptId: id, studentId: student.id, className: student.className, answers: {}, deadlineAt: endAt, studentName: student.name });
+      await saveOfflineRecord('session:active', { exam, attemptId: id, studentId, className: student?.className || studentClass, answers: {}, deadlineAt: endAt, studentName: student?.name || verifiedStudentName, ownerUid: sessionOwnerUid });
+      setOwnerUid(sessionOwnerUid);
       setAttemptId(id); setAnswers({}); setCurrentQuestion(0); setActiveExam(exam); setDeadlineAt(endAt); setSecondsLeft(exam.duration * 60); setSection('take'); setMessage(navigator.onLine ? '' : 'Mode offline aktif. Jawaban disimpan pada perangkat dan akan disinkronkan saat internet kembali.');
     } catch (e) { setMessage('Tidak dapat memulai ujian. Pastikan data ujian sudah tersimpan di perangkat.'); }
   };
 
   const finishExam = async (forced = false) => {
     if (!activeExam || !attemptId || saving) return;
-    const result = scoreAttempt(currentExamQuestions, answers);
     setSaving(true);
     const student = examStudents.find(s => s.id === studentId);
     const submittedAt = new Date().toISOString();
-    const payload = { examId: activeExam.id, examTitle: activeExam.title, studentId, studentName: student?.name || 'Siswa', className: student?.className || studentClass, answers, score: result.score, total: result.total, percent: result.percent, status: 'Selesai', startedAt: new Date(deadlineAt - activeExam.duration * 60 * 1000).toISOString(), submittedAt, autoSubmitted: forced };
+    let stableOwnerUid = ownerUid;
     try {
+      await auth.authStateReady();
+      if (navigator.onLine && !auth.currentUser) await signInAnonymously(auth);
+      const currentUid = auth.currentUser?.uid || '';
+      if (stableOwnerUid && currentUid && stableOwnerUid !== currentUid) throw new Error('Sesi Firebase berubah. Pengiriman dihentikan demi menjaga kepemilikan jawaban.');
+      if (!stableOwnerUid) stableOwnerUid = currentUid;
+      if (stableOwnerUid) setOwnerUid(stableOwnerUid);
+      const payload = { examId: activeExam.id, examTitle: activeExam.title, studentId, studentName: student?.name || verifiedStudentName || 'Siswa', className: student?.className || studentClass, ownerUid: stableOwnerUid, answers, status: 'Selesai', startedAt: new Date(deadlineAt - activeExam.duration * 60 * 1000).toISOString(), submittedAt, autoSubmitted: forced };
       await saveOfflineRecord('pending:' + attemptId, { id: attemptId, ...payload });
-      setFinishedResult({ title: activeExam.title, studentName: payload.studentName, className: payload.className, score: result.score, total: result.total, percent: result.percent });
+      setFinishedResult({ title: activeExam.title, studentName: payload.studentName, className: payload.className });
       if (navigator.onLine) {
         if (!auth.currentUser) await signInAnonymously(auth);
+        if (!stableOwnerUid) throw new Error('Identitas sesi Firebase belum tersedia.');
         await setDoc(doc(db, 'examAttempts', attemptId), payload, { merge: true });
         await deleteOfflineRecord('pending:' + attemptId);
         setMessage(forced ? 'Waktu habis. Jawaban terkirim otomatis.' : 'Jawaban berhasil dikirim.');
@@ -214,25 +397,30 @@ export const ExamPage: React.FC = () => {
 
   useEffect(() => {
     if (section !== 'take' || !attemptId || !activeExam) return;
-    const session = { exam: activeExam, attemptId, studentId, className: studentClass, answers, deadlineAt };
+    const session = { exam: activeExam, attemptId, studentId, className: studentClass, answers, deadlineAt, ownerUid };
     void saveOfflineRecord('session:active', session);
     const timer = window.setTimeout(() => {
-      if (navigator.onLine) updateDoc(doc(db, 'examAttempts', attemptId), { answers, lastSavedAt: new Date().toISOString() }).catch(() => {});
+      if (navigator.onLine && auth.currentUser?.uid && ownerUid && auth.currentUser.uid === ownerUid) updateDoc(doc(db, 'examAttempts', attemptId), { answers, lastSavedAt: new Date().toISOString() }).catch(() => {});
     }, 500);
     return () => window.clearTimeout(timer);
-  }, [answers, section, attemptId, activeExam, studentId, studentClass, deadlineAt]);
+  }, [answers, section, attemptId, activeExam, studentId, studentClass, deadlineAt, ownerUid]);
 
   useEffect(() => {
     if (!isOnline) return;
     let cancelled = false;
     const syncPending = async () => {
       try {
+        await auth.authStateReady();
         if (!auth.currentUser) await signInAnonymously(auth);
+        const syncUid = auth.currentUser?.uid || '';
+        if (!syncUid) throw new Error('UID Firebase tidak tersedia.');
         if (section === 'take' && activeExam && attemptId) {
+          if (ownerUid && ownerUid !== syncUid) throw new Error('Sesi Firebase berubah; sinkronisasi dihentikan.');
+          if (!ownerUid) { setOwnerUid(syncUid); await saveOfflineRecord('session:active', { exam: activeExam, attemptId, studentId, className: studentClass, answers, deadlineAt, ownerUid: syncUid }); }
           const student = examStudents.find(item => item.id === studentId);
           await setDoc(doc(db, 'examAttempts', attemptId), {
-            examId: activeExam.id, examTitle: activeExam.title, studentId,
-            studentName: student?.name || 'Siswa', className: student?.className || studentClass,
+            examId: activeExam.id, examTitle: activeExam.title, studentId, ownerUid: syncUid,
+            studentName: student?.name || verifiedStudentName || 'Siswa', className: student?.className || studentClass,
             answers, status: 'Mengerjakan', startedAt: new Date(deadlineAt - activeExam.duration * 60000).toISOString()
           }, { merge: true });
           await updateDoc(doc(db, 'examAttempts', attemptId), { answers, lastSavedAt: new Date().toISOString() });
@@ -240,7 +428,8 @@ export const ExamPage: React.FC = () => {
         const pending = await readOfflineRecords<any>('pending:');
         for (const item of pending) {
           if (cancelled) return;
-          await setDoc(doc(db, 'examAttempts', item.id), item, { merge: true });
+          if (item.ownerUid && item.ownerUid !== syncUid) { console.warn('Hasil offline dilewati karena UID tidak cocok:', item.id); continue; }
+          await setDoc(doc(db, 'examAttempts', item.id), { ...item, ownerUid: item.ownerUid || syncUid }, { merge: true });
           await deleteOfflineRecord('pending:' + item.id);
         }
         if (pending.length) setMessage(pending.length + ' hasil ujian offline berhasil disinkronkan ke server.');
@@ -248,12 +437,16 @@ export const ExamPage: React.FC = () => {
     };
     void syncPending();
     return () => { cancelled = true; };
-  }, [isOnline, section, activeExam, attemptId, answers, studentId, studentClass, examStudents, deadlineAt]);
+  }, [isOnline, section, activeExam, attemptId, answers, studentId, studentClass, examStudents, deadlineAt, ownerUid]);
 
   const fmt = (seconds: number) => String(Math.floor(seconds / 60)).padStart(2,'0') + ':' + String(seconds % 60).padStart(2,'0');
   const studentEntry = () => <div className="mx-auto max-w-xl space-y-4">
-    <div className="text-center"><div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E3F7EC] text-[#16B364]"><BookOpen size={30}/></div><h2 className="text-2xl font-black text-slate-800">Ruang Ujian Siswa</h2><p className="mt-1 text-sm text-slate-500">Pilih kelas dan nama untuk melihat ujian yang tersedia.</p></div>
-    <div className={panel}><label className="mb-1 block text-xs font-bold text-slate-600">Kelas</label><select className={field} value={studentClass} onChange={e => {setStudentClass(e.target.value);setStudentId('');}}><option value="">Pilih kelas</option>{classes.map(c=><option key={c} value={c}>{c}</option>)}</select><label className="mb-1 mt-4 block text-xs font-bold text-slate-600">Nama siswa</label><select className={field} value={studentId} onChange={e=>setStudentId(e.target.value)} disabled={!studentClass}><option value="">Pilih nama siswa</option>{studentsInClass.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></div>
+    <div className="text-center"><div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E3F7EC] text-[#16B364]"><BookOpen size={30}/></div><h2 className="text-2xl font-black text-slate-800">Ruang Ujian Siswa</h2><p className="mt-1 text-sm text-slate-500">Masukkan ID Ujian yang diberikan sekolah. Nama dan kelas akan dikenali otomatis.</p></div>
+    <div className={panel}>
+      <label className="mb-1 block text-xs font-bold text-slate-600">ID Ujian Siswa</label>
+      <div className="flex flex-col gap-2 sm:flex-row"><input className={field+' uppercase tracking-widest'} value={studentCode} onChange={e=>setStudentCode(e.target.value.toUpperCase())} placeholder="SW-XXXX-XXXX" disabled={Boolean(studentId)}/><button className={btn+' shrink-0'} onClick={()=>void verifyStudentCode()} disabled={Boolean(studentId)}>Verifikasi</button></div>
+      {studentId&&<div className="mt-4 rounded-xl border border-[#B7E8CD] bg-[#F7FCF9] p-3"><p className="text-xs font-bold text-[#0B8F4D]">IDENTITAS TERVERIFIKASI</p><p className="mt-1 font-extrabold">{verifiedStudentName}</p><p className="text-sm text-slate-500">{studentClass}</p><button className="mt-3 text-xs font-bold text-rose-600" onClick={()=>{setStudentId('');setStudentClass('');setVerifiedStudentName('');setStudentCode('');void deleteOfflineRecord('student:identity');}}>Keluar / Ganti ID</button></div>}
+    </div>
     {studentId && <div className="space-y-3"><h3 className="font-bold text-slate-700">Ujian tersedia</h3>{availableExams.map(ex=><div key={ex.id} className={panel}><div className="flex items-start justify-between gap-3"><div><h4 className="font-extrabold">{ex.title}</h4><p className="mt-1 text-xs text-slate-500">{ex.subject} · {ex.duration} menit · {ex.questionIds.length} soal</p></div><button className={btn} onClick={()=>void startExam(ex)}><Play size={15}/> Mulai</button></div></div>)}{!availableExams.length&&<p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Belum ada ujian aktif untuk kelas ini.</p>}</div>}
   </div>;
 
@@ -270,7 +463,7 @@ export const ExamPage: React.FC = () => {
 
   if (section === 'results' && !activeExam) {
     const result = finishedResult;
-    return <div className="mx-auto max-w-xl space-y-4"><div className={panel+' text-center'}><Trophy size={42} className="mx-auto text-amber-500"/><h2 className="mt-3 text-2xl font-black">Hasil Ujian</h2>{result?<><p className="mt-2 font-bold">{result.title}</p><p className="mt-1 text-sm text-slate-500">{result.studentName} · {result.className}</p><p className="my-5 text-5xl font-black text-[#0B8F4D]">{result.score}<span className="text-xl text-slate-400">/{result.total}</span></p><p className="text-sm font-bold text-slate-600">Nilai: {result.percent}</p></>:<p className="mt-3 text-sm text-slate-500">Hasil sedang disimpan.</p>}<button className={btn+' mt-5'} onClick={()=>{setSection('student');setAttemptId('');}}>Kembali</button></div></div>;
+    return <div className="mx-auto max-w-xl space-y-4"><div className={panel+' text-center'}><Trophy size={42} className="mx-auto text-amber-500"/><h2 className="mt-3 text-2xl font-black">Hasil Ujian</h2>{result?<><p className="mt-2 font-bold">{result.title}</p><p className="mt-1 text-sm text-slate-500">{result.studentName} · {result.className}</p><p className="my-5 text-lg font-bold text-[#0B8F4D]">Jawaban berhasil disimpan</p><p className="text-sm text-slate-600">Nilai menunggu pemeriksaan guru.</p></>:<p className="mt-3 text-sm text-slate-500">Hasil sedang disimpan.</p>}<button className={btn+' mt-5'} onClick={()=>{setSection('student');setAttemptId('');}}>Kembali</button></div></div>;
   }
 
   return <div className="space-y-5">
@@ -281,9 +474,9 @@ export const ExamPage: React.FC = () => {
     </div>
     {message&&<div className="rounded-xl bg-[#E3F7EC] p-3 text-sm text-[#076B3A]">{message}</div>}
     {section==='student'&&<div><button className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>setSection('home')}><ArrowLeft size={16}/> Kembali ke pengelolaan ujian</button>{studentEntry()}</div>}
-    {section==='home'&&<><div className="grid gap-3 sm:grid-cols-3"><button className={panel+' text-left hover:border-[#16B364]'} onClick={()=>setSection('upload')}><FileUp className="text-[#0B8F4D]"/><h3 className="mt-3 font-extrabold">Unggah File</h3><p className="mt-1 text-xs text-slate-500">Impor soal JSON/CSV atau simpan tautan Google Form.</p></button><button className={panel+' text-left hover:border-[#16B364]'} onClick={()=>setSection('create')}><Plus className="text-[#0B8F4D]"/><h3 className="mt-3 font-extrabold">Buat Ujian</h3><p className="mt-1 text-xs text-slate-500">Pilih tahun ajaran, semester, kelas, dan soal.</p></button><button className={panel+' text-left hover:border-[#16B364]'} onClick={()=>setSection('results')}><Trophy className="text-[#0B8F4D]"/><h3 className="mt-3 font-extrabold">Hasil Ujian</h3><p className="mt-1 text-xs text-slate-500">Lihat nilai dan status pengerjaan.</p></button></div><div className={panel}><h3 className="mb-3 font-extrabold">Pilih Kelas</h3><div className="grid grid-cols-3 gap-3">{cls.map(c=><button key={c} onClick={()=>{setLevel(c);setSection('create');}} className={`rounded-xl border p-5 text-center font-black ${level===c?'border-[#16B364] bg-[#E3F7EC] text-[#0B8F4D]':'border-slate-200'}`}>Kelas {c}</button>)}</div></div><div className={panel}><h3 className="mb-3 font-extrabold">Daftar Ujian</h3>{exams.map(ex=><div key={ex.id} className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 py-3"><div><p className="font-bold">{ex.title}</p><p className="text-xs text-slate-500">{ex.className} · {ex.subject} · {ex.duration} menit</p></div><span className="rounded-full bg-[#E3F7EC] px-3 py-1 text-xs font-bold text-[#0B8F4D]">{ex.status}</span></div>)}{!exams.length&&<p className="text-sm text-slate-500">Belum ada ujian dibuat.</p>}</div></>}
-    {section==='upload'&&<div className={panel+' max-w-3xl'}><button className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>setSection('home')}><ArrowLeft size={16}/> Kembali</button><h3 className="mb-4 text-lg font-black">Unggah File Soal</h3><div className="grid gap-3 sm:grid-cols-2"><div><label className="mb-1 block text-xs font-bold">Kelas</label><select className={field} value={level} onChange={e=>setLevel(e.target.value)}>{cls.map(c=><option key={c}>{c}</option>)}</select></div><div><label className="mb-1 block text-xs font-bold">Mata pelajaran</label><select className={field} value={subject} onChange={e=>setSubject(e.target.value)}><option value="">Pilih mapel</option>{subjects.map(s=><option key={s}>{s}</option>)}</select></div></div><label className="mb-1 mt-3 block text-xs font-bold">Nama soal / judul ujian</label><input className={field} value={title} onChange={e=>setTitle(e.target.value)} placeholder="Contoh: PTS Bahasa Arab Kelas VII"/><label className="mb-1 mt-3 block text-xs font-bold">Tautan Google Form (opsional)</label><input className={field} value={formUrl} onChange={e=>setFormUrl(e.target.value)} placeholder="https://docs.google.com/forms/..."/><p className="mt-1 text-xs text-slate-500">Tautan disimpan sebagai referensi. Judul Google Form belum dapat dibaca otomatis dari browser tanpa layanan penghubung Google Apps Script/API.</p><label className="mb-1 mt-4 block text-xs font-bold">Pilih file JSON atau CSV</label><input type="file" accept=".json,.csv,.txt" className={field} onChange={e=>void importFile(e.target.files?.[0])}/>{questionFileName&&<p className="mt-2 text-xs text-slate-500">File: {questionFileName}</p>}<p className="mt-3 text-xs text-slate-500">JSON: [{'{'}"prompt":"Pertanyaan","options":["A","B","C","D"],"answer":0{' }'}]. CSV: pertanyaan;A;B;C;D;kunci (1-4).</p></div>}
+    {section==='home'&&<><div className="grid gap-3 sm:grid-cols-3"><button className={panel+' text-left hover:border-[#16B364]'} onClick={()=>setSection('upload')}><FileUp className="text-[#0B8F4D]"/><h3 className="mt-3 font-extrabold">Impor Soal</h3><p className="mt-1 text-xs text-slate-500">Ambil soal dari Google Forms atau unggah JSON/CSV.</p></button><button className={panel+' text-left hover:border-[#16B364]'} onClick={()=>setSection('create')}><Plus className="text-[#0B8F4D]"/><h3 className="mt-3 font-extrabold">Buat Ujian</h3><p className="mt-1 text-xs text-slate-500">Pilih tahun ajaran, semester, kelas, dan soal.</p></button><button className={panel+' text-left hover:border-[#16B364]'} onClick={()=>setSection('results')}><Trophy className="text-[#0B8F4D]"/><h3 className="mt-3 font-extrabold">Hasil Ujian</h3><p className="mt-1 text-xs text-slate-500">Lihat nilai dan status pengerjaan.</p></button></div><div className={panel}><h3 className="mb-3 font-extrabold">Pilih Kelas</h3><div className="grid grid-cols-3 gap-3">{cls.map(c=><button key={c} onClick={()=>{setLevel(c);setSection('create');}} className={`rounded-xl border p-5 text-center font-black ${level===c?'border-[#16B364] bg-[#E3F7EC] text-[#0B8F4D]':'border-slate-200'}`}>Kelas {c}</button>)}</div></div><div className={panel}><h3 className="mb-3 font-extrabold">Daftar Ujian</h3>{exams.map(ex=><div key={ex.id} className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 py-3"><div><p className="font-bold">{ex.title}</p><p className="text-xs text-slate-500">{ex.className} · {ex.subject} · {ex.duration} menit</p></div><span className="rounded-full bg-[#E3F7EC] px-3 py-1 text-xs font-bold text-[#0B8F4D]">{ex.status}</span></div>)}{!exams.length&&<p className="text-sm text-slate-500">Belum ada ujian dibuat.</p>}</div>{isVerifiedExamAdmin&&<div className={panel}><div className="flex flex-wrap items-center justify-between gap-3"><div><h3 className="font-extrabold">ID Ujian Siswa</h3><p className="mt-1 text-xs text-slate-500">Buat ID untuk setiap siswa, perbarui satu siswa, atau perbarui seluruh siswa aktif.</p></div><button className={btn} onClick={()=>void generateAllStudentCodes()} disabled={saving}>{saving?'Memproses…':'Perbarui Semua ID'}</button></div><div className="mt-3 max-h-96 space-y-2 overflow-auto">{examStudents.filter(s=>s.status==='Aktif').map(student=>{const activeCode=studentCodes.find(item=>item.studentId===student.id&&item.active);return <div key={student.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-100 p-3"><div className="min-w-0"><p className="font-bold">{student.name}</p><p className="text-xs text-slate-500">{student.className} · {activeCode?activeCode.id:'Belum memiliki ID'}</p></div><button className="rounded-xl border border-[#16B364] px-3 py-2 text-xs font-bold text-[#0B8F4D]" onClick={()=>void generateStudentCode(student)}> {activeCode?'Perbarui ID':'Buat ID'} </button></div>})}{!examStudents.length&&<p className="text-sm text-slate-500">Data siswa belum tersedia.</p>}</div><p className="mt-3 text-xs text-slate-500">ID lama otomatis dinonaktifkan. ID baru menghapus ikatan perangkat lama dan perlu diverifikasi kembali oleh siswa.</p></div>}</>}
+    {section==='upload'&&<div className={panel+' max-w-3xl'}><button className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>setSection('home')}><ArrowLeft size={16}/> Kembali</button><h3 className="mb-4 text-lg font-black">Impor Soal</h3><div className="grid gap-3 sm:grid-cols-2"><div><label className="mb-1 block text-xs font-bold">Kelas</label><select className={field} value={level} onChange={e=>{setLevel(e.target.value);setGooglePreview(null)}}>{cls.map(c=><option key={c}>{c}</option>)}</select></div><div><label className="mb-1 block text-xs font-bold">Mata pelajaran</label><select className={field} value={subject} onChange={e=>setSubject(e.target.value)}><option value="">Pilih mapel</option>{subjects.map(s=><option key={s}>{s}</option>)}</select></div></div><label className="mb-1 mt-3 block text-xs font-bold">Nama bank soal / judul ujian</label><input className={field} value={title} onChange={e=>setTitle(e.target.value)} placeholder="Contoh: PTS Matematika Kelas VII"/><div className="mt-4 rounded-2xl border border-[#B7E8CD] bg-[#F7FCF9] p-4"><div className="flex flex-wrap items-center justify-between gap-2"><div><h4 className="font-extrabold text-slate-800">Impor langsung dari Google Forms</h4><p className="mt-1 text-xs text-slate-600">Login wajib memakai akun Google sekolah (@smpialwasi-maros.sch.id) yang memiliki akses ke formulir. SIMPATIK hanya meminta izin baca isi formulir.</p></div><button className={btn} onClick={()=>void connectGoogle()} disabled={googleBusy}>{googleBusy?'Menghubungkan…':googleConnected?'Hubungkan ulang Google':'Hubungkan Google'}</button></div><label className="mb-1 mt-4 block text-xs font-bold">Tautan Google Form</label><input className={field} value={formUrl} onChange={e=>{setFormUrl(e.target.value);setGooglePreview(null)}} placeholder="https://docs.google.com/forms/d/…/edit"/><p className="mt-1 text-xs text-slate-500">Gunakan tautan formulir yang dapat dibuka atau diedit oleh akun Google yang dihubungkan. Formulir harus berupa kuis jika ingin mengambil kunci jawaban.</p><button className={btn+' mt-3 w-full'} onClick={()=>void fetchGoogleQuestions()} disabled={googleBusy||!googleConnected}>{googleBusy?'Mengambil soal…':'Ambil soal dari Google Form'}</button><button className={btn+' mt-2 w-full'} onClick={()=>void saveGoogleQuestions()} disabled={googleBusy||!googlePreview||!isVerifiedExamAdmin||!subject}>{googleBusy?'Menyimpan…':googlePreview?'Simpan '+googlePreview.questions.length+' soal ke Bank Soal':'Simpan soal ke Bank Soal'}</button>{googlePreview&&<div className="mt-4 space-y-3"><div className="flex flex-wrap items-center justify-between gap-2"><div><p className="font-bold">{googlePreview.title}</p><p className="text-xs text-slate-600">{googlePreview.questions.length} soal pilihan ganda · {googlePreview.isQuiz?'Mode kuis':'Bukan kuis'}</p></div><span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-[#0B8F4D]">{googlePreview.questions.filter(q=>typeof q.answer==='number').length} kunci terbaca</span></div><div className="max-h-80 space-y-2 overflow-auto">{googlePreview.questions.map((q,i)=><div key={i} className="rounded-xl border border-slate-200 bg-white p-3"><p className="text-sm font-bold">{i+1}. {q.prompt}</p><div className="mt-2 grid gap-1 text-xs text-slate-600">{q.options.map((option,j)=><p key={j} className={q.answer===j?'font-bold text-[#0B8F4D]':''}>{String.fromCharCode(65+j)}. {option}{q.answer===j?' ✓':''}</p>)}</div></div>)}</div>{!isVerifiedExamAdmin&&<p className="text-xs text-rose-600">Hanya admin sekolah yang dapat menyimpan soal.</p>}</div>}</div><div className="mt-4 border-t border-slate-100 pt-4"><h4 className="font-bold">Alternatif: unggah file JSON / CSV</h4><input type="file" accept=".json,.csv,.txt" className={field+' mt-2'} onChange={e=>void importFile(e.target.files?.[0])}/>{questionFileName&&<p className="mt-2 text-xs text-slate-500">File: {questionFileName}</p>}<p className="mt-2 text-xs text-slate-500">JSON: [{'{'}"prompt":"Pertanyaan","options":["A","B","C","D"],"answer":0{' }'}]. CSV: pertanyaan;A;B;C;D;kunci (1-4).</p></div></div>}
     {section==='create'&&<div className={panel}><button className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>setSection('home')}><ArrowLeft size={16}/> Kembali</button><h3 className="mb-4 text-lg font-black">Buat Ujian</h3><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><div><label className="mb-1 block text-xs font-bold">Tahun ajaran</label><input className={field} value={settings.activeAcademicYear} readOnly/></div><div><label className="mb-1 block text-xs font-bold">Semester</label><input className={field} value={settings.activeSemester} readOnly/></div><div><label className="mb-1 block text-xs font-bold">Kelas</label><select className={field} value={level} onChange={e=>setLevel(e.target.value)}>{cls.map(c=><option key={c}>{c}</option>)}</select></div><div><label className="mb-1 block text-xs font-bold">Mata pelajaran</label><select className={field} value={subject} onChange={e=>setSubject(e.target.value)}><option value="">Pilih mapel</option>{subjects.map(s=><option key={s}>{s}</option>)}</select></div></div><label className="mb-1 mt-3 block text-xs font-bold">Nama ujian</label><input className={field} value={title} onChange={e=>setTitle(e.target.value)} placeholder="Nama ujian"/><label className="mb-1 mt-3 block text-xs font-bold">Durasi (menit)</label><input type="number" min="1" max="240" className={field+' max-w-40'} value={duration} onChange={e=>setDuration(Math.max(1,Number(e.target.value)))}/><h4 className="mb-2 mt-5 font-extrabold">Pilih soal dari bank soal</h4><div className="max-h-72 space-y-2 overflow-auto rounded-xl border border-slate-200 p-3">{classQuestions.map(q=><label key={q.id} className="flex cursor-pointer items-start gap-3 border-b border-slate-100 py-2 last:border-0"><input type="checkbox" checked={selectedQuestions.includes(q.id)} onChange={e=>setSelectedQuestions(a=>e.target.checked?[...a,q.id]:a.filter(id=>id!==q.id))}/><span><strong className="block text-sm">{q.prompt}</strong><small className="text-slate-500">{q.subject} · {q.className}</small></span></label>)}{!classQuestions.length&&<p className="text-sm text-slate-500">Bank soal kosong untuk kelas/mapel ini. Unggah atau buat soal terlebih dahulu.</p>}</div><button className={btn+' mt-4'} disabled={saving} onClick={()=>void createExam()}><Plus size={16}/> Terbitkan Ujian ({selectedQuestions.length} soal)</button></div>}
-    {section==='results'&&<div className={panel}><button className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>setSection('home')}><ArrowLeft size={16}/> Kembali</button><h3 className="mb-3 text-lg font-black">Hasil Ujian Siswa</h3><div className="overflow-x-auto"><table className="w-full min-w-[650px] text-left text-sm"><thead><tr className="border-b bg-slate-50 text-xs text-slate-500"><th className="p-3">Nama</th><th className="p-3">Kelas</th><th className="p-3">Ujian</th><th className="p-3">Nilai</th><th className="p-3">Status</th></tr></thead><tbody>{attempts.map(a=><tr key={a.id} className="border-b border-slate-100"><td className="p-3 font-semibold">{a.studentName}</td><td className="p-3">{a.className}</td><td className="p-3">{a.examTitle}</td><td className="p-3 font-bold">{a.status==='Selesai'?Math.round(a.score/Math.max(1,a.total)*100):'—'}</td><td className="p-3">{a.status}</td></tr>)}</tbody></table></div>{!attempts.length&&<p className="text-sm text-slate-500">Belum ada hasil ujian.</p>}</div>}
+    {section==='results'&&<div className={panel}><button className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>setSection('home')}><ArrowLeft size={16}/> Kembali</button><h3 className="mb-3 text-lg font-black">Hasil Ujian Siswa</h3><div className="overflow-x-auto"><table className="w-full min-w-[650px] text-left text-sm"><thead><tr className="border-b bg-slate-50 text-xs text-slate-500"><th className="p-3">Nama</th><th className="p-3">Kelas</th><th className="p-3">Ujian</th><th className="p-3">Nilai</th><th className="p-3">Status</th></tr></thead><tbody>{attempts.map(a=><tr key={a.id} className="border-b border-slate-100"><td className="p-3 font-semibold">{a.studentName}</td><td className="p-3">{a.className}</td><td className="p-3">{a.examTitle}</td><td className="p-3 font-bold">{a.status==='Selesai'?typeof a.score === 'number' && typeof a.total === 'number' ? Math.round(a.score/Math.max(1,a.total)*100) : 'Menunggu':'—'}</td><td className="p-3">{a.status}</td></tr>)}</tbody></table></div>{!attempts.length&&<p className="text-sm text-slate-500">Belum ada hasil ujian.</p>}</div>}
   </div>;
 };

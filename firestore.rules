@@ -81,13 +81,36 @@ service cloud.firestore {
     }
 
     match /examQuestions/{questionId} {
-      allow read, write: if isSignedIn();
+      allow read, write: if isAdmin();
+    }
+    match /examPublicQuestions/{questionId} {
+      allow read: if isSignedIn();
+      allow create, update: if isAdmin() && !('answer' in request.resource.data);
+      allow delete: if isAdmin();
+    }
+    match /examAnswerKeys/{questionId} {
+      allow read, write: if isAdmin();
     }
     match /exams/{examId} {
-      allow read, write: if isSignedIn();
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+    match /examStudentCodes/{code} {
+      allow get: if isSignedIn() && resource.data.active == true &&
+        (resource.data.ownerUid == null || resource.data.ownerUid == request.auth.uid);
+      allow list: if isAdmin();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() ||
+        (isSignedIn() && resource.data.active == true &&
+          resource.data.ownerUid == null &&
+          request.resource.data.ownerUid == request.auth.uid &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ownerUid']));
     }
     match /examAttempts/{attemptId} {
-      allow read, write: if isSignedIn();
+      allow read: if isAdmin();
+      allow create: if isSignedIn() && incoming().ownerUid == request.auth.uid && !('score' in incoming()) && !('total' in incoming()) && !('percent' in incoming());
+      allow update: if isAdmin() || (isSignedIn() && existing().ownerUid == request.auth.uid && incoming().ownerUid == request.auth.uid && existing().status == 'Mengerjakan' && !('score' in incoming()) && !('total' in incoming()) && !('percent' in incoming()));
+      allow delete: if isAdmin();
     }
   }
 }

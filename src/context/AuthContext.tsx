@@ -136,7 +136,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error) {
       console.error('Google Sign In Error:', error);
       alert(error instanceof Error ? error.message : 'Login Google gagal. Periksa koneksi internet dan coba kembali.');
-    } finally {
       setLoading(false);
     }
   };

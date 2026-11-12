@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+
 :root {
   color-scheme: light;
   --green-primary: #16B364;
@@ -13,6 +18,12 @@
 
 html, body, #root {
   min-height: 100%;
+}
+
+html, body, #root, button, input, textarea, select, option {
+  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
 }
 
 body {

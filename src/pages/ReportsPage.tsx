@@ -116,7 +116,7 @@ export const ReportsPage: React.FC = () => {
             </button>
             <button
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold text-white bg-[#0F5132] hover:bg-[#0B3D26] rounded-lg transition-colors shadow-xs"
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold text-white bg-[#076B3A] hover:bg-[#076B3A] rounded-lg transition-colors shadow-xs"
             >
               
               <span>Cetak Dokumen Resmi</span>
@@ -130,7 +130,7 @@ export const ReportsPage: React.FC = () => {
             onClick={() => setReportType('attendance')}
             className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors whitespace-nowrap ${
               reportType === 'attendance'
-                ? 'bg-[#0F5132] text-white shadow-xs'
+                ? 'bg-[#076B3A] text-white shadow-xs'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
@@ -141,7 +141,7 @@ export const ReportsPage: React.FC = () => {
             onClick={() => setReportType('journal')}
             className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors whitespace-nowrap ${
               reportType === 'journal'
-                ? 'bg-[#0F5132] text-white shadow-xs'
+                ? 'bg-[#076B3A] text-white shadow-xs'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
@@ -152,7 +152,7 @@ export const ReportsPage: React.FC = () => {
             onClick={() => setReportType('behavior')}
             className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors whitespace-nowrap ${
               reportType === 'behavior'
-                ? 'bg-[#0F5132] text-white shadow-xs'
+                ? 'bg-[#076B3A] text-white shadow-xs'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
@@ -164,7 +164,7 @@ export const ReportsPage: React.FC = () => {
               onClick={() => setReportType('counseling')}
               className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors whitespace-nowrap ${
                 reportType === 'counseling'
-                  ? 'bg-[#0F5132] text-white shadow-xs'
+                  ? 'bg-[#076B3A] text-white shadow-xs'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
@@ -176,7 +176,7 @@ export const ReportsPage: React.FC = () => {
             onClick={() => setReportType('grades')}
             className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors whitespace-nowrap ${
               reportType === 'grades'
-                ? 'bg-[#0F5132] text-white shadow-xs'
+                ? 'bg-[#076B3A] text-white shadow-xs'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
@@ -190,7 +190,7 @@ export const ReportsPage: React.FC = () => {
           <select
             value={selectedClass}
             onChange={(e) => setSelectedClass(e.target.value)}
-            className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+            className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
           >
             {classes.map((c) => (
               <option key={c} value={c}>
@@ -206,7 +206,7 @@ export const ReportsPage: React.FC = () => {
         {/* Kop Surat Resmi */}
         <div className="text-center pb-4 border-b-2 border-slate-900 space-y-1">
           <div className="flex items-center justify-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-[#0F5132] text-white flex items-center justify-center text-2xl font-bold">
+            <div className="w-14 h-14 rounded-full bg-[#076B3A] text-white flex items-center justify-center text-2xl font-bold">
               
             </div>
             <div className="text-left">
@@ -261,7 +261,7 @@ export const ReportsPage: React.FC = () => {
                     <td className="py-2 px-3 border-r border-slate-300 font-mono">{std.nis}</td>
                     <td className="py-2 px-3 border-r border-slate-300 font-medium">{std.name}</td>
                     <td className="py-2 px-3 border-r border-slate-300 text-center">{std.className}</td>
-                    <td className="py-2 px-3 border-r border-slate-300 text-center font-bold text-emerald-800">
+                    <td className="py-2 px-3 border-r border-slate-300 text-center font-bold text-#076B3A">
                       96%
                     </td>
                     <td className="py-2 px-3 text-center text-slate-600">Sangat Baik</td>
@@ -348,8 +348,8 @@ export const ReportsPage: React.FC = () => {
                     <td className="py-2 px-3 border-r border-slate-300 font-medium">{std.name}</td>
                     <td className="py-2 px-3 border-r border-slate-300 text-center">{std.className}</td>
                     <td className="py-2 px-3 border-r border-slate-300 text-center font-bold">86.5</td>
-                    <td className="py-2 px-3 border-r border-slate-300 text-center font-bold text-emerald-800">B</td>
-                    <td className="py-2 px-3 text-center text-emerald-800 font-semibold">Tuntas</td>
+                    <td className="py-2 px-3 border-r border-slate-300 text-center font-bold text-#076B3A">B</td>
+                    <td className="py-2 px-3 text-center text-#076B3A font-semibold">Tuntas</td>
                   </tr>
                 ))}
               </tbody>

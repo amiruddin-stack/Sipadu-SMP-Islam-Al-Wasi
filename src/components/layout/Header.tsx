@@ -62,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
           {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
         <button
-          onClick={() => navigate('dashboard')
+          onClick={() => navigate('dashboard')}
           className="flex shrink-0 items-center gap-2.5 text-left focus:outline-none"
           aria-label="SMP ISLAM AL-WASI' - Beranda"
         >

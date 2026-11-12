@@ -102,10 +102,11 @@ export async function readGoogleForm(value: string): Promise<{ title: string; is
   for (const item of form.items || []) {
     const question = item.questionItem?.question;
     const choice = question?.choiceQuestion;
-    if (!question || !choice?.options?.length) continue;
+    if (!question || !choice?.options?.length || choice.type === 'CHECKBOX') continue;
     const options = choice.options.map((option: { value?: string }) => String(option.value || '').trim()).filter(Boolean);
     if (options.length < 2) continue;
-    const correctValue = question.grading?.correctAnswers?.answers?.[0]?.value;
+    const correctValues = question.grading?.correctAnswers?.answers || [];
+    const correctValue = correctValues.length === 1 ? correctValues[0]?.value : undefined;
     const answerIndex = correctValue === undefined ? -1 : options.findIndex((option: string) => option === String(correctValue));
     questions.push({
       prompt: String(item.title || '').trim(),

@@ -249,6 +249,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       await setDoc(doc(db, 'attendance', record.id), record);
+      try {
+        await setDoc(doc(db, 'attendance_history', `${record.id}-${Date.now()}`), { ...record, submittedAt: new Date().toISOString() });
+      } catch (historyError) {
+        console.warn('Attendance history could not be saved:', historyError);
+      }
     } catch (e) {
       console.warn('Saved attendance to local storage (offline mode):', e);
     }

@@ -155,7 +155,6 @@ export const ExamPage: React.FC = () => {
   }, [isVerifiedExamAdmin]);
 
   const selectedClassNames = useMemo(() => classes.filter(c => classLevel(c) === level), [classes, level]);
-  const studentsInClass = useMemo(() => examStudents.filter(s => s.status === 'Aktif' && (studentClass ? s.className === studentClass : classLevel(s.className) === level)).sort((a,b) => a.name.localeCompare(b.name)), [examStudents, studentClass, level]);
   const classQuestions = questions.filter(q => classLevel(q.className) === level && (!subject || q.subject === subject));
   const currentExamQuestions = activeExam ? activeExam.questionIds.map(id => questions.find(q => q.id === id)).filter(Boolean) as Question[] : [];
   const availableExams = exams.filter(e => e.status === 'Aktif' && classLevel(e.className) === classLevel(studentClass || level));
@@ -224,6 +223,7 @@ export const ExamPage: React.FC = () => {
       if (!codeSnap.exists()) throw new Error('ID Ujian tidak ditemukan. Periksa kembali kode yang diberikan sekolah.');
       const data = codeSnap.data();
       if (data.active !== true) throw new Error('ID Ujian ini sudah dinonaktifkan. Hubungi admin sekolah.');
+      if (!data.studentId || !data.studentName || !data.className) throw new Error('Data ID Ujian tidak lengkap. Hubungi admin sekolah.');
       if (data.ownerUid && data.ownerUid !== uid) throw new Error('ID Ujian sudah terikat pada perangkat lain. Hubungi admin untuk memperbarui ID.');
       if (!data.ownerUid) await updateDoc(codeRef, { ownerUid: uid });
       await saveOfflineRecord('student:identity', { studentId: data.studentId, studentName: data.studentName, className: data.className, code, ownerUid: uid });

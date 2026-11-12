@@ -123,10 +123,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
           <Header activeTab={activeTab} onNavigate={onNavigate} embedded />
         </div>
 
-        {/* Hero Title & Actions: aligned to dashboard cards and reduced in height */}
+        {/* Hero illustration above the full-width hero card */}
         <div className="relative z-10 mx-auto max-w-[1240px] px-4 pt-2 pb-3 md:px-8 md:pt-3 md:pb-4">
-          <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-[1.45fr_1fr]">
-          <div className="overflow-hidden rounded-[24px] border border-[#D5EADB] bg-gradient-to-br from-white via-[#F4FBF7] to-[#E7F6EF] px-6 py-6 shadow-sm md:px-9 md:py-7">
+          <div className="mb-2 flex justify-center md:justify-end">
+            <img
+              src="./images/Desain%20tanpa%20judul_20261112_110817_0000.png"
+              alt="Ilustrasi struktur manajemen SIMPATIK"
+              className="h-auto max-h-[170px] w-auto max-w-full object-contain md:max-h-[190px]"
+              loading="eager"
+            />
+          </div>
+          <div className="w-full overflow-hidden rounded-[24px] border border-[#D5EADB] bg-gradient-to-br from-white via-[#F4FBF7] to-[#E7F6EF] px-6 py-6 shadow-sm md:px-9 md:py-7">
             <div className="max-w-3xl">
               <h1 className="text-4xl font-black tracking-tight text-[#0E8B7D] sm:text-5xl md:text-6xl">
                 SIMPATIK
@@ -160,15 +167,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
                 </button>
               </div>
             </div>
-          </div>
-          <div className="flex items-center justify-center md:min-h-[300px]">
-            <img
-              src="./images/Desain%20tanpa%20judul_20261112_110817_0000.png"
-              alt="Ilustrasi struktur manajemen SIMPATIK"
-              className="h-auto w-full max-w-[440px] object-contain"
-              loading="eager"
-            />
-          </div>
           </div>
         </div>
       </section>

@@ -54,7 +54,7 @@ export const SettingsPage: React.FC = () => {
             <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                Status PWA & Build APK Android
             </h3>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-bg-[#E3F7EC] text-#076B3A">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E3F7EC] text-[#076B3A]">
               Siap Kompilasi
             </span>
           </div>
@@ -62,12 +62,12 @@ export const SettingsPage: React.FC = () => {
           <div className="space-y-2.5 text-xs text-slate-600">
             <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
               <span className="font-medium">Web App Manifest & Service Worker</span>
-              <span className="font-bold text-#0B8F4D">✓ Aktif</span>
+              <span className="font-bold text-[#0B8F4D]">✓ Aktif</span>
             </div>
 
             <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
               <span className="font-medium">Capacitor Android Core</span>
-              <span className="font-bold text-#0B8F4D">✓ Terpasang</span>
+              <span className="font-bold text-[#0B8F4D]">✓ Terpasang</span>
             </div>
 
             <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
@@ -88,20 +88,20 @@ export const SettingsPage: React.FC = () => {
           </div>
 
           {/* Android APK Build Instructions Box */}
-          <div className="p-3.5 rounded-xl bg-bg-[#E3F7EC]/60 border border-bg-[#E3F7EC] space-y-2">
-            <span className="text-xs font-bold text-#076B3A block">
+          <div className="p-3.5 rounded-xl bg-[#E3F7EC]/60 border border-bg-[#E3F7EC] space-y-2">
+            <span className="text-xs font-bold text-[#076B3A] block">
                Cara Build APK Android dengan Capacitor:
             </span>
-            <div className="text-[11px] font-mono text-slate-700 bg-white p-2.5 rounded-lg border border-border-[#B7E8CD]/50 space-y-1">
+            <div className="text-[11px] font-mono text-slate-700 bg-white p-2.5 rounded-lg border border-[#B7E8CD]/50 space-y-1">
               <p># 1. Bangun aset web produksi</p>
-              <p className="font-bold text-#076B3A">npm run build</p>
+              <p className="font-bold text-[#076B3A]">npm run build</p>
               <p># 2. Sinkronkan aset ke platform Android</p>
-              <p className="font-bold text-#076B3A">npx cap add android</p>
-              <p className="font-bold text-#076B3A">npx cap sync</p>
+              <p className="font-bold text-[#076B3A]">npx cap add android</p>
+              <p className="font-bold text-[#076B3A]">npx cap sync</p>
               <p># 3. Buka Android Studio & Build APK</p>
-              <p className="font-bold text-#076B3A">npx cap open android</p>
+              <p className="font-bold text-[#076B3A]">npx cap open android</p>
             </div>
-            <p className="text-[11px] text-#076B3A">
+            <p className="text-[11px] text-[#076B3A]">
               Nama aplikasi Android telah diperbarui menjadi SIMPATIK. ID paket Android tetap dipertahankan agar pembaruan tidak dianggap sebagai aplikasi baru.
             </p>
           </div>
@@ -115,7 +115,7 @@ export const SettingsPage: React.FC = () => {
             </h3>
             <span
               className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                isOnline ? 'bg-bg-[#E3F7EC] text-#076B3A' : 'bg-amber-100 text-amber-800'
+                isOnline ? 'bg-[#E3F7EC] text-[#076B3A]' : 'bg-amber-100 text-amber-800'
               }`}
             >
               {isOnline ? 'Terhubung Online' : 'Lokal Offline'}
@@ -137,7 +137,7 @@ export const SettingsPage: React.FC = () => {
 
             <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
               <span className="font-medium">Keamanan Rules Firestore:</span>
-              <span className="font-bold text-#0B8F4D">✓ 8 Pilar ABAC Terpasang</span>
+              <span className="font-bold text-[#0B8F4D]">✓ 8 Pilar ABAC Terpasang</span>
             </div>
           </div>
 
@@ -163,7 +163,7 @@ export const SettingsPage: React.FC = () => {
         </div>
 
         {savedSuccess && (
-          <div className="p-3 rounded-xl bg-bg-[#E3F7EC] border border-border-[#B7E8CD] text-#076B3A text-xs font-semibold flex items-center gap-2">
+          <div className="p-3 rounded-xl bg-[#E3F7EC] border border-[#B7E8CD] text-[#076B3A] text-xs font-semibold flex items-center gap-2">
              Profil sekolah dan tahun akademik berhasil disimpan!
           </div>
         )}

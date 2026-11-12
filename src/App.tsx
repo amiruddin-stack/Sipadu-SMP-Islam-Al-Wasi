@@ -66,7 +66,7 @@ function AppContent() {
       case 'subjects': return <MasterDataPage initialSubTab="mapel" />;
       case 'reports': return <ReportsPage />;
       case 'settings': return <SettingsPage />;
-      case 'exams': return <ExamPage />;
+      case 'exams': return <ExamPage onBack={() => setActiveTab('dashboard')} />;
       case 'ils': return <ComingSoonPage />;
       default: return <DashboardPage activeTab={activeTab} onNavigate={(tab) => setActiveTab(tab)} />;
     }

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { PWAInstallButton } from '../common/PWAInstallButton';
 import { NavTab } from './Sidebar';
+import { Menu, X } from 'lucide-react';
 
 interface HeaderProps {
   activeTab: NavTab;
@@ -12,6 +13,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded = false }) => {
   const { currentUser, firebaseUser } = useAuth();
   const [academicOpen, setAcademicOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const academicRef = useRef<HTMLDivElement>(null);
   const academicMenuRef = useRef<HTMLDivElement>(null);
   const [academicPosition, setAcademicPosition] = useState({ left: 0, top: 76 });
@@ -44,13 +46,23 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
   const navigate = (tab: NavTab) => {
     onNavigate(tab);
     setAcademicOpen(false);
+    setMobileMenuOpen(false);
   };
 
   return (
     <header className={embedded ? "relative z-20 w-full bg-transparent" : "sticky top-0 z-50 w-full border-b border-emerald-100 bg-white/95 backdrop-blur-sm text-slate-800 shadow-xs"}>
-      <div className="mx-auto flex min-h-[64px] max-w-[1240px] items-center justify-between gap-3 px-4 md:px-6">
+      <div className="mx-auto flex min-h-[60px] max-w-[1240px] items-center justify-between gap-3 px-4 md:min-h-[64px] md:px-6">
         <button
-          onClick={() => navigate('dashboard')}
+          type="button"
+          onClick={() => setMobileMenuOpen((open) => !open)}
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-100 bg-white text-[#0E8B7D] shadow-sm md:hidden"
+          aria-label={mobileMenuOpen ? "Tutup menu" : "Buka menu"}
+          aria-expanded={mobileMenuOpen}
+        >
+          {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
+        <button
+          onClick={() => navigate('dashboard')
           className="flex shrink-0 items-center gap-2.5 text-left focus:outline-none"
           aria-label="SMP ISLAM AL-WASI' - Beranda"
         >
@@ -66,7 +78,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
 
         <nav
           aria-label="Navigasi utama"
-          className="flex h-[64px] min-w-0 flex-1 flex-nowrap items-center justify-start md:justify-center gap-1 overflow-x-auto whitespace-nowrap pl-4 [scrollbar-width:none] [-ms-overflow-style:none]"
+          className="hidden h-[64px] min-w-0 flex-1 flex-nowrap items-center justify-start md:justify-center gap-1 overflow-x-auto whitespace-nowrap pl-4 [scrollbar-width:none] [-ms-overflow-style:none] md:flex"
         >
           <button onClick={() => navigate('dashboard')} className={navClass('dashboard')}>
             Beranda
@@ -128,6 +140,31 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
           )}
         </div>
       </div>
+
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-[80] md:hidden">
+          <button type="button" aria-label="Tutup menu" onClick={() => setMobileMenuOpen(false)} className="absolute inset-0 bg-slate-950/35" />
+          <aside className="absolute left-0 top-0 flex h-full w-[min(82vw,320px)] flex-col overflow-y-auto bg-white p-5 shadow-2xl">
+            <div className="mb-6 flex items-center justify-between border-b border-emerald-100 pb-4">
+              <div className="flex items-center gap-3">
+                <img src={`${import.meta.env.BASE_URL}logo-alwasi.png`} alt="Logo SMP Islam Al-Wasi" className="h-10 w-10 object-contain" />
+                <div><p className="text-sm font-extrabold text-slate-900">SIMPATIK</p><p className="text-[10px] font-medium text-slate-500">SMP ISLAM AL-WASI</p></div>
+              </div>
+              <button type="button" onClick={() => setMobileMenuOpen(false)} className="rounded-lg p-2 text-slate-500" aria-label="Tutup menu"><X size={21} /></button>
+            </div>
+            <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Menu utama</p>
+            <div className="space-y-1">
+              {([['dashboard','Beranda'],['settings','Profil'],['classes','Kelas'],['subjects','Mapel'],['attendance','Presensi Siswa'],['journal','Jurnal Pembelajaran'],['assessment','Input Nilai Kelas'],['grades','Rekap Nilai'],['ils','ILS'],['counseling','BK'],['exams','Ujian'],['reports','Laporan'],['behavior','Perilaku Siswa'],['master','Data Master']] as [NavTab,string][]).map(([tab,label]) => (
+                <button key={tab} type="button" onClick={() => navigate(tab)} className={`flex w-full items-center rounded-xl px-3.5 py-3 text-left text-sm font-semibold transition ${activeTab === tab ? "bg-[#EAF6ED] text-[#0E8B7D]" : "text-slate-700 hover:bg-slate-50"}`}>{label}</button>
+              ))}
+            </div>
+            <div className="mt-auto border-t border-emerald-100 pt-4">
+              {currentUser?.displayName && <p className="truncate text-xs font-semibold text-slate-500">{currentUser.displayName}</p>}
+              <p className="mt-1 text-[10px] text-slate-400">Qurani, Ramah Anak dan Berkarakter</p>
+            </div>
+          </aside>
+        </div>
+      )}
 
       {academicOpen && (
         <div

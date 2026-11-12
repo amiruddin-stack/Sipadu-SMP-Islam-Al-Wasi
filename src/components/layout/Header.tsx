@@ -50,7 +50,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
   };
 
   return (
-    <header className={embedded ? "relative z-20 w-full bg-transparent" : "sticky top-0 z-50 w-full border-b border-emerald-100 bg-white/95 backdrop-blur-sm text-slate-800 shadow-xs"}>
+    <header className={embedded ? "relative z-[9999] w-full bg-transparent" : "sticky top-0 z-[9999] w-full border-b border-emerald-100 bg-white/95 backdrop-blur-sm text-slate-800 shadow-xs"}>
       <div className="mx-auto flex min-h-[60px] max-w-[1240px] items-center justify-between gap-3 px-4 md:min-h-[64px] md:px-6">
         <button
           type="button"

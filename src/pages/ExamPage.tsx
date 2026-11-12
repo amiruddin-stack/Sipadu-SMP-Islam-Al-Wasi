@@ -6,7 +6,7 @@ import { BookOpen, Clock3, FileUp, Plus, ClipboardList, Trophy, ArrowLeft, Check
 import { db, auth } from '../firebase/config';
 import { useData } from '../context/DataContext';
 
-type Question = { id: string; title: string; subject: string; className: string; academicYear: string; semester: string; prompt: string; options: string[]; answer: number; points: number };
+type Question = { id: string; title: string; subject: string; className: string; academicYear: string; semester: string; prompt: string; options: string[]; answer?: number; points: number };
 type Exam = { id: string; title: string; subject: string; className: string; academicYear: string; semester: string; duration: number; questionIds: string[]; formUrl?: string; status: 'Aktif' | 'Draft'; createdAt: string };
 type Attempt = { id: string; examId: string; examTitle: string; studentId: string; studentName: string; className: string; answers: Record<string, number>; score: number; total: number; status: 'Mengerjakan' | 'Selesai'; startedAt: string; submittedAt?: string };
 
@@ -50,7 +50,7 @@ export const ExamPage: React.FC = () => {
   const [isOnline, setIsOnline] = useState(typeof navigator === 'undefined' ? true : navigator.onLine);
   const [offlineReady, setOfflineReady] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [finishedResult, setFinishedResult] = useState<{ title: string; studentName: string; className: string; score: number; total: number; percent: number } | null>(null);
+  const [finishedResult, setFinishedResult] = useState<{ title: string; studentName: string; className: string } | null>(null);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export const ExamPage: React.FC = () => {
     };
     void prepareStudentAccess();
     const unQ = onSnapshot(collection(db, 'examQuestions'), snap => {
-      const rows = snap.docs.map(d => ({ ...d.data(), id: d.id } as Question));
+      const rows = snap.docs.map(d => ({ ...d.data(), id: d.id, answer: undefined } as Question));
       setQuestions(rows); setOfflineReady(true); void saveOfflineRecord('cache:questions', rows);
     }, e => setMessage('Bank soal belum dapat dibaca: ' + e.message));
     const unE = onSnapshot(collection(db, 'exams'), snap => {
@@ -114,7 +114,9 @@ export const ExamPage: React.FC = () => {
     if (!questionText.trim() || options.some(o => !o.trim()) || !subject) { setMessage('Lengkapi mapel, pertanyaan, dan semua pilihan jawaban.'); return; }
     setSaving(true);
     try {
-      await addDoc(collection(db, 'examQuestions'), { title: title.trim() || 'Bank Soal ' + subject, subject, className: selectedClassNames[0] || level, academicYear: settings.activeAcademicYear, semester: settings.activeSemester, prompt: questionText.trim(), options, answer: correct, points: 1, createdAt: new Date().toISOString() });
+      const questionRef = doc(collection(db, 'examQuestions'));
+      await setDoc(questionRef, { title: title.trim() || 'Bank Soal ' + subject, subject, className: selectedClassNames[0] || level, academicYear: settings.activeAcademicYear, semester: settings.activeSemester, prompt: questionText.trim(), options, points: 1, createdAt: new Date().toISOString() });
+      await setDoc(doc(db, 'examAnswerKeys', questionRef.id), { answer: correct, points: 1, createdAt: new Date().toISOString() });
       setQuestionText(''); setOptions(['','','','']); setCorrect(0); setMessage('Soal berhasil disimpan ke bank soal.');
     } catch (e) { setMessage('Gagal menyimpan soal. Pastikan login Firebase aktif.'); }
     finally { setSaving(false); }
@@ -140,7 +142,7 @@ export const ExamPage: React.FC = () => {
         points: Number(q.points || 1), createdAt: new Date().toISOString()
       })).filter(q => q.prompt && q.options.length >= 2 && q.options.every(Boolean));
       if (!batch.length) throw new Error('Tidak ada soal valid');
-      await Promise.all(batch.map(q => addDoc(collection(db, 'examQuestions'), q)));
+      await Promise.all(batch.map(async q => { const { answer, ...publicQuestion } = q; const questionRef = doc(collection(db, 'examQuestions')); await setDoc(questionRef, publicQuestion); await setDoc(doc(db, 'examAnswerKeys', questionRef.id), { answer, points: q.points, createdAt: q.createdAt }); }));
       setMessage(batch.length + ' soal berhasil diimpor.');
     } catch (e) { setMessage('File tidak terbaca. Gunakan JSON atau CSV titik koma dengan kolom pertanyaan;A;B;C;D;kunci (1-4).'); }
   };
@@ -175,14 +177,14 @@ export const ExamPage: React.FC = () => {
 
   const finishExam = async (forced = false) => {
     if (!activeExam || !attemptId || saving) return;
-    const result = scoreAttempt(currentExamQuestions, answers);
+    const result = { score: 0, total: 0, percent: 0 };
     setSaving(true);
     const student = examStudents.find(s => s.id === studentId);
     const submittedAt = new Date().toISOString();
-    const payload = { examId: activeExam.id, examTitle: activeExam.title, studentId, studentName: student?.name || 'Siswa', className: student?.className || studentClass, answers, score: result.score, total: result.total, percent: result.percent, status: 'Selesai', startedAt: new Date(deadlineAt - activeExam.duration * 60 * 1000).toISOString(), submittedAt, autoSubmitted: forced };
+    const payload = { examId: activeExam.id, examTitle: activeExam.title, studentId, studentName: student?.name || 'Siswa', className: student?.className || studentClass, answers, status: 'Selesai', startedAt: new Date(deadlineAt - activeExam.duration * 60 * 1000).toISOString(), submittedAt, autoSubmitted: forced };
     try {
       await saveOfflineRecord('pending:' + attemptId, { id: attemptId, ...payload });
-      setFinishedResult({ title: activeExam.title, studentName: payload.studentName, className: payload.className, score: result.score, total: result.total, percent: result.percent });
+      setFinishedResult({ title: activeExam.title, studentName: payload.studentName, className: payload.className });
       if (navigator.onLine) {
         if (!auth.currentUser) await signInAnonymously(auth);
         await setDoc(doc(db, 'examAttempts', attemptId), payload, { merge: true });
@@ -270,7 +272,7 @@ export const ExamPage: React.FC = () => {
 
   if (section === 'results' && !activeExam) {
     const result = finishedResult;
-    return <div className="mx-auto max-w-xl space-y-4"><div className={panel+' text-center'}><Trophy size={42} className="mx-auto text-amber-500"/><h2 className="mt-3 text-2xl font-black">Hasil Ujian</h2>{result?<><p className="mt-2 font-bold">{result.title}</p><p className="mt-1 text-sm text-slate-500">{result.studentName} · {result.className}</p><p className="my-5 text-5xl font-black text-[#0B8F4D]">{result.score}<span className="text-xl text-slate-400">/{result.total}</span></p><p className="text-sm font-bold text-slate-600">Nilai: {result.percent}</p></>:<p className="mt-3 text-sm text-slate-500">Hasil sedang disimpan.</p>}<button className={btn+' mt-5'} onClick={()=>{setSection('student');setAttemptId('');}}>Kembali</button></div></div>;
+    return <div className="mx-auto max-w-xl space-y-4"><div className={panel+' text-center'}><Trophy size={42} className="mx-auto text-amber-500"/><h2 className="mt-3 text-2xl font-black">Hasil Ujian</h2>{result?<><p className="mt-2 font-bold">{result.title}</p><p className="mt-1 text-sm text-slate-500">{result.studentName} · {result.className}</p><p className="my-5 text-lg font-bold text-[#0B8F4D]">Jawaban berhasil disimpan</p><p className="text-sm text-slate-600">Nilai menunggu pemeriksaan guru.</p></>:<p className="mt-3 text-sm text-slate-500">Hasil sedang disimpan.</p>}<button className={btn+' mt-5'} onClick={()=>{setSection('student');setAttemptId('');}}>Kembali</button></div></div>;
   }
 
   return <div className="space-y-5">
@@ -284,6 +286,6 @@ export const ExamPage: React.FC = () => {
     {section==='home'&&<><div className="grid gap-3 sm:grid-cols-3"><button className={panel+' text-left hover:border-[#16B364]'} onClick={()=>setSection('upload')}><FileUp className="text-[#0B8F4D]"/><h3 className="mt-3 font-extrabold">Unggah File</h3><p className="mt-1 text-xs text-slate-500">Impor soal JSON/CSV atau simpan tautan Google Form.</p></button><button className={panel+' text-left hover:border-[#16B364]'} onClick={()=>setSection('create')}><Plus className="text-[#0B8F4D]"/><h3 className="mt-3 font-extrabold">Buat Ujian</h3><p className="mt-1 text-xs text-slate-500">Pilih tahun ajaran, semester, kelas, dan soal.</p></button><button className={panel+' text-left hover:border-[#16B364]'} onClick={()=>setSection('results')}><Trophy className="text-[#0B8F4D]"/><h3 className="mt-3 font-extrabold">Hasil Ujian</h3><p className="mt-1 text-xs text-slate-500">Lihat nilai dan status pengerjaan.</p></button></div><div className={panel}><h3 className="mb-3 font-extrabold">Pilih Kelas</h3><div className="grid grid-cols-3 gap-3">{cls.map(c=><button key={c} onClick={()=>{setLevel(c);setSection('create');}} className={`rounded-xl border p-5 text-center font-black ${level===c?'border-[#16B364] bg-[#E3F7EC] text-[#0B8F4D]':'border-slate-200'}`}>Kelas {c}</button>)}</div></div><div className={panel}><h3 className="mb-3 font-extrabold">Daftar Ujian</h3>{exams.map(ex=><div key={ex.id} className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 py-3"><div><p className="font-bold">{ex.title}</p><p className="text-xs text-slate-500">{ex.className} · {ex.subject} · {ex.duration} menit</p></div><span className="rounded-full bg-[#E3F7EC] px-3 py-1 text-xs font-bold text-[#0B8F4D]">{ex.status}</span></div>)}{!exams.length&&<p className="text-sm text-slate-500">Belum ada ujian dibuat.</p>}</div></>}
     {section==='upload'&&<div className={panel+' max-w-3xl'}><button className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>setSection('home')}><ArrowLeft size={16}/> Kembali</button><h3 className="mb-4 text-lg font-black">Unggah File Soal</h3><div className="grid gap-3 sm:grid-cols-2"><div><label className="mb-1 block text-xs font-bold">Kelas</label><select className={field} value={level} onChange={e=>setLevel(e.target.value)}>{cls.map(c=><option key={c}>{c}</option>)}</select></div><div><label className="mb-1 block text-xs font-bold">Mata pelajaran</label><select className={field} value={subject} onChange={e=>setSubject(e.target.value)}><option value="">Pilih mapel</option>{subjects.map(s=><option key={s}>{s}</option>)}</select></div></div><label className="mb-1 mt-3 block text-xs font-bold">Nama soal / judul ujian</label><input className={field} value={title} onChange={e=>setTitle(e.target.value)} placeholder="Contoh: PTS Bahasa Arab Kelas VII"/><label className="mb-1 mt-3 block text-xs font-bold">Tautan Google Form (opsional)</label><input className={field} value={formUrl} onChange={e=>setFormUrl(e.target.value)} placeholder="https://docs.google.com/forms/..."/><p className="mt-1 text-xs text-slate-500">Tautan disimpan sebagai referensi. Judul Google Form belum dapat dibaca otomatis dari browser tanpa layanan penghubung Google Apps Script/API.</p><label className="mb-1 mt-4 block text-xs font-bold">Pilih file JSON atau CSV</label><input type="file" accept=".json,.csv,.txt" className={field} onChange={e=>void importFile(e.target.files?.[0])}/>{questionFileName&&<p className="mt-2 text-xs text-slate-500">File: {questionFileName}</p>}<p className="mt-3 text-xs text-slate-500">JSON: [{'{'}"prompt":"Pertanyaan","options":["A","B","C","D"],"answer":0{' }'}]. CSV: pertanyaan;A;B;C;D;kunci (1-4).</p></div>}
     {section==='create'&&<div className={panel}><button className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>setSection('home')}><ArrowLeft size={16}/> Kembali</button><h3 className="mb-4 text-lg font-black">Buat Ujian</h3><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><div><label className="mb-1 block text-xs font-bold">Tahun ajaran</label><input className={field} value={settings.activeAcademicYear} readOnly/></div><div><label className="mb-1 block text-xs font-bold">Semester</label><input className={field} value={settings.activeSemester} readOnly/></div><div><label className="mb-1 block text-xs font-bold">Kelas</label><select className={field} value={level} onChange={e=>setLevel(e.target.value)}>{cls.map(c=><option key={c}>{c}</option>)}</select></div><div><label className="mb-1 block text-xs font-bold">Mata pelajaran</label><select className={field} value={subject} onChange={e=>setSubject(e.target.value)}><option value="">Pilih mapel</option>{subjects.map(s=><option key={s}>{s}</option>)}</select></div></div><label className="mb-1 mt-3 block text-xs font-bold">Nama ujian</label><input className={field} value={title} onChange={e=>setTitle(e.target.value)} placeholder="Nama ujian"/><label className="mb-1 mt-3 block text-xs font-bold">Durasi (menit)</label><input type="number" min="1" max="240" className={field+' max-w-40'} value={duration} onChange={e=>setDuration(Math.max(1,Number(e.target.value)))}/><h4 className="mb-2 mt-5 font-extrabold">Pilih soal dari bank soal</h4><div className="max-h-72 space-y-2 overflow-auto rounded-xl border border-slate-200 p-3">{classQuestions.map(q=><label key={q.id} className="flex cursor-pointer items-start gap-3 border-b border-slate-100 py-2 last:border-0"><input type="checkbox" checked={selectedQuestions.includes(q.id)} onChange={e=>setSelectedQuestions(a=>e.target.checked?[...a,q.id]:a.filter(id=>id!==q.id))}/><span><strong className="block text-sm">{q.prompt}</strong><small className="text-slate-500">{q.subject} · {q.className}</small></span></label>)}{!classQuestions.length&&<p className="text-sm text-slate-500">Bank soal kosong untuk kelas/mapel ini. Unggah atau buat soal terlebih dahulu.</p>}</div><button className={btn+' mt-4'} disabled={saving} onClick={()=>void createExam()}><Plus size={16}/> Terbitkan Ujian ({selectedQuestions.length} soal)</button></div>}
-    {section==='results'&&<div className={panel}><button className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>setSection('home')}><ArrowLeft size={16}/> Kembali</button><h3 className="mb-3 text-lg font-black">Hasil Ujian Siswa</h3><div className="overflow-x-auto"><table className="w-full min-w-[650px] text-left text-sm"><thead><tr className="border-b bg-slate-50 text-xs text-slate-500"><th className="p-3">Nama</th><th className="p-3">Kelas</th><th className="p-3">Ujian</th><th className="p-3">Nilai</th><th className="p-3">Status</th></tr></thead><tbody>{attempts.map(a=><tr key={a.id} className="border-b border-slate-100"><td className="p-3 font-semibold">{a.studentName}</td><td className="p-3">{a.className}</td><td className="p-3">{a.examTitle}</td><td className="p-3 font-bold">{a.status==='Selesai'?Math.round(a.score/Math.max(1,a.total)*100):'—'}</td><td className="p-3">{a.status}</td></tr>)}</tbody></table></div>{!attempts.length&&<p className="text-sm text-slate-500">Belum ada hasil ujian.</p>}</div>}
+    {section==='results'&&<div className={panel}><button className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>setSection('home')}><ArrowLeft size={16}/> Kembali</button><h3 className="mb-3 text-lg font-black">Hasil Ujian Siswa</h3><div className="overflow-x-auto"><table className="w-full min-w-[650px] text-left text-sm"><thead><tr className="border-b bg-slate-50 text-xs text-slate-500"><th className="p-3">Nama</th><th className="p-3">Kelas</th><th className="p-3">Ujian</th><th className="p-3">Nilai</th><th className="p-3">Status</th></tr></thead><tbody>{attempts.map(a=><tr key={a.id} className="border-b border-slate-100"><td className="p-3 font-semibold">{a.studentName}</td><td className="p-3">{a.className}</td><td className="p-3">{a.examTitle}</td><td className="p-3 font-bold">{a.status==='Selesai'?typeof a.score === 'number' && typeof a.total === 'number' ? Math.round(a.score/Math.max(1,a.total)*100) : 'Menunggu':'—'}</td><td className="p-3">{a.status}</td></tr>)}</tbody></table></div>{!attempts.length&&<p className="text-sm text-slate-500">Belum ada hasil ujian.</p>}</div>}
   </div>;
 };

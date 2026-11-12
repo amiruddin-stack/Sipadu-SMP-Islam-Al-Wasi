@@ -189,9 +189,9 @@ export const BehaviorPage: React.FC = () => {
           <span className="text-[11px] font-semibold text-slate-400">Total Catatan Pembinaan</span>
           <p className="text-xl font-bold text-slate-900 mt-0.5">{behaviors.length} Kejadian</p>
         </div>
-        <div className="p-3.5 rounded-xl bg-bg-[#E3F7EC] border border-border-[#B7E8CD]">
-          <span className="text-[11px] font-semibold text-#076B3A">Perilaku Positif & Prestasi</span>
-          <p className="text-xl font-bold text-#076B3A mt-0.5">{positiveCount} Catatan</p>
+        <div className="p-3.5 rounded-xl bg-[#E3F7EC] border border-[#B7E8CD]">
+          <span className="text-[11px] font-semibold text-[#076B3A]">Perilaku Positif & Prestasi</span>
+          <p className="text-xl font-bold text-[#076B3A] mt-0.5">{positiveCount} Catatan</p>
         </div>
         <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200">
           <span className="text-[11px] font-semibold text-amber-800">Dalam Proses Pembinaan</span>
@@ -225,7 +225,7 @@ export const BehaviorPage: React.FC = () => {
                     <span
                       className={`px-2 py-0.5 rounded-md text-[11px] font-bold ${
                         isPositive
-                          ? 'bg-bg-[#E3F7EC] text-#076B3A'
+                          ? 'bg-[#E3F7EC] text-[#076B3A]'
                           : item.category === 'Kedisiplinan'
                           ? 'bg-amber-100 text-amber-800'
                           : 'bg-rose-100 text-rose-800'
@@ -240,7 +240,7 @@ export const BehaviorPage: React.FC = () => {
                     <span
                       className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                         item.status === 'Selesai'
-                          ? 'bg-bg-[#E3F7EC] text-#076B3A border border-border-[#B7E8CD]'
+                          ? 'bg-[#E3F7EC] text-[#076B3A] border border-[#B7E8CD]'
                           : 'bg-amber-50 text-amber-800 border border-amber-200'
                       }`}
                     >

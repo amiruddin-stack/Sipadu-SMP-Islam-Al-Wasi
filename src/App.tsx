@@ -44,6 +44,9 @@ function AppContent() {
     );
   }
 
+  const sharedExamLink = new URLSearchParams(window.location.search).has('ujian');
+  if (sharedExamLink) return <ExamPage />;
+
   if (!currentUser) return <LoginPage />;
 
   const registrationType = new URLSearchParams(window.location.search).get('daftar');

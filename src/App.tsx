@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
 import { Header } from './components/layout/Header';
 import { NavTab } from './components/layout/Sidebar';
@@ -15,6 +15,7 @@ import { MasterDataPage, RegistrationPage } from './pages/MasterDataPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { ExamPage } from './pages/ExamPage';
+import { LoginPage } from './pages/LoginPage';
 
 function ComingSoonPage() {
   return (
@@ -29,7 +30,22 @@ function ComingSoonPage() {
 }
 
 function AppContent() {
+  const { currentUser, loading } = useAuth();
   const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
+
+  if (loading) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#f8fbf9]">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-emerald-100 border-t-emerald-700" />
+          <p className="text-sm font-medium text-slate-500">Memeriksa sesi SIMPATIK…</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (!currentUser) return <LoginPage />;
+
   const registrationType = new URLSearchParams(window.location.search).get('daftar');
   if (registrationType === 'guru' || registrationType === 'siswa') return <RegistrationPage type={registrationType} />;
 

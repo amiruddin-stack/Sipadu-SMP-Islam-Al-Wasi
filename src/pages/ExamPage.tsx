@@ -82,7 +82,7 @@ export const ExamPage: React.FC = () => {
     void restoreOfflineData();
     const prepareStudentAccess = async () => {
       try {
-        if (navigator.onLine && !auth.currentUser) await signInAnonymously(auth);
+        if (!isVerifiedExamAdmin && navigator.onLine && !auth.currentUser) await signInAnonymously(auth);
         if (!navigator.onLine) return;
         const snapshot = await getDocs(collection(db, 'students'));
         if (active && !snapshot.empty) setExamStudents(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as typeof students[number])));

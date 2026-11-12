@@ -85,7 +85,8 @@ service cloud.firestore {
     }
     match /examPublicQuestions/{questionId} {
       allow read: if isSignedIn();
-      allow create, update, delete: if isAdmin() && !('answer' in request.resource.data);
+      allow create, update: if isAdmin() && !('answer' in request.resource.data);
+      allow delete: if isAdmin();
     }
     match /examAnswerKeys/{questionId} {
       allow read, write: if isAdmin();

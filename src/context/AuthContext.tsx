@@ -11,6 +11,7 @@ import {
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase/config';
 import { UserProfile, UserRole } from '../types';
+import { setGoogleFormsAccessToken } from '../lib/googleForms';
 
 const ADMIN_EMAIL = 'amiruddin@smpialwasi-maros.sch.id';
 const SCHOOL_DOMAIN = '@smpialwasi-maros.sch.id';
@@ -123,6 +124,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setLoading(true);
       const provider = new GoogleAuthProvider();
+      provider.addScope('https://www.googleapis.com/auth/forms.body.readonly');
       provider.setCustomParameters({
         hd: 'smpialwasi-maros.sch.id',
         prompt: 'select_account',
@@ -133,6 +135,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await signOut(auth);
         throw new Error('Gunakan akun Google sekolah terverifikasi dengan domain @smpialwasi-maros.sch.id.');
       }
+      setGoogleFormsAccessToken(GoogleAuthProvider.credentialFromResult(result)?.accessToken);
     } catch (error) {
       console.error('Google Sign In Error:', error);
       alert(error instanceof Error ? error.message : 'Login Google gagal. Periksa koneksi internet dan coba kembali.');

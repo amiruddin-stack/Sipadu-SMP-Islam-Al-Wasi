@@ -59,6 +59,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
     record.date >= periodStartStr && record.date <= todayStr &&
     (attendanceClass === 'Semua Kelas' || record.className === attendanceClass)
   );
+  const attendanceDate = relevantAttendances.reduce((latest, record) => record.date > latest ? record.date : latest, '');
   const realTotals = { Hadir: 0, Izin: 0, Sakit: 0, Alpa: 0 };
   const absentByStudent = new Map<string, { student: typeof students[number]; status: string; count: number }>();
   relevantAttendances.forEach(record => {
@@ -270,7 +271,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
                   </div>
                   <span className="font-bold text-slate-800">{totals.Hadir}</span>
                   <span className="w-10 text-right font-semibold text-slate-600">
-                    {Math.round((totals.Hadir / totalRecorded) * 100)}%
+                    {totalRecorded ? Math.round((totals.Hadir / totalRecorded) * 100) : 0}%
                   </span>
                 </div>
 
@@ -281,7 +282,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
                   </div>
                   <span className="font-bold text-slate-800">{totals.Izin}</span>
                   <span className="w-10 text-right font-semibold text-slate-600">
-                    {Math.round((totals.Izin / totalRecorded) * 100)}%
+                    {totalRecorded ? Math.round((totals.Izin / totalRecorded) * 100) : 0}%
                   </span>
                 </div>
 
@@ -292,7 +293,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
                   </div>
                   <span className="font-bold text-slate-800">{totals.Sakit}</span>
                   <span className="w-10 text-right font-semibold text-slate-600">
-                    {Math.round((totals.Sakit / totalRecorded) * 100)}%
+                    {totalRecorded ? Math.round((totals.Sakit / totalRecorded) * 100) : 0}%
                   </span>
                 </div>
 
@@ -303,7 +304,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
                   </div>
                   <span className="font-bold text-slate-800">{totals.Alpa}</span>
                   <span className="w-10 text-right font-semibold text-slate-600">
-                    {Math.round((totals.Alpa / totalRecorded) * 100)}%
+                    {totalRecorded ? Math.round((totals.Alpa / totalRecorded) * 100) : 0}%
                   </span>
                 </div>
               </div>

@@ -210,7 +210,7 @@ export const CounselingPage: React.FC = () => {
                   <span
                     className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                       item.followUpStatus === 'Selesai'
-                        ? 'bg-bg-[#E3F7EC] text-#076B3A border border-border-[#B7E8CD]'
+                        ? 'bg-[#E3F7EC] text-[#076B3A] border border-[#B7E8CD]'
                         : item.followUpStatus === 'Rujukan'
                         ? 'bg-purple-50 text-purple-800 border border-purple-200'
                         : 'bg-amber-50 text-amber-800 border border-amber-200'

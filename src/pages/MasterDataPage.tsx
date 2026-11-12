@@ -97,7 +97,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
             onClick={() => setActiveSubTab('siswa')}
             className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors ${
               activeSubTab === 'siswa'
-                ? 'bg-[#0F5132] text-white shadow-xs'
+                ? 'bg-[#076B3A] text-white shadow-xs'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
@@ -107,7 +107,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
             onClick={() => setActiveSubTab('guru')}
             className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors ${
               activeSubTab === 'guru'
-                ? 'bg-[#0F5132] text-white shadow-xs'
+                ? 'bg-[#076B3A] text-white shadow-xs'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
@@ -117,7 +117,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
             onClick={() => setActiveSubTab('akademik')}
             className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors ${
               activeSubTab === 'akademik'
-                ? 'bg-[#0F5132] text-white shadow-xs'
+                ? 'bg-[#076B3A] text-white shadow-xs'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
@@ -128,7 +128,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
         {activeSubTab === 'siswa' && canManageMasterData && (
           <button
             onClick={handleOpenAddStudent}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-[#0F5132] hover:bg-[#0B3D26] rounded-lg transition-colors shadow-xs"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-[#076B3A] hover:bg-[#076B3A] rounded-lg transition-colors shadow-xs"
           >
             
             <span>Tambah Siswa</span>
@@ -146,7 +146,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
               <select
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
-                className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
               >
                 <option value="Semua">Semua Kelas</option>
                 {classes.map((c) => (
@@ -163,7 +163,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
                 placeholder="Cari nama, NIS, atau NISN..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                className="w-full px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
               />
             </div>
           </div>
@@ -207,7 +207,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
                         {std.className}
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                        <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-bg-[#E3F7EC] text-#076B3A">
                           {std.status}
                         </span>
                       </td>
@@ -289,7 +289,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
                     </td>
                     <td className="py-3 px-4 font-mono text-slate-500">{tch.email}</td>
                     <td className="py-3 px-4 text-center">
-                      <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                      <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-bg-[#E3F7EC] text-#076B3A">
                         {tch.status}
                       </span>
                     </td>
@@ -319,7 +319,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
                   className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between"
                 >
                   <span className="text-xs font-bold text-slate-800">Kelas {c}</span>
-                  <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md">
+                  <span className="text-[10px] font-semibold text-#076B3A bg-bg-[#E3F7EC] px-2 py-0.5 rounded-md">
                     {students.filter((s) => s.className === c).length} Siswa
                   </span>
                 </div>
@@ -377,7 +377,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
                     required
                     value={studentForm.nis}
                     onChange={(e) => setStudentForm({ ...studentForm, nis: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
                   />
                 </div>
                 <div>
@@ -387,7 +387,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
                     required
                     value={studentForm.nisn}
                     onChange={(e) => setStudentForm({ ...studentForm, nisn: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
                   />
                 </div>
               </div>
@@ -400,7 +400,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
                   placeholder="Nama lengkap siswa..."
                   value={studentForm.name}
                   onChange={(e) => setStudentForm({ ...studentForm, name: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
                 />
               </div>
 
@@ -412,7 +412,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
                     onChange={(e) =>
                       setStudentForm({ ...studentForm, gender: e.target.value as 'L' | 'P' })
                     }
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
                   >
                     <option value="L">Laki-Laki (L)</option>
                     <option value="P">Perempuan (P)</option>
@@ -423,7 +423,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
                   <select
                     value={studentForm.className}
                     onChange={(e) => setStudentForm({ ...studentForm, className: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
                   >
                     {classes.map((c) => (
                       <option key={c} value={c}>
@@ -442,7 +442,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
                         status: e.target.value as 'Aktif' | 'Lulus' | 'Mutasi',
                       })
                     }
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
                   >
                     <option value="Aktif">Aktif</option>
                     <option value="Lulus">Lulus</option>
@@ -461,7 +461,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
                     onChange={(e) =>
                       setStudentForm({ ...studentForm, parentPhone: e.target.value })
                     }
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
                   />
                 </div>
                 <div>
@@ -471,7 +471,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
                     placeholder="Nama wali..."
                     value={studentForm.parentName}
                     onChange={(e) => setStudentForm({ ...studentForm, parentName: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
                   />
                 </div>
               </div>
@@ -486,7 +486,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 text-xs font-bold text-white bg-[#0F5132] hover:bg-[#0B3D26] rounded-xl shadow-xs"
+                  className="px-5 py-2 text-xs font-bold text-white bg-[#076B3A] hover:bg-[#076B3A] rounded-xl shadow-xs"
                 >
                   Simpan Siswa
                 </button>

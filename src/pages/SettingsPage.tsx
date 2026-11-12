@@ -54,7 +54,7 @@ export const SettingsPage: React.FC = () => {
             <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                Status PWA & Build APK Android
             </h3>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-bg-[#E3F7EC] text-#076B3A">
               Siap Kompilasi
             </span>
           </div>
@@ -62,12 +62,12 @@ export const SettingsPage: React.FC = () => {
           <div className="space-y-2.5 text-xs text-slate-600">
             <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
               <span className="font-medium">Web App Manifest & Service Worker</span>
-              <span className="font-bold text-emerald-700">✓ Aktif</span>
+              <span className="font-bold text-#0B8F4D">✓ Aktif</span>
             </div>
 
             <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
               <span className="font-medium">Capacitor Android Core</span>
-              <span className="font-bold text-emerald-700">✓ Terpasang</span>
+              <span className="font-bold text-#0B8F4D">✓ Terpasang</span>
             </div>
 
             <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
@@ -80,7 +80,7 @@ export const SettingsPage: React.FC = () => {
             {isInstallable && !isInstalled && (
               <button
                 onClick={install}
-                className="w-full mt-2 py-2 text-xs font-bold text-white bg-[#0F5132] hover:bg-[#0B3D26] rounded-xl shadow-xs text-center"
+                className="w-full mt-2 py-2 text-xs font-bold text-white bg-[#076B3A] hover:bg-[#076B3A] rounded-xl shadow-xs text-center"
               >
                  Pasang Aplikasi ke Layar Utama Sekarang
               </button>
@@ -88,20 +88,20 @@ export const SettingsPage: React.FC = () => {
           </div>
 
           {/* Android APK Build Instructions Box */}
-          <div className="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-100 space-y-2">
-            <span className="text-xs font-bold text-emerald-950 block">
+          <div className="p-3.5 rounded-xl bg-bg-[#E3F7EC]/60 border border-bg-[#E3F7EC] space-y-2">
+            <span className="text-xs font-bold text-#076B3A block">
                Cara Build APK Android dengan Capacitor:
             </span>
-            <div className="text-[11px] font-mono text-slate-700 bg-white p-2.5 rounded-lg border border-emerald-200/50 space-y-1">
+            <div className="text-[11px] font-mono text-slate-700 bg-white p-2.5 rounded-lg border border-border-[#B7E8CD]/50 space-y-1">
               <p># 1. Bangun aset web produksi</p>
-              <p className="font-bold text-emerald-900">npm run build</p>
+              <p className="font-bold text-#076B3A">npm run build</p>
               <p># 2. Sinkronkan aset ke platform Android</p>
-              <p className="font-bold text-emerald-900">npx cap add android</p>
-              <p className="font-bold text-emerald-900">npx cap sync</p>
+              <p className="font-bold text-#076B3A">npx cap add android</p>
+              <p className="font-bold text-#076B3A">npx cap sync</p>
               <p># 3. Buka Android Studio & Build APK</p>
-              <p className="font-bold text-emerald-900">npx cap open android</p>
+              <p className="font-bold text-#076B3A">npx cap open android</p>
             </div>
-            <p className="text-[11px] text-emerald-800">
+            <p className="text-[11px] text-#076B3A">
               Nama aplikasi Android telah diperbarui menjadi SIMPATIK. ID paket Android tetap dipertahankan agar pembaruan tidak dianggap sebagai aplikasi baru.
             </p>
           </div>
@@ -115,7 +115,7 @@ export const SettingsPage: React.FC = () => {
             </h3>
             <span
               className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                isOnline ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                isOnline ? 'bg-bg-[#E3F7EC] text-#076B3A' : 'bg-amber-100 text-amber-800'
               }`}
             >
               {isOnline ? 'Terhubung Online' : 'Lokal Offline'}
@@ -137,7 +137,7 @@ export const SettingsPage: React.FC = () => {
 
             <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
               <span className="font-medium">Keamanan Rules Firestore:</span>
-              <span className="font-bold text-emerald-700">✓ 8 Pilar ABAC Terpasang</span>
+              <span className="font-bold text-#0B8F4D">✓ 8 Pilar ABAC Terpasang</span>
             </div>
           </div>
 
@@ -163,7 +163,7 @@ export const SettingsPage: React.FC = () => {
         </div>
 
         {savedSuccess && (
-          <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
+          <div className="p-3 rounded-xl bg-bg-[#E3F7EC] border border-border-[#B7E8CD] text-#076B3A text-xs font-semibold flex items-center gap-2">
              Profil sekolah dan tahun akademik berhasil disimpan!
           </div>
         )}
@@ -177,7 +177,7 @@ export const SettingsPage: React.FC = () => {
                 required
                 value={formData.schoolName}
                 onChange={(e) => setFormData({ ...formData, schoolName: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
               />
             </div>
 
@@ -188,7 +188,7 @@ export const SettingsPage: React.FC = () => {
                 required
                 value={formData.npsn}
                 onChange={(e) => setFormData({ ...formData, npsn: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
               />
             </div>
           </div>
@@ -200,7 +200,7 @@ export const SettingsPage: React.FC = () => {
               required
               value={formData.address}
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
             />
           </div>
 
@@ -211,7 +211,7 @@ export const SettingsPage: React.FC = () => {
                 type="text"
                 value={formData.district}
                 onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
               />
             </div>
 
@@ -221,7 +221,7 @@ export const SettingsPage: React.FC = () => {
                 type="text"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
               />
             </div>
 
@@ -231,7 +231,7 @@ export const SettingsPage: React.FC = () => {
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
               />
             </div>
           </div>
@@ -244,7 +244,7 @@ export const SettingsPage: React.FC = () => {
                 required
                 value={formData.principal}
                 onChange={(e) => setFormData({ ...formData, principal: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
               />
             </div>
 
@@ -254,7 +254,7 @@ export const SettingsPage: React.FC = () => {
                 type="text"
                 value={formData.principalNip}
                 onChange={(e) => setFormData({ ...formData, principalNip: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
               />
             </div>
           </div>
@@ -267,7 +267,7 @@ export const SettingsPage: React.FC = () => {
                 required
                 value={formData.activeAcademicYear}
                 onChange={(e) => setFormData({ ...formData, activeAcademicYear: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
               />
             </div>
 
@@ -278,7 +278,7 @@ export const SettingsPage: React.FC = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, activeSemester: e.target.value as 'Ganjil' | 'Genap' })
                 }
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
               >
                 <option value="Ganjil">Ganjil</option>
                 <option value="Genap">Genap</option>
@@ -293,7 +293,7 @@ export const SettingsPage: React.FC = () => {
                 max="200"
                 value={formData.effectiveDays}
                 onChange={(e) => setFormData({ ...formData, effectiveDays: Number(e.target.value) })}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+                className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
               />
             </div>
           </div>
@@ -302,7 +302,7 @@ export const SettingsPage: React.FC = () => {
             <div className="flex justify-end pt-3">
               <button
                 type="submit"
-                className="px-6 py-2.5 text-xs font-bold text-white bg-[#0F5132] hover:bg-[#0B3D26] rounded-xl transition-colors shadow-xs"
+                className="px-6 py-2.5 text-xs font-bold text-white bg-[#076B3A] hover:bg-[#076B3A] rounded-xl transition-colors shadow-xs"
               >
                  Simpan Konfigurasi Sekolah
               </button>

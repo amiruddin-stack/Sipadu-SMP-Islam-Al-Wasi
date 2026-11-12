@@ -50,6 +50,8 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate }) => {
         <nav aria-label="Navigasi utama" className="ml-1 flex h-[68px] min-w-0 flex-1 flex-nowrap items-center gap-0.5 overflow-x-auto whitespace-nowrap [scrollbar-width:thin] [overscroll-behavior-x:contain]">
           <button onClick={() => navigate('dashboard')} className={navClass('dashboard')}>Beranda</button>
           <button onClick={() => navigate('settings')} className={navClass('settings')}>Profil</button>
+          <button onClick={() => navigate('classes')} className={navClass('classes')}>Kelas</button>
+          <button onClick={() => navigate('subjects')} className={navClass('subjects')}>Mapel</button>
 
           <div ref={academicRef} className="relative shrink-0">
             <button onClick={() => { const rect = academicRef.current?.getBoundingClientRect(); if (rect) setAcademicPosition({ left: Math.max(8, Math.min(rect.left, window.innerWidth - 232)), top: rect.bottom + 8 }); setAcademicOpen(v => !v); }} aria-expanded={academicOpen} className={`flex min-h-11 items-center gap-1 px-3 text-sm font-semibold transition-colors hover:text-[#078A78] ${(['attendance','journal','assessment','grades'].includes(activeTab) ? 'text-[#078A78]' : 'text-slate-600')}`}>

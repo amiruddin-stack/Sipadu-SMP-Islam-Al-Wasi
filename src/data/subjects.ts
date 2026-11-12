@@ -1,0 +1,20 @@
+export const SCHOOL_SUBJECTS = [
+  "Pendidikan Agama Islam dan Budi Pekerti",
+  "Pendidikan Pancasila dan Kewarganegaraan",
+  "Bahasa Indonesia",
+  "Matematika",
+  "Ilmu Pengetahuan Alam",
+  "Ilmu Pengetahuan Sosial",
+  "Bahasa Inggris",
+  "Seni Budaya",
+  "Pendidikan Jasmani, Olahraga dan Kesehatan",
+  "Prakarya",
+  "Teknologi Informasi dan Komunikasi",
+  "Bahasa Daerah",
+  "Baca Tulis Al-Qur'an",
+  "Bahasa Arab",
+  "Dirasa Islamiyah",
+  "Tahsin",
+  "Bacaan Sholat, Doa dan Zikir",
+  "Tahfiz"
+];

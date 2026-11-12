@@ -151,7 +151,7 @@ export const AttendancePage: React.FC = () => {
               onClick={() => setActiveTab('input')}
               className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors ${
                 activeTab === 'input'
-                  ? 'bg-[#0F5132] text-white shadow-xs'
+                  ? 'bg-[#076B3A] text-white shadow-xs'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
@@ -161,7 +161,7 @@ export const AttendancePage: React.FC = () => {
               onClick={() => setActiveTab('rekap')}
               className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors ${
                 activeTab === 'rekap'
-                  ? 'bg-[#0F5132] text-white shadow-xs'
+                  ? 'bg-[#076B3A] text-white shadow-xs'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
@@ -198,7 +198,7 @@ export const AttendancePage: React.FC = () => {
             <select
               value={selectedClass}
               onChange={(e) => setSelectedClass(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
             >
               {classes.map((cls) => (
                 <option key={cls} value={cls}>
@@ -216,7 +216,7 @@ export const AttendancePage: React.FC = () => {
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
             />
           </div>
 
@@ -237,9 +237,9 @@ export const AttendancePage: React.FC = () => {
           <span className="text-[11px] font-semibold text-slate-500">Total Siswa</span>
           <p className="text-lg font-bold text-slate-900">{totalStudents}</p>
         </div>
-        <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-center">
-          <span className="text-[11px] font-semibold text-emerald-800">Hadir</span>
-          <p className="text-lg font-bold text-emerald-900">{hadirCount}</p>
+        <div className="p-3 rounded-xl bg-bg-[#E3F7EC] border border-border-[#B7E8CD] text-center">
+          <span className="text-[11px] font-semibold text-#076B3A">Hadir</span>
+          <p className="text-lg font-bold text-#076B3A">{hadirCount}</p>
         </div>
         <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-center">
           <span className="text-[11px] font-semibold text-blue-800">Sakit</span>
@@ -272,7 +272,7 @@ export const AttendancePage: React.FC = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleSetAllPresent}
-                className="px-3 py-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors"
+                className="px-3 py-1.5 text-xs font-semibold text-#076B3A bg-bg-[#E3F7EC] hover:bg-bg-[#E3F7EC] border border-border-[#B7E8CD] rounded-lg transition-colors"
                 title="Tandai semua siswa hadir"
               >
                 ✓ Setel Semua Hadir
@@ -280,7 +280,7 @@ export const AttendancePage: React.FC = () => {
               {canInputAttendance && (
                 <button
                   onClick={handleSave}
-                  className="px-4 py-1.5 text-xs font-bold text-white bg-[#0F5132] hover:bg-[#0B3D26] rounded-lg transition-colors shadow-xs"
+                  className="px-4 py-1.5 text-xs font-bold text-white bg-[#076B3A] hover:bg-[#076B3A] rounded-lg transition-colors shadow-xs"
                 >
                    Simpan Presensi
                 </button>
@@ -289,7 +289,7 @@ export const AttendancePage: React.FC = () => {
           </div>
 
           {savedSuccess && (
-            <div className="m-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
+            <div className="m-4 p-3 rounded-xl bg-bg-[#E3F7EC] border border-border-[#B7E8CD] text-#076B3A text-xs font-semibold flex items-center gap-2">
                Presensi Kelas {selectedClass} berhasil disimpan ke Firestore!
             </div>
           )}
@@ -346,8 +346,8 @@ export const AttendancePage: React.FC = () => {
                                 const isSelected = status === opt;
                                 const buttonColors: Record<AttendanceStatus, string> = {
                                   Hadir: isSelected
-                                    ? 'bg-[#0F5132] text-white border-[#0F5132]'
-                                    : 'bg-white text-slate-700 border-slate-200 hover:bg-emerald-50',
+                                    ? 'bg-[#076B3A] text-white border-[#076B3A]'
+                                    : 'bg-white text-slate-700 border-slate-200 hover:bg-bg-[#E3F7EC]',
                                   Sakit: isSelected
                                     ? 'bg-blue-600 text-white border-blue-600'
                                     : 'bg-white text-slate-700 border-slate-200 hover:bg-blue-50',
@@ -380,7 +380,7 @@ export const AttendancePage: React.FC = () => {
                             placeholder="Catatan surat/alasan..."
                             value={notes[student.id] || ''}
                             onChange={(e) => handleNoteChange(student.id, e.target.value)}
-                            className="w-full px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 text-xs focus:outline-none focus:bg-white focus:border-[#0F5132]"
+                            className="w-full px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 text-xs focus:outline-none focus:bg-white focus:border-[#076B3A]"
                           />
                         </td>
                       </tr>
@@ -445,7 +445,7 @@ export const AttendancePage: React.FC = () => {
                     <tr key={std.id} className="hover:bg-slate-50">
                       <td className="py-2.5 px-3 text-center text-slate-400">{idx + 1}</td>
                       <td className="py-2.5 px-3 font-semibold text-slate-900">{std.name}</td>
-                      <td className="py-2.5 px-3 text-center text-emerald-700 font-medium">{h}</td>
+                      <td className="py-2.5 px-3 text-center text-#0B8F4D font-medium">{h}</td>
                       <td className="py-2.5 px-3 text-center text-blue-700 font-medium">{s}</td>
                       <td className="py-2.5 px-3 text-center text-amber-700 font-medium">{i}</td>
                       <td className="py-2.5 px-3 text-center text-rose-700 font-medium">{a}</td>
@@ -454,7 +454,7 @@ export const AttendancePage: React.FC = () => {
                         <span
                           className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                             pct >= 90
-                              ? 'bg-emerald-100 text-emerald-800'
+                              ? 'bg-bg-[#E3F7EC] text-#076B3A'
                               : pct >= 75
                               ? 'bg-amber-100 text-amber-800'
                               : 'bg-rose-100 text-rose-800'

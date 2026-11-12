@@ -12,10 +12,13 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate }) => {
   const { currentUser, firebaseUser } = useAuth();
   const [academicOpen, setAcademicOpen] = useState(false);
   const academicRef = useRef<HTMLDivElement>(null);
+  const academicMenuRef = useRef<HTMLDivElement>(null);
+  const [academicPosition, setAcademicPosition] = useState({ left: 0, top: 76 });
 
   useEffect(() => {
     const closeMenus = (event: MouseEvent) => {
-      if (academicRef.current && !academicRef.current.contains(event.target as Node)) setAcademicOpen(false);
+      const target = event.target as Node;
+      if (academicRef.current && !academicRef.current.contains(target) && !academicMenuRef.current?.contains(target)) setAcademicOpen(false);
     };
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setAcademicOpen(false);
@@ -49,12 +52,11 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate }) => {
           <button onClick={() => navigate('settings')} className={navClass('settings')}>Profil</button>
 
           <div ref={academicRef} className="relative shrink-0">
-            <button onClick={() => setAcademicOpen(v => !v)} aria-expanded={academicOpen} className={`flex min-h-11 items-center gap-1 px-3 text-sm font-semibold transition-colors hover:text-[#078A78] ${(['attendance','journal','assessment','grades'].includes(activeTab) ? 'text-[#078A78]' : 'text-slate-600')}`}>
+            <button onClick={() => { const rect = academicRef.current?.getBoundingClientRect(); if (rect) setAcademicPosition({ left: Math.max(8, Math.min(rect.left, window.innerWidth - 232)), top: rect.bottom + 8 }); setAcademicOpen(v => !v); }} aria-expanded={academicOpen} className={`flex min-h-11 items-center gap-1 px-3 text-sm font-semibold transition-colors hover:text-[#078A78] ${(['attendance','journal','assessment','grades'].includes(activeTab) ? 'text-[#078A78]' : 'text-slate-600')}`}>
               Akademik <svg aria-hidden="true" viewBox="0 0 20 20" className={`h-4 w-4 transition-transform ${academicOpen ? 'rotate-180' : ''}`} fill="currentColor"><path d="m5 7 5 5 5-5H5Z" /></svg>
             </button>
-            {academicOpen && <div className="absolute left-0 top-full mt-2 w-56 rounded-xl border border-slate-200 bg-white p-2 text-slate-700 shadow-xl">
-              {([['attendance','Presensi'],['journal','Jurnal'],['assessment','Penilaian'],['grades','Guru Wali']] as [NavTab,string][]).map(([tab,label]) => <button key={tab} onClick={() => navigate(tab)} className={`block w-full rounded-lg px-3 py-2.5 text-left text-sm hover:bg-emerald-50 ${activeTab === tab ? 'bg-emerald-50 font-bold text-emerald-800' : ''}`}>{label}</button>)}
-            </div>}
+
+
           </div>
 
           <button onClick={() => navigate('ils')} className={navClass('ils')}>ILS <span className="ml-1 rounded-full bg-emerald-50 text-emerald-700 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide">Soon</span></button>
@@ -68,6 +70,9 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate }) => {
           <span className="hidden max-w-36 truncate text-right text-xs font-semibold xl:block">{currentUser?.displayName || firebaseUser?.displayName || ''}</span>
         </div>
       </div>
+      {academicOpen && <div ref={academicMenuRef} style={{ left: academicPosition.left, top: academicPosition.top }} className="fixed z-[70] w-56 rounded-xl border border-slate-200 bg-white p-2 text-slate-700 shadow-xl">
+        {([['attendance','Presensi'],['journal','Jurnal'],['assessment','Penilaian'],['grades','Guru Wali']] as [NavTab,string][]).map(([tab,label]) => <button key={tab} onClick={() => navigate(tab)} className={`block w-full rounded-lg px-3 py-2.5 text-left text-sm hover:bg-emerald-50 ${activeTab === tab ? 'bg-emerald-50 font-bold text-emerald-800' : ''}`}>{label}</button>)}
+      </div>}
     </header>
   );
 };

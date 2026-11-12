@@ -126,7 +126,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
         {/* Full-width hero card with illustration beside unchanged hero text */}
         <div className="relative z-10 mx-auto max-w-[1240px] px-4 pt-2 pb-3 md:px-8 md:pt-3 md:pb-4">
           <div className="flex w-full flex-col items-center justify-between gap-5 overflow-hidden rounded-[24px] border border-[#D5EADB] bg-gradient-to-br from-white via-[#F4FBF7] to-[#E7F6EF] px-6 py-6 shadow-sm md:flex-row md:gap-8 md:px-9 md:py-7">
-            <div className="w-full max-w-3xl shrink-0">
+            <div className="min-w-0 w-full max-w-3xl flex-1">
               <h1 className="text-4xl font-black tracking-tight text-[#0E8B7D] sm:text-5xl md:text-6xl">
                 SIMPATIK
               </h1>
@@ -159,11 +159,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
                 </button>
               </div>
             </div>
-            <div className="flex w-full shrink-0 items-center justify-center md:w-[34%] md:self-stretch">
+            <div className="flex w-full shrink-0 items-center justify-center md:mr-5 md:w-[28%] md:self-stretch">
               <img
                 src="./images/Desain%20tanpa%20judul_20261112_110817_0000.png"
                 alt="Ilustrasi struktur manajemen SIMPATIK"
-                className="h-auto max-h-[230px] w-full max-w-[360px] object-contain"
+                className="h-auto max-h-[210px] w-full max-w-[300px] object-contain"
                 loading="eager"
               />
             </div>

@@ -76,7 +76,8 @@ export const ExamPage: React.FC = () => {
         const [cachedQuestions, cachedExams, session] = await Promise.all([
           readOfflineRecord<Question[]>('cache:questions'),
           readOfflineRecord<Exam[]>('cache:exams'),
-          readOfflineRecord<any>('session:active')
+          readOfflineRecord<any>('session:active'),
+          readOfflineRecord<any>('student:identity')
         ]);
         if (!active) return;
         if (cachedQuestions) setQuestions(cachedQuestions);
@@ -95,9 +96,15 @@ export const ExamPage: React.FC = () => {
           setMessage('Ujian sebelumnya dipulihkan dari penyimpanan perangkat.');
         }
         setOfflineReady(Boolean(cachedQuestions?.length && cachedExams?.length));
+        await auth.authStateReady();
+        if (cachedIdentity && auth.currentUser?.uid === cachedIdentity.ownerUid) {
+          setStudentId(cachedIdentity.studentId || '');
+          setStudentClass(cachedIdentity.className || '');
+          setVerifiedStudentName(cachedIdentity.studentName || '');
+          setStudentCode(cachedIdentity.code || '');
+        }
         if (!navigator.onLine) return;
 
-        await auth.authStateReady();
         if (!isVerifiedExamAdmin && !auth.currentUser) await signInAnonymously(auth);
         if (!active || !auth.currentUser) return;
 
@@ -219,6 +226,7 @@ export const ExamPage: React.FC = () => {
       if (data.active !== true) throw new Error('ID Ujian ini sudah dinonaktifkan. Hubungi admin sekolah.');
       if (data.ownerUid && data.ownerUid !== uid) throw new Error('ID Ujian sudah terikat pada perangkat lain. Hubungi admin untuk memperbarui ID.');
       if (!data.ownerUid) await updateDoc(codeRef, { ownerUid: uid });
+      await saveOfflineRecord('student:identity', { studentId: data.studentId, studentName: data.studentName, className: data.className, code, ownerUid: uid });
       setStudentId(data.studentId);
       setStudentClass(data.className);
       setVerifiedStudentName(data.studentName);
@@ -361,7 +369,7 @@ export const ExamPage: React.FC = () => {
     <div className={panel}>
       <label className="mb-1 block text-xs font-bold text-slate-600">ID Ujian Siswa</label>
       <div className="flex flex-col gap-2 sm:flex-row"><input className={field+' uppercase tracking-widest'} value={studentCode} onChange={e=>setStudentCode(e.target.value.toUpperCase())} placeholder="SW-XXXX-XXXX" disabled={Boolean(studentId)}/><button className={btn+' shrink-0'} onClick={()=>void verifyStudentCode()} disabled={Boolean(studentId)}>Verifikasi</button></div>
-      {studentId&&<div className="mt-4 rounded-xl border border-[#B7E8CD] bg-[#F7FCF9] p-3"><p className="text-xs font-bold text-[#0B8F4D]">IDENTITAS TERVERIFIKASI</p><p className="mt-1 font-extrabold">{verifiedStudentName}</p><p className="text-sm text-slate-500">{studentClass}</p><button className="mt-3 text-xs font-bold text-rose-600" onClick={()=>{setStudentId('');setStudentClass('');setVerifiedStudentName('');setStudentCode('');}}>Keluar / Ganti ID</button></div>}
+      {studentId&&<div className="mt-4 rounded-xl border border-[#B7E8CD] bg-[#F7FCF9] p-3"><p className="text-xs font-bold text-[#0B8F4D]">IDENTITAS TERVERIFIKASI</p><p className="mt-1 font-extrabold">{verifiedStudentName}</p><p className="text-sm text-slate-500">{studentClass}</p><button className="mt-3 text-xs font-bold text-rose-600" onClick={()=>{setStudentId('');setStudentClass('');setVerifiedStudentName('');setStudentCode('');void deleteOfflineRecord('student:identity');}}>Keluar / Ganti ID</button></div>}
     </div>
     {studentId && <div className="space-y-3"><h3 className="font-bold text-slate-700">Ujian tersedia</h3>{availableExams.map(ex=><div key={ex.id} className={panel}><div className="flex items-start justify-between gap-3"><div><h4 className="font-extrabold">{ex.title}</h4><p className="mt-1 text-xs text-slate-500">{ex.subject} · {ex.duration} menit · {ex.questionIds.length} soal</p></div><button className={btn} onClick={()=>void startExam(ex)}><Play size={15}/> Mulai</button></div></div>)}{!availableExams.length&&<p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Belum ada ujian aktif untuk kelas ini.</p>}</div>}
   </div>;

@@ -127,7 +127,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
         <div className="relative z-10 mx-auto max-w-[1240px] px-4 pt-2 pb-3 md:px-8 md:pt-3 md:pb-4">
           <div className="flex w-full flex-col items-center justify-between gap-5 overflow-hidden rounded-[24px] border border-[#D5EADB] bg-gradient-to-br from-white via-[#F4FBF7] to-[#E7F6EF] px-6 py-6 shadow-sm md:flex-row md:gap-8 md:px-9 md:py-7">
             <div className="min-w-0 w-full max-w-3xl flex-1">
-              <h1 className="text-4xl font-black tracking-tight text-[#0E8B7D] sm:text-5xl md:text-6xl">
+              <h1 className="text-4xl font-black tracking-tight text-[#078A28] sm:text-5xl md:text-6xl">
                 SIMPATIK
               </h1>
 
@@ -140,7 +140,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
                 </p>
               </div>
 
-              <p className="mt-3 text-base font-bold text-[#0E8B7D] sm:text-lg">
+              <p className="mt-3 text-base font-bold text-[#078A28] sm:text-lg">
                 Terpadu - Interaktif - Kolaboratif
               </p>
 
@@ -293,7 +293,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
             {/* Card Header Band */}
             <div className="flex items-center justify-between gap-3 bg-[#EAF6ED] px-5 py-3.5">
               <div className="flex items-center gap-3">
-                <BookOpen size={26} className="text-[#15884B]" />
+                <BookOpen size={26} className="text-[#078A28]" />
                 <h2 className="text-base font-bold text-[#144728] md:text-lg">
                   Jurnal Pembelajaran
                 </h2>
@@ -502,7 +502,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
               onClick={() => onNavigate('behavior')}
               className="flex min-h-[110px] flex-col justify-between rounded-2xl bg-[#ECF7EF] p-4 text-left transition hover:border-[#BCE4C9] hover:bg-[#E5F5E9] focus:outline-none"
             >
-              <Users size={22} className="text-[#15884B]" />
+              <Users size={22} className="text-[#078A28]" />
               <div>
                 <strong className="block text-sm font-bold text-[#143D26]">
                   Perilaku Siswa
@@ -518,7 +518,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
               onClick={() => onNavigate('counseling')}
               className="flex min-h-[110px] flex-col justify-between rounded-2xl bg-[#ECF7EF] p-4 text-left transition hover:border-[#BCE4C9] hover:bg-[#E5F5E9] focus:outline-none"
             >
-              <BookOpen size={22} className="text-[#15884B]" />
+              <BookOpen size={22} className="text-[#078A28]" />
               <div>
                 <strong className="block text-sm font-bold text-[#143D26]">
                   Bimbingan Konseling
@@ -534,7 +534,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
               onClick={() => onNavigate('grades')}
               className="flex min-h-[110px] flex-col justify-between rounded-2xl bg-[#ECF7EF] p-4 text-left transition hover:border-[#BCE4C9] hover:bg-[#E5F5E9] focus:outline-none"
             >
-              <ClipboardCheck size={22} className="text-[#15884B]" />
+              <ClipboardCheck size={22} className="text-[#078A28]" />
               <div>
                 <strong className="block text-sm font-bold text-[#143D26]">
                   Rekap Nilai
@@ -550,7 +550,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
               onClick={() => onNavigate('master')}
               className="flex min-h-[110px] flex-col justify-between rounded-2xl bg-[#ECF7EF] p-4 text-left transition hover:border-[#BCE4C9] hover:bg-[#E5F5E9] focus:outline-none"
             >
-              <Users size={22} className="text-[#15884B]" />
+              <Users size={22} className="text-[#078A28]" />
               <div>
                 <strong className="block text-sm font-bold text-[#143D26]">
                   Data Master
@@ -566,7 +566,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
               onClick={() => onNavigate('reports')}
               className="flex min-h-[110px] flex-col justify-between rounded-2xl bg-[#ECF7EF] p-4 text-left transition hover:border-[#BCE4C9] hover:bg-[#E5F5E9] focus:outline-none"
             >
-              <FileText size={22} className="text-[#15884B]" />
+              <FileText size={22} className="text-[#078A28]" />
               <div>
                 <strong className="block text-sm font-bold text-[#143D26]">
                   Laporan
@@ -582,7 +582,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
               onClick={() => onNavigate('settings')}
               className="flex min-h-[110px] flex-col justify-between rounded-2xl bg-[#ECF7EF] p-4 text-left transition hover:border-[#BCE4C9] hover:bg-[#E5F5E9] focus:outline-none"
             >
-              <Settings size={22} className="text-[#15884B]" />
+              <Settings size={22} className="text-[#078A28]" />
               <div>
                 <strong className="block text-sm font-bold text-[#143D26]">
                   Pengaturan

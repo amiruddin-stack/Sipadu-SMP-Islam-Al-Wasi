@@ -136,9 +136,21 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
       </div>
 
       {mobileMenuOpen && createPortal(
-        <div className="fixed inset-0 z-[2147483647] md:hidden">
-          <button type="button" aria-label="Tutup menu" onClick={() => setMobileMenuOpen(false)} className="absolute inset-0 bg-slate-950/45" />
-          <aside className="absolute left-0 top-0 z-[2147483647] flex h-[100dvh] w-[min(82vw,320px)] flex-col overflow-y-auto bg-white p-5 shadow-2xl">
+        <div
+          className="md:hidden"
+          style={{ position: 'fixed', inset: 0, zIndex: 2147483647, isolation: 'isolate' }}
+        >
+          <button
+            type="button"
+            aria-label="Tutup menu"
+            onClick={() => setMobileMenuOpen(false)}
+            className="bg-slate-950/45"
+            style={{ position: 'fixed', inset: 0, zIndex: 2147483646, width: '100%', height: '100%', border: 0 }}
+          />
+          <aside
+            className="flex flex-col overflow-y-auto bg-white p-5 shadow-2xl"
+            style={{ position: 'fixed', left: 0, top: 0, zIndex: 2147483647, height: '100dvh', width: 'min(82vw, 320px)', maxWidth: 320, overscrollBehavior: 'contain' }}
+          >
             <div className="mb-6 flex items-center justify-between border-b border-emerald-100 pb-4">
               <div className="flex items-center gap-3">
                 <img src={`${import.meta.env.BASE_URL}logo-alwasi.png`} alt="Logo SMP Islam Al-Wasi" className="h-10 w-10 object-contain" />

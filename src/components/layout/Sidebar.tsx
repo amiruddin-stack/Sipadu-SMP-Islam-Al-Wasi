@@ -12,6 +12,8 @@ export type NavTab =
   | 'master'
   | 'reports'
   | 'settings'
+  | 'classes'
+  | 'subjects'
   | 'ils';
 
 interface SidebarProps {

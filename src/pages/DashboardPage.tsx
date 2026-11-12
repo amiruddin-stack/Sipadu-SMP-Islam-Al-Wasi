@@ -127,7 +127,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
         <div className="relative z-10 mx-auto max-w-[1240px] px-4 pt-2 pb-3 md:px-8 md:pt-3 md:pb-4">
           <div className="flex w-full flex-col items-center justify-between gap-5 overflow-hidden rounded-[24px] border border-[#D5EADB] bg-gradient-to-br from-white via-[#F4FBF7] to-[#E7F6EF] px-6 py-6 shadow-sm md:flex-row md:gap-8 md:px-9 md:py-7">
             <div className="min-w-0 w-full max-w-3xl flex-1">
-              <h1 className="text-4xl font-black tracking-tight text-[#078A28] sm:text-5xl md:text-6xl">
+              <h1 className="text-4xl font-black tracking-tight text-[#0B8F4D] sm:text-5xl md:text-6xl">
                 SIMPATIK
               </h1>
 
@@ -140,7 +140,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
                 </p>
               </div>
 
-              <p className="mt-3 text-base font-bold text-[#078A28] sm:text-lg">
+              <p className="mt-3 text-base font-bold text-[#0B8F4D] sm:text-lg">
                 Terpadu - Interaktif - Kolaboratif
               </p>
 
@@ -179,7 +179,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
           className="flex w-full items-center justify-between gap-3 rounded-[22px] border border-[#D5EADB] bg-[#EAF6ED] px-4 py-3 shadow-2xs"
         >
           <div className="flex min-w-0 flex-1 items-center gap-3">
-            <Search size={20} className="shrink-0 text-[#108A38]" />
+            <Search size={20} className="shrink-0 text-[#16B364]" />
             <input
               value={globalSearch}
               onChange={(e) => setGlobalSearch(e.target.value)}
@@ -191,7 +191,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
           </div>
           <button
             type="submit"
-            className="shrink-0 rounded-xl bg-[#108A38] px-5 py-2 text-xs font-bold text-white shadow-2xs transition hover:bg-[#0E7730] focus:outline-none"
+            className="shrink-0 rounded-xl bg-[#16B364] px-5 py-2 text-xs font-bold text-white shadow-2xs transition hover:bg-[#076B3A] focus:outline-none"
           >
             Cari
           </button>
@@ -204,11 +204,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
             {/* Card Header Band */}
             <div className="flex items-center justify-between gap-3 bg-[#EAF6ED] px-5 py-3.5">
               <div className="flex items-center gap-3">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#0CA678] text-white">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#16B364] text-white">
                   <Users size={22} fill="currentColor" />
                 </span>
                 <div>
-                  <h2 className="text-base font-bold text-[#144728] md:text-lg">
+                  <h2 className="text-base font-bold text-[#076B3A] md:text-lg">
                     Kehadiran Siswa
                   </h2>
                   <p className="text-[11px] text-slate-500">10 November 2026</p>
@@ -243,7 +243,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
               <div className="mt-8 w-full max-w-[280px] space-y-2">
                 <div className="flex items-center justify-between border-b border-slate-100 py-1.5 text-sm">
                   <div className="flex items-center gap-2.5">
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#0CA678]" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#16B364]" />
                     <span className="font-medium text-slate-700">Hadir</span>
                   </div>
                   <span className="font-bold text-slate-800">{totals.Hadir}</span>
@@ -293,8 +293,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
             {/* Card Header Band */}
             <div className="flex items-center justify-between gap-3 bg-[#EAF6ED] px-5 py-3.5">
               <div className="flex items-center gap-3">
-                <BookOpen size={26} className="text-[#078A28]" />
-                <h2 className="text-base font-bold text-[#144728] md:text-lg">
+                <BookOpen size={26} className="text-[#0B8F4D]" />
+                <h2 className="text-base font-bold text-[#076B3A] md:text-lg">
                   Jurnal Pembelajaran
                 </h2>
               </div>
@@ -311,7 +311,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
               {/* Top Split Stats */}
               <div className="grid grid-cols-[1.4fr_1fr] gap-4">
                 {/* Left Stat Box: Dark Green */}
-                <div className="flex min-h-[110px] items-center justify-between rounded-2xl bg-[#168824] px-6 text-white shadow-xs">
+                <div className="flex min-h-[110px] items-center justify-between rounded-2xl bg-[#16B364] px-6 text-white shadow-xs">
                   <BookOpen size={42} className="text-white shrink-0" />
                   <div className="h-12 w-[1px] bg-white/40" />
                   <div className="text-right">
@@ -325,8 +325,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
                 </div>
 
                 {/* Right Stat Box: Mint Green */}
-                <div className="flex min-h-[110px] flex-col items-center justify-center rounded-2xl bg-[#E5F6EE] px-4 text-center text-[#144728]">
-                  <CalendarCheck size={28} className="text-[#168824]" />
+                <div className="flex min-h-[110px] flex-col items-center justify-center rounded-2xl bg-[#E5F6EE] px-4 text-center text-[#076B3A]">
+                  <CalendarCheck size={28} className="text-[#16B364]" />
                   <span className="mt-1 text-3xl font-black text-[#17334B] leading-none">
                     {displayJournalYear}
                   </span>
@@ -341,31 +341,31 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
                 <div className="flex h-36 items-end justify-between border-b border-slate-200 px-4">
                   {/* Month 1: Jun */}
                   <div className="flex flex-col items-center gap-1.5 pb-2">
-                    <div className="h-1.5 w-8 rounded-full bg-[#0CA78B]" />
+                    <div className="h-1.5 w-8 rounded-full bg-[#16B364]" />
                     <span className="text-[11px] font-semibold text-slate-600">Jun</span>
                   </div>
 
                   {/* Month 2: Jul */}
                   <div className="flex flex-col items-center gap-1.5 pb-2">
-                    <div className="h-1.5 w-8 rounded-full bg-[#0CA78B]" />
+                    <div className="h-1.5 w-8 rounded-full bg-[#16B364]" />
                     <span className="text-[11px] font-semibold text-slate-600">Jul</span>
                   </div>
 
                   {/* Month 3: Agu */}
                   <div className="flex flex-col items-center gap-1.5 pb-2">
-                    <div className="h-1.5 w-8 rounded-full bg-[#0CA78B]" />
+                    <div className="h-1.5 w-8 rounded-full bg-[#16B364]" />
                     <span className="text-[11px] font-semibold text-slate-600">Agu</span>
                   </div>
 
                   {/* Month 4: Sep */}
                   <div className="flex flex-col items-center gap-1.5 pb-2">
-                    <div className="h-1.5 w-8 rounded-full bg-[#0CA78B]" />
+                    <div className="h-1.5 w-8 rounded-full bg-[#16B364]" />
                     <span className="text-[11px] font-semibold text-slate-600">Sep</span>
                   </div>
 
                   {/* Month 5: Okt */}
                   <div className="flex flex-col items-center gap-1.5 pb-2">
-                    <div className="h-1.5 w-8 rounded-full bg-[#0CA78B]" />
+                    <div className="h-1.5 w-8 rounded-full bg-[#16B364]" />
                     <span className="text-[11px] font-semibold text-slate-600">Okt</span>
                   </div>
 
@@ -394,7 +394,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
               onClick={() => onNavigate('attendance')}
               className="group flex w-24 shrink-0 flex-col items-center text-center transition hover:opacity-90"
             >
-              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0CA678] text-white shadow-xs transition group-hover:scale-105">
+              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#16B364] text-white shadow-xs transition group-hover:scale-105">
                 <Users size={24} fill="currentColor" />
               </span>
               <span className="mt-2 text-xs font-bold leading-tight text-[#173B56]">
@@ -502,7 +502,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
               onClick={() => onNavigate('behavior')}
               className="flex min-h-[110px] flex-col justify-between rounded-2xl bg-[#ECF7EF] p-4 text-left transition hover:border-[#BCE4C9] hover:bg-[#E5F5E9] focus:outline-none"
             >
-              <Users size={22} className="text-[#078A28]" />
+              <Users size={22} className="text-[#0B8F4D]" />
               <div>
                 <strong className="block text-sm font-bold text-[#143D26]">
                   Perilaku Siswa
@@ -518,7 +518,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
               onClick={() => onNavigate('counseling')}
               className="flex min-h-[110px] flex-col justify-between rounded-2xl bg-[#ECF7EF] p-4 text-left transition hover:border-[#BCE4C9] hover:bg-[#E5F5E9] focus:outline-none"
             >
-              <BookOpen size={22} className="text-[#078A28]" />
+              <BookOpen size={22} className="text-[#0B8F4D]" />
               <div>
                 <strong className="block text-sm font-bold text-[#143D26]">
                   Bimbingan Konseling
@@ -534,7 +534,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
               onClick={() => onNavigate('grades')}
               className="flex min-h-[110px] flex-col justify-between rounded-2xl bg-[#ECF7EF] p-4 text-left transition hover:border-[#BCE4C9] hover:bg-[#E5F5E9] focus:outline-none"
             >
-              <ClipboardCheck size={22} className="text-[#078A28]" />
+              <ClipboardCheck size={22} className="text-[#0B8F4D]" />
               <div>
                 <strong className="block text-sm font-bold text-[#143D26]">
                   Rekap Nilai
@@ -550,7 +550,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
               onClick={() => onNavigate('master')}
               className="flex min-h-[110px] flex-col justify-between rounded-2xl bg-[#ECF7EF] p-4 text-left transition hover:border-[#BCE4C9] hover:bg-[#E5F5E9] focus:outline-none"
             >
-              <Users size={22} className="text-[#078A28]" />
+              <Users size={22} className="text-[#0B8F4D]" />
               <div>
                 <strong className="block text-sm font-bold text-[#143D26]">
                   Data Master
@@ -566,7 +566,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
               onClick={() => onNavigate('reports')}
               className="flex min-h-[110px] flex-col justify-between rounded-2xl bg-[#ECF7EF] p-4 text-left transition hover:border-[#BCE4C9] hover:bg-[#E5F5E9] focus:outline-none"
             >
-              <FileText size={22} className="text-[#078A28]" />
+              <FileText size={22} className="text-[#0B8F4D]" />
               <div>
                 <strong className="block text-sm font-bold text-[#143D26]">
                   Laporan
@@ -582,7 +582,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
               onClick={() => onNavigate('settings')}
               className="flex min-h-[110px] flex-col justify-between rounded-2xl bg-[#ECF7EF] p-4 text-left transition hover:border-[#BCE4C9] hover:bg-[#E5F5E9] focus:outline-none"
             >
-              <Settings size={22} className="text-[#078A28]" />
+              <Settings size={22} className="text-[#0B8F4D]" />
               <div>
                 <strong className="block text-sm font-bold text-[#143D26]">
                   Pengaturan

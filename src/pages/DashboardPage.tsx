@@ -51,16 +51,27 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
   return (
     <div className="min-h-full bg-[#f5f9f8] text-slate-800">
-      <section className="relative overflow-hidden bg-[#1599a8] px-5 py-7 text-white md:px-9 md:py-8">
-        <div className="pointer-events-none absolute -right-12 -top-20 h-64 w-64 rounded-full bg-white/5" />
-        <div className="relative mx-auto flex max-w-[1500px] items-center justify-between gap-5">
+      <section className="simpatik-hero relative overflow-hidden px-5 py-7 text-white md:px-9 md:py-8">
+        <svg className="simpatik-hero-shapes pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 1200 360" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs><pattern id="simpatik-dot-grid" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="white" opacity=".24" /></pattern></defs>
+          <rect x="0" y="0" width="250" height="180" fill="url(#simpatik-dot-grid)" opacity=".55" />
+          <circle className="geo geo-one" cx="980" cy="60" r="92" fill="white" opacity=".09" />
+          <circle className="geo geo-two" cx="840" cy="270" r="58" fill="none" stroke="#d9ffc8" strokeWidth="2" opacity=".2" />
+          <path className="geo geo-three" d="M520 35 L590 155 L450 155 Z" fill="#d9ffc8" opacity=".12" />
+          <path className="geo geo-four" d="M1080 180 L1140 240 L1080 300 L1020 240 Z" fill="white" opacity=".1" />
+          <path className="geo geo-five" d="M720 55 L770 83 L770 139 L720 167 L670 139 L670 83 Z" fill="none" stroke="white" strokeWidth="2" opacity=".2" />
+          <circle className="geo geo-six" cx="390" cy="280" r="38" fill="#d9ffc8" opacity=".1" />
+          <path className="geo geo-seven" d="M250 205 L310 240 L250 275 L190 240 Z" fill="none" stroke="#e8ffdc" strokeWidth="2" opacity=".2" />
+        </svg>
+        <div className="simpatik-hero-shine pointer-events-none absolute inset-y-0 -left-1/2 w-1/3" />
+        <div className="relative z-10 mx-auto flex max-w-[1500px] items-center justify-between gap-5">
           <div className="min-w-0">
             <p className="text-sm text-white/85">Selamat datang, <strong>{currentUser?.displayName || firebaseUser?.displayName || 'Pengguna'}</strong></p>
-            <h1 className="mt-1 text-5xl font-black leading-none tracking-tight sm:text-6xl lg:text-7xl">SIMPATIK</h1>
+            <h1 className="simpatik-hero-title mt-1 text-5xl font-black leading-none tracking-tight sm:text-6xl lg:text-7xl">SIMPATIK</h1>
             <p className="mt-3 max-w-xl text-sm font-semibold leading-relaxed md:text-base">Sistem Informasi Manajemen Pendidikan dan Akademik<br className="hidden sm:block" /> Terpadu, Interaktif dan Kolaboratif</p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <button onClick={() => onNavigate('attendance')} className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-xs font-bold text-[#087d79] shadow-sm transition hover:bg-teal-50"><CalendarCheck size={16} /> Lakukan Presensi</button>
-              <button onClick={() => onNavigate('journal')} className="inline-flex items-center gap-2 rounded-full border border-white/70 px-5 py-2.5 text-xs font-bold text-white transition hover:bg-white/10"><PencilLine size={16} /> Tulis Jurnal</button>
+              <button onClick={() => onNavigate('attendance')} className="hero-primary inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-xs font-bold text-[#176b16] shadow-sm transition hover:bg-green-50"><CalendarCheck size={16} /> Lakukan Presensi</button>
+              <button onClick={() => onNavigate('journal')} className="hero-secondary inline-flex items-center gap-2 rounded-full border border-white/70 px-5 py-2.5 text-xs font-bold text-white transition hover:bg-white/10"><PencilLine size={16} /> Tulis Jurnal</button>
             </div>
           </div>
           <div className="hidden shrink-0 flex-col items-center justify-center sm:flex">

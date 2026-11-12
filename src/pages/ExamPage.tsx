@@ -160,6 +160,49 @@ export const ExamPage: React.FC = () => {
     };
   }, [isVerifiedExamAdmin]);
 
+  useEffect(() => {
+    if (!isVerifiedExamAdmin || !attempts.length || !exams.length) return;
+    let cancelled = false;
+    const gradeCompletedAttempts = async () => {
+      const pending = attempts.filter(attempt =>
+        attempt.status === 'Selesai' &&
+        (typeof attempt.score !== 'number' || typeof attempt.total !== 'number')
+      );
+      for (const attempt of pending) {
+        if (cancelled) return;
+        const exam = exams.find(item => item.id === attempt.examId);
+        if (!exam || !exam.questionIds.length) continue;
+        try {
+          const keySnapshots = await Promise.all(
+            exam.questionIds.map(questionId => getDoc(doc(db, 'examAnswerKeys', questionId)))
+          );
+          if (keySnapshots.some(snapshot => !snapshot.exists())) continue;
+          let score = 0;
+          let total = 0;
+          exam.questionIds.forEach((questionId, index) => {
+            const key = keySnapshots[index]?.data();
+            if (!key) return;
+            const points = Number(key.points) || 1;
+            total += points;
+            if (attempt.answers?.[questionId] === key.answer) score += points;
+          });
+          if (!cancelled && total > 0) {
+            await updateDoc(doc(db, 'examAttempts', attempt.id), {
+              score,
+              total,
+              percent: Math.round((score / total) * 100),
+              gradedAt: new Date().toISOString()
+            });
+          }
+        } catch (error) {
+          console.error('Penilaian otomatis ujian gagal:', attempt.id, error);
+        }
+      }
+    };
+    void gradeCompletedAttempts();
+    return () => { cancelled = true; };
+  }, [isVerifiedExamAdmin, attempts, exams]);
+
   const selectedClassNames = useMemo(() => classes.filter(c => classLevel(c) === level), [classes, level]);
   const classQuestions = questions.filter(q => classLevel(q.className) === level && (!subject || q.subject === subject));
   const currentExamQuestions = activeExam ? activeExam.questionIds.map(id => questions.find(q => q.id === id)).filter(Boolean) as Question[] : [];

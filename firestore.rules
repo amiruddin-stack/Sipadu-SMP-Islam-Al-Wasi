@@ -2,89 +2,82 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Default deny all
     match /{document=**} {
       allow read, write: if false;
     }
 
-    // Helper functions
     function isSignedIn() {
       return request.auth != null;
     }
 
-    function isValidId(id) {
-      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
-    }
-
-    function incoming() {
-      return request.resource.data;
-    }
-
-    function existing() {
-      return resource.data;
+    function isSchoolGoogleAccount() {
+      return isSignedIn() &&
+        request.auth.token.email_verified == true &&
+        request.auth.token.firebase.sign_in_provider == 'google.com' &&
+        request.auth.token.email.matches('^[^@]+@smpialwasi-maros\\.sch\\.id$');
     }
 
     function isAdmin() {
-      return isSignedIn() && (
-        request.auth.token.email == 'amiruddin@smpialwasi-maros.sch.id' ||
-        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
-      );
+      return isSchoolGoogleAccount() &&
+        request.auth.token.email == 'amiruddin@smpialwasi-maros.sch.id';
     }
 
     function canManageExamQuestions() {
-      return isAdmin() || (isSignedIn() &&
-        request.auth.token.email.matches('.*@smpialwasi-maros\\.sch\\.id') &&
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['guru', 'wali_kelas']);
+      return isAdmin() ||
+        (isSchoolGoogleAccount() &&
+          exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'guru');
     }
 
-    // Users collection
+    function validOwnProfile(userId) {
+      return isSchoolGoogleAccount() &&
+        request.auth.uid == userId &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.email == request.auth.token.email &&
+        request.resource.data.role == (isAdmin() ? 'super_admin' : 'guru');
+    }
+
     match /users/{userId} {
-      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
-      allow create, update: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow read: if isSchoolGoogleAccount() && (request.auth.uid == userId || isAdmin());
+      allow create, update: if validOwnProfile(userId) || isAdmin();
       allow delete: if isAdmin();
     }
 
-    // Students master data
     match /students/{studentId} {
-      allow read: if isSignedIn();
-      allow write: if isSignedIn();
+      allow read, write: if isSchoolGoogleAccount();
     }
-
-    // Attendance records
     match /attendance/{attendanceId} {
-      allow read: if isSignedIn();
-      allow write: if isSignedIn();
+      allow read, write: if isSchoolGoogleAccount();
     }
-
-    // Teacher Journals
     match /journals/{journalId} {
-      allow read: if isSignedIn();
-      allow write: if isSignedIn();
+      allow read, write: if isSchoolGoogleAccount();
     }
-
-    // Student Behavior Records
     match /behaviors/{behaviorId} {
-      allow read: if isSignedIn();
-      allow write: if isSignedIn();
+      allow read, write: if isSchoolGoogleAccount();
     }
-
-    // Confidential BK Counseling Records - Restricted to BK Counselors and Admin
     match /counseling/{counselingId} {
-      allow read: if isSignedIn();
-      allow write: if isSignedIn();
+      allow read, write: if isSchoolGoogleAccount();
     }
-
-    // Academic Assessments and Grades
     match /assessments/{assessmentId} {
-      allow read: if isSignedIn();
-      allow write: if isSignedIn();
+      allow read, write: if isSchoolGoogleAccount();
     }
-
-    // Settings
     match /settings/{settingId} {
-      allow read: if isSignedIn();
-      allow write: if isSignedIn();
+      allow read, write: if isSchoolGoogleAccount();
+    }
+    match /teachers/{teacherId} {
+      allow read, write: if isSchoolGoogleAccount();
+    }
+    match /master_classes/{classId} {
+      allow read, write: if isSchoolGoogleAccount();
+    }
+    match /master_subjects/{subjectId} {
+      allow read, write: if isSchoolGoogleAccount();
+    }
+    match /extracurriculars/{itemId} {
+      allow read, write: if isSchoolGoogleAccount();
+    }
+    match /attendance_history/{historyId} {
+      allow read, write: if isSchoolGoogleAccount();
     }
 
     match /examQuestions/{questionId} {
@@ -116,8 +109,17 @@ service cloud.firestore {
     }
     match /examAttempts/{attemptId} {
       allow read: if isAdmin();
-      allow create: if isSignedIn() && incoming().ownerUid == request.auth.uid && !('score' in incoming()) && !('total' in incoming()) && !('percent' in incoming());
-      allow update: if isAdmin() || (isSignedIn() && existing().ownerUid == request.auth.uid && incoming().ownerUid == request.auth.uid && existing().status == 'Mengerjakan' && !('score' in incoming()) && !('total' in incoming()) && !('percent' in incoming()));
+      allow create: if isSignedIn() &&
+        incoming().ownerUid == request.auth.uid &&
+        !('score' in incoming()) && !('total' in incoming()) && !('percent' in incoming());
+      allow update: if isAdmin() ||
+        (isSignedIn() &&
+          resource.data.ownerUid == request.auth.uid &&
+          request.resource.data.ownerUid == request.auth.uid &&
+          resource.data.status == 'Mengerjakan' &&
+          !('score' in request.resource.data) &&
+          !('total' in request.resource.data) &&
+          !('percent' in request.resource.data));
       allow delete: if isAdmin();
     }
   }

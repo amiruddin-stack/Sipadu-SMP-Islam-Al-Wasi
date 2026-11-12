@@ -168,7 +168,7 @@ export const ExamPage: React.FC = () => {
     const groups = new Map<string, { key: string; title: string; questions: Question[] }>();
     classQuestions.forEach(q => {
       const packageTitle = q.title || 'Paket Soal';
-      const key = [q.subject, classLevel(q.className), packageTitle].join('::');
+      const key = [q.subject, classLevel(q.className), q.sourceFormId || packageTitle].join('::');
       const group = groups.get(key) || { key, title: packageTitle, questions: [] };
       group.questions.push(q);
       groups.set(key, group);

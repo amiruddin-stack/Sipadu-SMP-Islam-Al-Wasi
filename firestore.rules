@@ -95,7 +95,10 @@ service cloud.firestore {
       allow read, write: if isSignedIn();
     }
     match /examAttempts/{attemptId} {
-      allow read, write: if isSignedIn();
+      allow read: if isAdmin();
+      allow create: if isSignedIn() && incoming().ownerUid == request.auth.uid && !('score' in incoming()) && !('total' in incoming()) && !('percent' in incoming());
+      allow update: if isSignedIn() && existing().ownerUid == request.auth.uid && incoming().ownerUid == request.auth.uid && !('score' in incoming()) && !('total' in incoming()) && !('percent' in incoming());
+      allow delete: if isAdmin();
     }
   }
 }

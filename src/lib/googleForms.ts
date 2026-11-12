@@ -44,7 +44,16 @@ function loadGoogleIdentity(): Promise<void> {
   return googleScriptPromise!;
 }
 
-export async function authorizeGoogleForms(clientId: string): Promise<void> {
+export function setGoogleFormsAccessToken(accessToken?: string): void {
+  activeAccessToken = accessToken || '';
+}
+
+export async function ensureGoogleFormsAccess(clientId: string): Promise<void> {
+  if (activeAccessToken) return;
+  await authorizeGoogleForms(clientId);
+}
+
+async function authorizeGoogleForms(clientId: string): Promise<void> {
   if (!clientId || clientId === 'ISI_CLIENT_ID_DI_SINI' || !clientId.endsWith('.apps.googleusercontent.com')) throw new Error('OAuth Client ID belum diisi dengan benar. Masukkan Client ID Web dari Google Cloud (akhiran .apps.googleusercontent.com).');
   await loadGoogleIdentity();
   const oauth2 = window.google?.accounts?.oauth2;

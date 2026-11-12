@@ -108,6 +108,7 @@ export const ExamPage: React.FC = () => {
   const availableExams = exams.filter(e => e.status === 'Aktif' && classLevel(e.className) === classLevel(studentClass || level));
 
   const addQuestion = async () => {
+    if (!isVerifiedExamAdmin) { setMessage('Hanya admin sekolah yang dapat menambahkan soal dan kunci jawaban.'); return; }
     if (!questionText.trim() || options.some(o => !o.trim()) || !subject) { setMessage('Lengkapi mapel, pertanyaan, dan semua pilihan jawaban.'); return; }
     setSaving(true);
     try {
@@ -121,6 +122,7 @@ export const ExamPage: React.FC = () => {
 
   const importFile = async (file?: File) => {
     if (!file) return;
+    if (!isVerifiedExamAdmin) { setMessage('Hanya admin sekolah yang dapat mengimpor soal dan kunci jawaban.'); return; }
     setQuestionFileName(file.name);
     try {
       const raw = await file.text();
@@ -145,6 +147,7 @@ export const ExamPage: React.FC = () => {
   };
 
   const createExam = async () => {
+    if (!isVerifiedExamAdmin) { setMessage('Hanya admin sekolah yang dapat menerbitkan ujian.'); return; }
     if (!title.trim() || !subject || !selectedQuestions.length) { setMessage('Isi nama ujian, mapel, dan pilih minimal satu soal.'); return; }
     setSaving(true);
     try {

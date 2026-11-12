@@ -23,7 +23,7 @@ let activeAccessToken = '';
 function loadGoogleIdentity(): Promise<void> {
   if (window.google?.accounts?.oauth2) return Promise.resolve();
   if (!googleScriptPromise) {
-    googleScriptPromise = new Promise((resolve, reject) => {
+    googleScriptPromise = new Promise<void>((resolve, reject) => {
       const existing = document.querySelector<HTMLScriptElement>('script[data-google-identity]');
       const script = existing || document.createElement('script');
       const fail = () => reject(new Error('Layanan login Google gagal dimuat. Periksa koneksi internet.'));
@@ -41,7 +41,7 @@ function loadGoogleIdentity(): Promise<void> {
       throw error;
     });
   }
-  return googleScriptPromise;
+  return googleScriptPromise!;
 }
 
 export async function authorizeGoogleForms(clientId: string): Promise<void> {

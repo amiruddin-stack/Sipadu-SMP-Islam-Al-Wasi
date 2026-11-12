@@ -33,7 +33,7 @@ function AppContent() {
 
   const renderCurrentPage = () => {
     switch (activeTab) {
-      case 'dashboard': return <DashboardPage onNavigate={(tab) => setActiveTab(tab)} />;
+      case 'dashboard': return <DashboardPage activeTab={activeTab} onNavigate={(tab) => setActiveTab(tab)} />;
       case 'attendance': return <AttendancePage />;
       case 'journal': return <JournalPage />;
       case 'behavior': return <BehaviorPage />;
@@ -47,13 +47,13 @@ function AppContent() {
       case 'settings': return <SettingsPage />;
       case 'exams': return <ExamPage />;
       case 'ils': return <ComingSoonPage />;
-      default: return <DashboardPage onNavigate={(tab) => setActiveTab(tab)} />;
+      default: return <DashboardPage activeTab={activeTab} onNavigate={(tab) => setActiveTab(tab)} />;
     }
   };
 
   return (
     <div className="flex h-screen w-full flex-col overflow-hidden bg-[#F4F9F7] font-sans text-slate-800">
-      <Header activeTab={activeTab} onNavigate={setActiveTab} />
+      {activeTab !== 'dashboard' && <Header activeTab={activeTab} onNavigate={setActiveTab} />}
       <main className="min-h-0 flex-1 overflow-y-auto p-0">
         <div className={activeTab === 'dashboard' ? 'w-full' : 'mx-auto w-full max-w-7xl px-4 py-5 md:px-6 md:py-6'}>
           {renderCurrentPage()}

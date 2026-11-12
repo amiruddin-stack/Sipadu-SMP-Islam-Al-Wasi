@@ -41,12 +41,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
   const quickItems: { label: string; description: string; tab: NavTab; icon: React.ReactNode; color: string }[] = [
     { label: 'Presensi Siswa', description: 'Catat kehadiran', tab: 'attendance', icon: <Users size={25} />, color: 'bg-emerald-500' },
-    { label: 'Jurnal Pembelajaran', description: 'Catat kegiatan KBM', tab: 'journal', icon: <BookOpen size={25} />, color: 'bg-blue-600' },
-    { label: 'Input Nilai Kelas', description: 'Kelola penilaian', tab: 'assessment', icon: <ClipboardList size={25} />, color: 'bg-purple-600' },
-    { label: 'Ujian', description: 'Bank soal dan ujian siswa', tab: 'exams', icon: <ClipboardCheck size={25} />, color: 'bg-teal-600' },
-    { label: 'Ujian', description: 'Bank soal dan ujian siswa', tab: 'exams', icon: <ClipboardCheck size={25} />, color: 'bg-teal-600' },
-    { label: 'Catatan Wali Kelas', description: 'Catatan siswa', tab: 'behavior', icon: <FileText size={25} />, color: 'bg-cyan-700' },
-    { label: 'Pengaturan', description: 'Atur aplikasi', tab: 'settings', icon: <Settings size={25} />, color: 'bg-orange-500' },
+    { label: 'Jurnal Pembelajaran', description: 'Catat kegiatan KBM', tab: 'journal', icon: <BookOpen size={25} />, color: 'bg-emerald-600' },
+    { label: 'Input Nilai Kelas', description: 'Kelola penilaian', tab: 'assessment', icon: <ClipboardList size={25} />, color: 'bg-green-700' },
+    { label: 'Ujian', description: 'Bank soal dan ujian siswa', tab: 'exams', icon: <ClipboardCheck size={25} />, color: 'bg-green-600' },
+    { label: 'Ujian', description: 'Bank soal dan ujian siswa', tab: 'exams', icon: <ClipboardCheck size={25} />, color: 'bg-green-600' },
+    { label: 'Catatan Wali Kelas', description: 'Catatan siswa', tab: 'behavior', icon: <FileText size={25} />, color: 'bg-lime-700' },
+    { label: 'Pengaturan', description: 'Atur aplikasi', tab: 'settings', icon: <Settings size={25} />, color: 'bg-emerald-700' },
   ];
 
   return (
@@ -83,9 +83,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
       <main className="mx-auto max-w-[1500px] space-y-5 px-3 py-5 md:px-5 md:py-6">
         <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <article className="min-w-0 overflow-hidden rounded-[20px] border border-[#d8e9e9] bg-white shadow-[0_3px_14px_rgba(20,90,100,.05)]">
-            <div className="flex items-center justify-between gap-3 bg-[#f8fcfc] px-4 py-3 md:px-5">
-              <div className="flex items-center gap-3"><span className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500 text-white"><Users size={25} fill="currentColor" /></span><div><h2 className="text-lg font-extrabold text-[#14536b] md:text-xl">Kehadiran Siswa</h2><p className="text-[11px] text-slate-500">{attendanceDateLabel}</p></div></div>
+          <article className="min-w-0 overflow-hidden rounded-[20px] border border-[var(--simpatik-green-line)] bg-white shadow-[0_3px_14px_rgba(20,90,100,.05)]">
+            <div className="flex items-center justify-between gap-3 bg-[var(--simpatik-green-soft)] px-4 py-3 md:px-5">
+              <div className="flex items-center gap-3"><span className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500 text-white"><Users size={25} fill="currentColor" /></span><div><h2 className="text-lg font-extrabold text-[var(--simpatik-green-deep)] md:text-xl">Kehadiran Siswa</h2><p className="text-[11px] text-slate-500">{attendanceDateLabel}</p></div></div>
               <button onClick={() => onNavigate('attendance')} className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm">Semua kelas⌄</button>
             </div>
             <div className="flex flex-col items-center gap-5 p-4 xl:flex-row xl:justify-around md:p-6">
@@ -104,14 +104,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             </div>
           </article>
 
-          <article className="overflow-hidden rounded-[20px] border border-[#d8e9e9] bg-white shadow-[0_3px_14px_rgba(20,90,100,.05)]">
-            <div className="flex items-center justify-between gap-3 bg-[#f8fcfc] px-4 py-3 md:px-5">
-              <div className="flex items-center gap-3"><BookOpen size={34} className="text-[#087f78]" /><h2 className="text-lg font-extrabold text-[#14536b] md:text-xl">Jurnal Pembelajaran</h2></div>
+          <article className="overflow-hidden rounded-[20px] border border-[var(--simpatik-green-line)] bg-white shadow-[0_3px_14px_rgba(20,90,100,.05)]">
+            <div className="flex items-center justify-between gap-3 bg-[var(--simpatik-green-soft)] px-4 py-3 md:px-5">
+              <div className="flex items-center gap-3"><BookOpen size={34} className="text-[var(--simpatik-green-primary)]" /><h2 className="text-lg font-extrabold text-[var(--simpatik-green-deep)] md:text-xl">Jurnal Pembelajaran</h2></div>
               <button onClick={() => onNavigate('journal')} className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm">Semua kelas⌄</button>
             </div>
             <div className="grid grid-cols-[1.35fr_1fr] gap-3 p-3 md:p-4">
-              <div className="flex min-h-[104px] items-center justify-center gap-4 rounded-2xl bg-gradient-to-r from-[#0d9ba8] to-[#087c88] px-3 text-white"><BookOpen size={39} /><div className="border-l border-white/70 pl-4 text-center"><strong className="block text-4xl font-black md:text-5xl">{currentMonthCount}</strong><span className="text-xs">Jurnal Bulan Ini</span></div></div>
-              <div className="flex min-h-[104px] flex-col items-center justify-center rounded-2xl bg-[#e0f7f3] px-2 text-center text-[#116a72]"><CalendarCheck size={27} /><strong className="mt-1 text-3xl font-black">{journals.length}</strong><span className="text-[11px]">Sepanjang Tahun</span></div>
+              <div className="flex min-h-[104px] items-center justify-center gap-4 rounded-2xl bg-gradient-to-r from-[var(--simpatik-green-deep)] to-[var(--simpatik-green-bright)] px-3 text-white"><BookOpen size={39} /><div className="border-l border-white/70 pl-4 text-center"><strong className="block text-4xl font-black md:text-5xl">{currentMonthCount}</strong><span className="text-xs">Jurnal Bulan Ini</span></div></div>
+              <div className="flex min-h-[104px] flex-col items-center justify-center rounded-2xl bg-[var(--simpatik-green-soft)] px-2 text-center text-[var(--simpatik-green-deep)]"><CalendarCheck size={27} /><strong className="mt-1 text-3xl font-black">{journals.length}</strong><span className="text-[11px]">Sepanjang Tahun</span></div>
             </div>
             <div className="px-4 pb-4 pt-1 md:px-5">
               <div className="flex h-32 items-end justify-around gap-3 border-b border-l border-slate-200 px-3">
@@ -122,7 +122,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         </section>
 
         <section className="rounded-[20px] bg-gradient-to-r from-[#e4f6f3] to-[#eef9f8] p-3 md:p-4">
-          <div className="mb-3 flex items-center gap-2"><span className="text-2xl text-[#0b9b82]">ϟ</span><h2 className="text-xl font-extrabold text-[#14536b]">Menu</h2></div>
+          <div className="mb-3 flex items-center gap-2"><span className="text-2xl text-[var(--simpatik-green-primary)]">ϟ</span><h2 className="text-xl font-extrabold text-[var(--simpatik-green-deep)]">Menu</h2></div>
           <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain pb-2 touch-pan-x">
             {quickItems.map(item => <button key={item.tab} onClick={() => onNavigate(item.tab)} className="group flex w-[92px] shrink-0 snap-start flex-col items-center justify-start gap-2 rounded-xl px-1 py-2 text-center transition hover:bg-white/80">
               <span className={`flex h-14 w-14 items-center justify-center rounded-full text-white shadow-sm transition group-hover:-translate-y-0.5 group-hover:shadow-md ${item.color}`}>{item.icon}</span>
@@ -131,10 +131,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           </div>
         </section>
 
-        <section className="rounded-[20px] border border-[#d8e9e9] bg-white p-4 shadow-[0_3px_14px_rgba(20,90,100,.05)] md:p-5">
+        <section className="rounded-[20px] border border-[var(--simpatik-green-line)] bg-white p-4 shadow-[0_3px_14px_rgba(20,90,100,.05)] md:p-5">
           <div className="mb-4 flex items-center justify-between gap-3">
-            <div><h2 className="text-xl font-extrabold text-[#14536b]">Lainnya</h2><p className="mt-1 text-xs text-slate-500">Akses seluruh fitur SIMPATIK lainnya</p></div>
-            <span className="rounded-full bg-[#e4f6f3] px-3 py-1 text-xs font-bold text-[#087f78]">Semua fitur</span>
+            <div><h2 className="text-xl font-extrabold text-[var(--simpatik-green-deep)]">Lainnya</h2><p className="mt-1 text-xs text-slate-500">Akses seluruh fitur SIMPATIK lainnya</p></div>
+            <span className="rounded-full bg-[var(--simpatik-green-soft)] px-3 py-1 text-xs font-bold text-[var(--simpatik-green-primary)]">Semua fitur</span>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {([
@@ -144,8 +144,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               { label: 'Data Master', description: 'Data sekolah', tab: 'master' as NavTab, icon: <Users size={22} /> },
               { label: 'Laporan', description: 'Rekap dan cetak', tab: 'reports' as NavTab, icon: <FileText size={22} /> },
               { label: 'Pengaturan', description: 'Konfigurasi aplikasi', tab: 'settings' as NavTab, icon: <Settings size={22} /> },
-            ]).map(item => <button key={item.tab} onClick={() => onNavigate(item.tab)} className="flex min-h-[112px] flex-col items-start justify-between rounded-2xl border border-[#e0eeee] bg-[#f8fcfc] p-3 text-left transition hover:border-[#0ca78b] hover:bg-[#effaf7]">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#dff5ef] text-[#087f78]">{item.icon}</span>
+            ]).map(item => <button key={item.tab} onClick={() => onNavigate(item.tab)} className="flex min-h-[112px] flex-col items-start justify-between rounded-2xl border border-[#e0eeee] bg-[var(--simpatik-green-soft)] p-3 text-left transition hover:border-[#0ca78b] hover:bg-[#effaf7]">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--simpatik-green-soft)] text-[var(--simpatik-green-primary)]">{item.icon}</span>
               <span><strong className="block text-xs leading-tight text-[#173b56]">{item.label}</strong><small className="mt-1 block text-[10px] text-slate-500">{item.description}</small></span>
             </button>)}
           </div>

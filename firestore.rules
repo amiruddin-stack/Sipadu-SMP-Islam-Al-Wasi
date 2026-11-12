@@ -81,7 +81,13 @@ service cloud.firestore {
     }
 
     match /examQuestions/{questionId} {
-      allow read, write: if isSignedIn();
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && !('answer' in request.resource.data);
+      allow update: if isSignedIn() && !('answer' in request.resource.data);
+      allow delete: if isAdmin();
+    }
+    match /examAnswerKeys/{questionId} {
+      allow read, write: if isAdmin();
     }
     match /exams/{examId} {
       allow read, write: if isSignedIn();

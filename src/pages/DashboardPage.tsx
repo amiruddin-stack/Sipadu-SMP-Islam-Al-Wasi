@@ -88,8 +88,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
 
   return (
     <div className="min-h-screen w-full bg-[#f8fbf9] font-sans text-slate-800 antialiased">
-      {/* HERO SECTION with watercolor texture and integrated top navbar */}
-      <section className="relative w-full overflow-hidden pb-12 pt-0 bg-[#f4faf7]">
+      {/* HERO SECTION with compact aligned card and integrated top navbar */}
+      <section className="relative w-full overflow-hidden pb-3 pt-0 bg-[#f4faf7]">
         {/* Soft pastel mint watercolor wash background effect */}
         <div
           className="pointer-events-none absolute inset-0 z-0 opacity-70"
@@ -123,39 +123,41 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
           <Header activeTab={activeTab} onNavigate={onNavigate} embedded />
         </div>
 
-        {/* Hero Title & Actions */}
-        <div className="relative z-10 mx-auto max-w-[1240px] px-4 pt-10 pb-6 md:px-8 md:pt-14 md:pb-8">
-          <div className="max-w-3xl">
-            <h1 className="text-5xl font-black tracking-tight text-[#0E8B7D] sm:text-6xl md:text-7xl">
-              SIMPATIK
-            </h1>
+        {/* Hero Title & Actions: aligned to dashboard cards and reduced in height */}
+        <div className="relative z-10 mx-auto max-w-[1240px] px-4 pt-5 pb-3 md:px-8 md:pt-6 md:pb-4">
+          <div className="overflow-hidden rounded-[24px] border border-[#D5EADB] bg-gradient-to-br from-white via-[#F4FBF7] to-[#E7F6EF] px-6 py-6 shadow-sm md:px-9 md:py-7">
+            <div className="max-w-3xl">
+              <h1 className="text-4xl font-black tracking-tight text-[#0E8B7D] sm:text-5xl md:text-6xl">
+                SIMPATIK
+              </h1>
 
-            <div className="mt-4 space-y-1">
-              <p className="text-3xl font-extrabold tracking-tight text-[#17334B] sm:text-4xl lg:text-[42px] leading-tight">
-                Sistem Informasi Manajemen
+              <div className="mt-2 space-y-0.5">
+                <p className="text-2xl font-extrabold leading-tight tracking-tight text-[#17334B] sm:text-3xl lg:text-4xl">
+                  Sistem Informasi Manajemen
+                </p>
+                <p className="text-2xl font-extrabold leading-tight tracking-tight text-[#17334B] sm:text-3xl lg:text-4xl">
+                  Pendidikan dan Akademik
+                </p>
+              </div>
+
+              <p className="mt-3 text-base font-bold text-[#0E8B7D] sm:text-lg">
+                Terpadu - Interaktif - Kolaboratif
               </p>
-              <p className="text-3xl font-extrabold tracking-tight text-[#17334B] sm:text-4xl lg:text-[42px] leading-tight">
-                Pendidikan dan Akademik
-              </p>
-            </div>
 
-            <p className="mt-4 text-xl font-bold text-[#0E8B7D] sm:text-2xl">
-              Terpadu - Interaktif - Kolaboratif
-            </p>
-
-            <div className="mt-7 flex flex-wrap items-center gap-3.5">
-              <button
-                onClick={() => onNavigate('attendance')}
-                className="rounded-xl border border-slate-200/90 bg-white px-7 py-2.5 text-sm font-semibold text-slate-800 shadow-xs transition hover:bg-slate-50 hover:shadow-sm focus:outline-none"
-              >
-                Isi Presensi
-              </button>
-              <button
-                onClick={() => onNavigate('journal')}
-                className="rounded-xl border border-slate-200/90 bg-white px-7 py-2.5 text-sm font-semibold text-slate-800 shadow-xs transition hover:bg-slate-50 hover:shadow-sm focus:outline-none"
-              >
-                Tulis Jurnal
-              </button>
+              <div className="mt-5 flex flex-wrap items-center gap-3">
+                <button
+                  onClick={() => onNavigate('attendance')}
+                  className="rounded-xl border border-slate-200/90 bg-white px-6 py-2 text-sm font-semibold text-slate-800 shadow-xs transition hover:bg-slate-50 hover:shadow-sm focus:outline-none"
+                >
+                  Isi Presensi
+                </button>
+                <button
+                  onClick={() => onNavigate('journal')}
+                  className="rounded-xl border border-slate-200/90 bg-white px-6 py-2 text-sm font-semibold text-slate-800 shadow-xs transition hover:bg-slate-50 hover:shadow-sm focus:outline-none"
+                >
+                  Tulis Jurnal
+                </button>
+              </div>
             </div>
           </div>
         </div>

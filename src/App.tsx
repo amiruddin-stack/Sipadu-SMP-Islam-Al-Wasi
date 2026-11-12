@@ -19,8 +19,8 @@ import { ExamPage } from './pages/ExamPage';
 function ComingSoonPage() {
   return (
     <section className="mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center px-6 text-center">
-      <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-emerald-50 text-3xl font-black text-emerald-700">ILS</div>
-      <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-emerald-700">SIMPATIK AL-WASI’</p>
+      <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-emerald-50 text-3xl font-black text-[#078A28]">ILS</div>
+      <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-[#078A28]">SIMPATIK AL-WASI’</p>
       <h1 className="text-3xl font-bold text-slate-800">ILS</h1>
       <p className="mt-3 max-w-md text-sm leading-6 text-slate-500">Fitur ini sedang dalam tahap persiapan dan akan segera tersedia.</p>
       <span className="mt-6 rounded-full bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700">Coming Soon</span>

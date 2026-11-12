@@ -2,9 +2,13 @@
 
 :root {
   color-scheme: light;
-  --simpatik-primary: #078A28;
-  --simpatik-primary-dark: #1F6B0A;
-  --simpatik-primary-light: #84C6BC;
+  --green-primary: #16B364;
+  --green-dark: #0B8F4D;
+  --green-deep: #076B3A;
+  --green-soft: #E3F7EC;
+  --simpatik-primary: var(--green-primary);
+  --simpatik-primary-dark: var(--green-deep);
+  --simpatik-primary-light: #8BDDB3;
 }
 
 html, body, #root {

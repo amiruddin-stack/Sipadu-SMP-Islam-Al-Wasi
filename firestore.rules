@@ -85,19 +85,19 @@ service cloud.firestore {
     }
     match /examPublicQuestions/{questionId} {
       allow read: if isSignedIn();
-      allow create, update: if isSignedIn() && !('answer' in request.resource.data);
-      allow delete: if isAdmin();
+      allow create, update, delete: if isAdmin() && !('answer' in request.resource.data);
     }
     match /examAnswerKeys/{questionId} {
       allow read, write: if isAdmin();
     }
     match /exams/{examId} {
-      allow read, write: if isSignedIn();
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
     }
     match /examAttempts/{attemptId} {
       allow read: if isAdmin();
       allow create: if isSignedIn() && incoming().ownerUid == request.auth.uid && !('score' in incoming()) && !('total' in incoming()) && !('percent' in incoming());
-      allow update: if isSignedIn() && existing().ownerUid == request.auth.uid && incoming().ownerUid == request.auth.uid && !('score' in incoming()) && !('total' in incoming()) && !('percent' in incoming());
+      allow update: if isAdmin() || (isSignedIn() && existing().ownerUid == request.auth.uid && incoming().ownerUid == request.auth.uid && existing().status == 'Mengerjakan' && !('score' in incoming()) && !('total' in incoming()) && !('percent' in incoming()));
       allow delete: if isAdmin();
     }
   }

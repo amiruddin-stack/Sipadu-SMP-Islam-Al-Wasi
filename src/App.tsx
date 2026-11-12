@@ -11,7 +11,7 @@ import { BehaviorPage } from './pages/BehaviorPage';
 import { CounselingPage } from './pages/CounselingPage';
 import { AssessmentPage } from './pages/AssessmentPage';
 import { GradeSummaryPage } from './pages/GradeSummaryPage';
-import { MasterDataPage } from './pages/MasterDataPage';
+import { MasterDataPage, RegistrationPage } from './pages/MasterDataPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { ExamPage } from './pages/ExamPage';
@@ -30,6 +30,8 @@ function ComingSoonPage() {
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
+  const registrationType = new URLSearchParams(window.location.search).get('daftar');
+  if (registrationType === 'guru' || registrationType === 'siswa') return <RegistrationPage type={registrationType} />;
 
   const renderCurrentPage = () => {
     switch (activeTab) {

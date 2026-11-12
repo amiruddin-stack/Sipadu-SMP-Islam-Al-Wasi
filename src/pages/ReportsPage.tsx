@@ -261,7 +261,7 @@ export const ReportsPage: React.FC = () => {
                     <td className="py-2 px-3 border-r border-slate-300 font-mono">{std.nis}</td>
                     <td className="py-2 px-3 border-r border-slate-300 font-medium">{std.name}</td>
                     <td className="py-2 px-3 border-r border-slate-300 text-center">{std.className}</td>
-                    <td className="py-2 px-3 border-r border-slate-300 text-center font-bold text-#076B3A">
+                    <td className="py-2 px-3 border-r border-slate-300 text-center font-bold text-[#076B3A]">
                       96%
                     </td>
                     <td className="py-2 px-3 text-center text-slate-600">Sangat Baik</td>
@@ -348,8 +348,8 @@ export const ReportsPage: React.FC = () => {
                     <td className="py-2 px-3 border-r border-slate-300 font-medium">{std.name}</td>
                     <td className="py-2 px-3 border-r border-slate-300 text-center">{std.className}</td>
                     <td className="py-2 px-3 border-r border-slate-300 text-center font-bold">86.5</td>
-                    <td className="py-2 px-3 border-r border-slate-300 text-center font-bold text-#076B3A">B</td>
-                    <td className="py-2 px-3 text-center text-#076B3A font-semibold">Tuntas</td>
+                    <td className="py-2 px-3 border-r border-slate-300 text-center font-bold text-[#076B3A]">B</td>
+                    <td className="py-2 px-3 text-center text-[#076B3A] font-semibold">Tuntas</td>
                   </tr>
                 ))}
               </tbody>

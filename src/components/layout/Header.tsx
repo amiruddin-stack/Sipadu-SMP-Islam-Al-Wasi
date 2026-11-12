@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../../context/AuthContext';
 import { PWAInstallButton } from '../common/PWAInstallButton';
 import { NavTab } from './Sidebar';
@@ -63,17 +64,10 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
         </button>
         <button
           onClick={() => navigate('dashboard')}
-          className="flex shrink-0 items-center gap-2.5 text-left focus:outline-none"
+          className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap text-center text-sm font-extrabold tracking-tight text-slate-900 uppercase focus:outline-none md:static md:translate-x-0 md:text-left md:text-base"
           aria-label="SMP ISLAM AL-WASI' - Beranda"
         >
-          <img
-            src={`${import.meta.env.BASE_URL}logo-alwasi.png`}
-            alt="Logo SMP Islam Al-Wasi'"
-            className="h-9 w-9 object-contain"
-          />
-          <span className="whitespace-nowrap text-sm md:text-base font-extrabold tracking-tight text-slate-900 uppercase">
-            SMP ISLAM AL-WASI'
-          </span>
+          SMP ISLAM AL-WASI'
         </button>
 
         <nav
@@ -141,10 +135,10 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
         </div>
       </div>
 
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-[80] md:hidden">
-          <button type="button" aria-label="Tutup menu" onClick={() => setMobileMenuOpen(false)} className="absolute inset-0 bg-slate-950/35" />
-          <aside className="absolute left-0 top-0 flex h-full w-[min(82vw,320px)] flex-col overflow-y-auto bg-white p-5 shadow-2xl">
+      {mobileMenuOpen && createPortal(
+        <div className="fixed inset-0 z-[2147483647] md:hidden">
+          <button type="button" aria-label="Tutup menu" onClick={() => setMobileMenuOpen(false)} className="absolute inset-0 bg-slate-950/45" />
+          <aside className="absolute left-0 top-0 z-[2147483647] flex h-[100dvh] w-[min(82vw,320px)] flex-col overflow-y-auto bg-white p-5 shadow-2xl">
             <div className="mb-6 flex items-center justify-between border-b border-emerald-100 pb-4">
               <div className="flex items-center gap-3">
                 <img src={`${import.meta.env.BASE_URL}logo-alwasi.png`} alt="Logo SMP Islam Al-Wasi" className="h-10 w-10 object-contain" />
@@ -163,7 +157,8 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
               <p className="mt-1 text-[10px] text-slate-400">Qurani, Ramah Anak dan Berkarakter</p>
             </div>
           </aside>
-        </div>
+        </div>,
+        document.body
       )}
 
       {academicOpen && (

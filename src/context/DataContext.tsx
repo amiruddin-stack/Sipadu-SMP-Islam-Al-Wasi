@@ -35,6 +35,16 @@ interface DataContextType {
   teachers: Teacher[];
   classes: string[];
   subjects: string[];
+  extracurriculars: string[];
+  addTeacher: (teacher: Omit<Teacher, 'id'>) => Promise<void>;
+  updateTeacher: (id: string, partial: Partial<Teacher>) => Promise<void>;
+  deleteTeacher: (id: string) => Promise<void>;
+  addClass: (name: string) => Promise<void>;
+  deleteClass: (name: string) => Promise<void>;
+  addSubject: (name: string) => Promise<void>;
+  deleteSubject: (name: string) => Promise<void>;
+  addExtracurricular: (name: string) => Promise<void>;
+  deleteExtracurricular: (name: string) => Promise<void>;
   attendances: AttendanceRecord[];
   journals: Journal[];
   behaviors: BehaviorRecord[];
@@ -82,8 +92,9 @@ function saveLocal<T>(key: string, data: T) {
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [students, setStudents] = useState<Student[]>(() => loadLocal('students', initialStudents));
   const [teachers, setTeachers] = useState<Teacher[]>(() => loadLocal('teachers', initialTeachers));
-  const [classes] = useState<string[]>(initialClasses);
-  const [subjects] = useState<string[]>(initialSubjects);
+  const [classes, setClasses] = useState<string[]>(() => loadLocal('classes', initialClasses));
+  const [subjects, setSubjects] = useState<string[]>(() => loadLocal('subjects', initialSubjects));
+  const [extracurriculars, setExtracurriculars] = useState<string[]>(() => loadLocal('extracurriculars', ['Pramuka', 'Tahfidz', 'Hadroh', 'Olahraga']));
   const [attendances, setAttendances] = useState<AttendanceRecord[]>(() =>
     loadLocal('attendances', initialAttendances)
   );
@@ -183,6 +194,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
+    const unsubTeachers = onSnapshot(collection(db, 'teachers'), (snapshot) => {
+      if (!snapshot.empty) { const list = snapshot.docs.map((d) => d.data() as Teacher); setTeachers(list); saveLocal('teachers', list); }
+    }, (error) => console.warn('Firestore teachers snapshot:', error.message));
+    const unsubClasses = onSnapshot(collection(db, 'master_classes'), (snapshot) => {
+      if (!snapshot.empty) { const list = snapshot.docs.map((d) => String(d.data().name)); setClasses(list); saveLocal('classes', list); }
+    }, (error) => console.warn('Firestore classes snapshot:', error.message));
+    const unsubSubjects = onSnapshot(collection(db, 'master_subjects'), (snapshot) => {
+      if (!snapshot.empty) { const list = snapshot.docs.map((d) => String(d.data().name)); setSubjects(list); saveLocal('subjects', list); }
+    }, (error) => console.warn('Firestore subjects snapshot:', error.message));
+    const unsubExtracurriculars = onSnapshot(collection(db, 'extracurriculars'), (snapshot) => {
+      if (!snapshot.empty) { const list = snapshot.docs.map((d) => String(d.data().name)); setExtracurriculars(list); saveLocal('extracurriculars', list); }
+    }, (error) => console.warn('Firestore extracurriculars snapshot:', error.message));
+
     // Listen to Students
     const unsubStudents = onSnapshot(
       collection(db, 'students'),
@@ -207,6 +231,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       unsubCounseling();
       unsubAssessments();
       unsubStudents();
+      unsubTeachers();
+      unsubClasses();
+      unsubSubjects();
+      unsubExtracurriculars();
     };
   }, []);
 
@@ -384,6 +412,37 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const addTeacher = async (data: Omit<Teacher, 'id'>) => {
+    const item: Teacher = { ...data, id: `tch-${Date.now()}` };
+    const updated = [...teachers, item]; setTeachers(updated); saveLocal('teachers', updated);
+    try { await setDoc(doc(db, 'teachers', item.id), item); } catch (e) { console.warn('Saved teacher locally:', e); }
+  };
+  const updateTeacher = async (id: string, partial: Partial<Teacher>) => {
+    const updated = teachers.map((t) => t.id === id ? { ...t, ...partial } : t); setTeachers(updated); saveLocal('teachers', updated);
+    try { await setDoc(doc(db, 'teachers', id), partial, { merge: true }); } catch (e) { console.warn('Updated teacher locally:', e); }
+  };
+  const deleteTeacher = async (id: string) => {
+    const updated = teachers.filter((t) => t.id !== id); setTeachers(updated); saveLocal('teachers', updated);
+    try { await deleteDoc(doc(db, 'teachers', id)); } catch (e) { console.warn('Deleted teacher locally:', e); }
+  };
+  const saveMasterList = async (key: 'classes' | 'subjects' | 'extracurriculars', values: string[]) => {
+    if (key === 'classes') { setClasses(values); saveLocal(key, values); }
+    if (key === 'subjects') { setSubjects(values); saveLocal(key, values); }
+    if (key === 'extracurriculars') { setExtracurriculars(values); saveLocal(key, values); }
+    const collectionName = key === 'classes' ? 'master_classes' : key === 'subjects' ? 'master_subjects' : 'extracurriculars';
+    try {
+      const snap = await import('firebase/firestore').then(({ getDocs }) => getDocs(collection(db, collectionName)));
+      await Promise.all(snap.docs.map((item) => deleteDoc(item.ref)));
+      await Promise.all(values.map((name) => setDoc(doc(db, collectionName, encodeURIComponent(name)), { name })));
+    } catch (e) { console.warn('Saved master list locally:', e); }
+  };
+  const addClass = async (name: string) => { if (name.trim() && !classes.includes(name.trim())) await saveMasterList('classes', [...classes, name.trim()]); };
+  const deleteClass = async (name: string) => { if (students.some((s) => s.className === name)) { alert('Kelas masih digunakan oleh data siswa. Pindahkan siswa terlebih dahulu.'); return; } await saveMasterList('classes', classes.filter((x) => x !== name)); };
+  const addSubject = async (name: string) => { if (name.trim() && !subjects.includes(name.trim())) await saveMasterList('subjects', [...subjects, name.trim()]); };
+  const deleteSubject = async (name: string) => { await saveMasterList('subjects', subjects.filter((x) => x !== name)); };
+  const addExtracurricular = async (name: string) => { if (name.trim() && !extracurriculars.includes(name.trim())) await saveMasterList('extracurriculars', [...extracurriculars, name.trim()]); };
+  const deleteExtracurricular = async (name: string) => { await saveMasterList('extracurriculars', extracurriculars.filter((x) => x !== name)); };
+
   // Students
   const addStudent = async (studentData: Omit<Student, 'id'>) => {
     const newStudent: Student = {
@@ -463,6 +522,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         teachers,
         classes,
         subjects,
+        extracurriculars,
+        addTeacher, updateTeacher, deleteTeacher,
+        addClass, deleteClass, addSubject, deleteSubject,
+        addExtracurricular, deleteExtracurricular,
         attendances,
         journals,
         behaviors,

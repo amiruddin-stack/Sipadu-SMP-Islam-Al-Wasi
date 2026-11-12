@@ -140,7 +140,7 @@ export const GradeSummaryPage: React.FC = () => {
             <select
               value={selectedClass}
               onChange={(e) => setSelectedClass(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
             >
               {classes.map((cls) => (
                 <option key={cls} value={cls}>
@@ -155,7 +155,7 @@ export const GradeSummaryPage: React.FC = () => {
             <select
               value={selectedSubject}
               onChange={(e) => setSelectedSubject(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
             >
               <option value="Semua">Semua Mata Pelajaran</option>
               {subjects.map((sub) => (
@@ -173,7 +173,7 @@ export const GradeSummaryPage: React.FC = () => {
               placeholder="Cari..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#0F5132]"
+              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:outline-none focus:border-[#076B3A]"
             />
           </div>
         </div>
@@ -183,11 +183,11 @@ export const GradeSummaryPage: React.FC = () => {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="p-3.5 rounded-xl bg-white border border-slate-200 text-center">
           <span className="text-[11px] font-semibold text-slate-400">Rata-Rata Kelas</span>
-          <p className="text-xl font-bold text-[#0F5132] mt-0.5">{overallAvg}</p>
+          <p className="text-xl font-bold text-[#076B3A] mt-0.5">{overallAvg}</p>
         </div>
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-center">
-          <span className="text-[11px] font-semibold text-emerald-800">Tuntas KKM</span>
-          <p className="text-xl font-bold text-emerald-950 mt-0.5">
+        <div className="p-3.5 rounded-xl bg-bg-[#E3F7EC] border border-border-[#B7E8CD] text-center">
+          <span className="text-[11px] font-semibold text-#076B3A">Tuntas KKM</span>
+          <p className="text-xl font-bold text-#076B3A mt-0.5">
             {tuntasCount} / {classStudents.length} Siswa
           </p>
         </div>
@@ -252,7 +252,7 @@ export const GradeSummaryPage: React.FC = () => {
                     <span
                       className={`inline-block px-2.5 py-0.5 rounded-md font-bold text-xs ${
                         item.predicate === 'A'
-                          ? 'bg-emerald-100 text-emerald-800'
+                          ? 'bg-bg-[#E3F7EC] text-#076B3A'
                           : item.predicate === 'B'
                           ? 'bg-blue-100 text-blue-800'
                           : 'bg-amber-100 text-amber-800'
@@ -265,7 +265,7 @@ export const GradeSummaryPage: React.FC = () => {
                     <span
                       className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
                         item.isTuntas
-                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                          ? 'bg-bg-[#E3F7EC] text-#076B3A border border-border-[#B7E8CD]'
                           : 'bg-rose-50 text-rose-800 border border-rose-200'
                       }`}
                     >
@@ -277,9 +277,9 @@ export const GradeSummaryPage: React.FC = () => {
                       <div
                         className={`h-full rounded-full ${
                           item.average >= 90
-                            ? 'bg-[#0F5132]'
+                            ? 'bg-[#076B3A]'
                             : item.average >= 75
-                            ? 'bg-emerald-600'
+                            ? 'bg-#0B8F4D'
                             : 'bg-rose-500'
                         }`}
                         style={{ width: `${Math.min(100, item.average)}%` }}

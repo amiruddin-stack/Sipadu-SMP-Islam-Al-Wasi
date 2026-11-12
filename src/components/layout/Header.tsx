@@ -45,7 +45,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
       <div className={`mx-auto flex min-h-[68px] w-full flex-nowrap items-center gap-3 overflow-hidden px-3 md:px-5 ${embedded ? "border-b border-white/20" : ""}`}>
         <button onClick={() => navigate('dashboard')} className="flex shrink-0 items-center gap-2.5 rounded-lg text-left" aria-label="SIMPATIK - Beranda">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white"><img src={`${import.meta.env.BASE_URL}Helmi%20hawari_20261111_083840_0000.png?v=2`} alt="Logo SMP Islam Al-Wasi’" className="h-full w-full object-contain" /></span>
-          <span className="whitespace-nowrap bg-gradient-to-r from-[#078A78] via-[#0E9F83] to-[#25B56F] bg-clip-text text-base font-extrabold tracking-wide text-transparent md:text-lg">SIMPATIK</span>
+          <span className={`whitespace-nowrap text-base font-extrabold tracking-wide md:text-lg ${embedded ? "text-white" : "bg-gradient-to-r from-[#078A78] via-[#0E9F83] to-[#25B56F] bg-clip-text text-transparent"}`}>SIMPATIK</span>
         </button>
 
         <nav data-embedded={embedded} aria-label="Navigasi utama" className="ml-1 flex h-[68px] min-w-0 flex-1 flex-nowrap items-center gap-0.5 overflow-x-auto whitespace-nowrap [scrollbar-width:thin] [overscroll-behavior-x:contain]">

@@ -52,10 +52,14 @@ export const ExamPage: React.FC = () => {
 
   useEffect(() => {
     let active = true;
+    let unQ = () => {};
+    let unE = () => {};
+    let unA = () => {};
     const setNetwork = () => setIsOnline(navigator.onLine);
     window.addEventListener('online', setNetwork);
     window.addEventListener('offline', setNetwork);
-    const restoreOfflineData = async () => {
+
+    const initialize = async () => {
       try {
         const [cachedQuestions, cachedExams, session] = await Promise.all([
           readOfflineRecord<Question[]>('cache:questions'),
@@ -77,28 +81,52 @@ export const ExamPage: React.FC = () => {
           setMessage('Ujian sebelumnya dipulihkan dari penyimpanan perangkat.');
         }
         setOfflineReady(Boolean(cachedQuestions?.length && cachedExams?.length));
-      } catch (e) { console.warn('Offline cache:', e); }
-    };
-    void restoreOfflineData();
-    const prepareStudentAccess = async () => {
-      try {
-        if (!isVerifiedExamAdmin && navigator.onLine && !auth.currentUser) await signInAnonymously(auth);
         if (!navigator.onLine) return;
+
+        await auth.authStateReady();
+        if (!isVerifiedExamAdmin && !auth.currentUser) await signInAnonymously(auth);
+        if (!active || !auth.currentUser) return;
+
         const snapshot = await getDocs(collection(db, 'students'));
-        if (active && !snapshot.empty) setExamStudents(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as typeof students[number])));
-      } catch (e) { console.warn('Student exam access:', e); }
+        if (active && !snapshot.empty) {
+          setExamStudents(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as typeof students[number])));
+        }
+        if (!active) return;
+
+        unQ = onSnapshot(collection(db, 'examPublicQuestions'), snap => {
+          const rows = snap.docs.map(d => ({ ...d.data(), id: d.id, answer: undefined } as Question));
+          setQuestions(rows);
+          setOfflineReady(true);
+          void saveOfflineRecord('cache:questions', rows);
+        }, e => setMessage('Bank soal belum dapat dibaca: ' + e.message));
+
+        unE = onSnapshot(collection(db, 'exams'), snap => {
+          const rows = snap.docs.map(d => ({ ...d.data(), id: d.id } as Exam));
+          setExams(rows);
+          setOfflineReady(true);
+          void saveOfflineRecord('cache:exams', rows);
+        }, e => setMessage('Data ujian belum dapat dibaca: ' + e.message));
+
+        if (isVerifiedExamAdmin) {
+          unA = onSnapshot(collection(db, 'examAttempts'), snap => {
+            setAttempts(snap.docs.map(d => ({ ...d.data(), id: d.id } as Attempt)));
+          }, e => console.warn(e));
+        }
+      } catch (e) {
+        console.warn('Persiapan akses ujian:', e);
+        if (active) setMessage('Akses ujian belum siap. Periksa koneksi dan akun Firebase.');
+      }
     };
-    void prepareStudentAccess();
-    const unQ = onSnapshot(collection(db, 'examPublicQuestions'), snap => {
-      const rows = snap.docs.map(d => ({ ...d.data(), id: d.id, answer: undefined } as Question));
-      setQuestions(rows); setOfflineReady(true); void saveOfflineRecord('cache:questions', rows);
-    }, e => setMessage('Bank soal belum dapat dibaca: ' + e.message));
-    const unE = onSnapshot(collection(db, 'exams'), snap => {
-      const rows = snap.docs.map(d => ({ ...d.data(), id: d.id } as Exam));
-      setExams(rows); setOfflineReady(true); void saveOfflineRecord('cache:exams', rows);
-    }, e => setMessage('Data ujian belum dapat dibaca: ' + e.message));
-    const unA = isVerifiedExamAdmin ? onSnapshot(collection(db, 'examAttempts'), snap => setAttempts(snap.docs.map(d => ({ ...d.data(), id: d.id } as Attempt))), e => console.warn(e)) : () => setAttempts([]);
-    return () => { active = false; window.removeEventListener('online', setNetwork); window.removeEventListener('offline', setNetwork); unQ(); unE(); unA(); };
+
+    void initialize();
+    return () => {
+      active = false;
+      window.removeEventListener('online', setNetwork);
+      window.removeEventListener('offline', setNetwork);
+      unQ();
+      unE();
+      unA();
+    };
   }, [isVerifiedExamAdmin]);
 
   const selectedClassNames = useMemo(() => classes.filter(c => classLevel(c) === level), [classes, level]);
@@ -186,7 +214,7 @@ export const ExamPage: React.FC = () => {
       setFinishedResult({ title: activeExam.title, studentName: payload.studentName, className: payload.className });
       if (navigator.onLine) {
         if (!auth.currentUser) await signInAnonymously(auth);
-        await setDoc(doc(db, 'examAttempts', attemptId), { ...payload, ownerUid: auth.currentUser.uid }, { merge: true });
+        await setDoc(doc(db, 'examAttempts', attemptId), { ...payload, ownerUid: auth.currentUser?.uid || '' }, { merge: true });
         await deleteOfflineRecord('pending:' + attemptId);
         setMessage(forced ? 'Waktu habis. Jawaban terkirim otomatis.' : 'Jawaban berhasil dikirim.');
       } else {
@@ -232,7 +260,7 @@ export const ExamPage: React.FC = () => {
         if (section === 'take' && activeExam && attemptId) {
           const student = examStudents.find(item => item.id === studentId);
           await setDoc(doc(db, 'examAttempts', attemptId), {
-            examId: activeExam.id, examTitle: activeExam.title, studentId, ownerUid: auth.currentUser.uid,
+            examId: activeExam.id, examTitle: activeExam.title, studentId, ownerUid: auth.currentUser?.uid || '',
             studentName: student?.name || 'Siswa', className: student?.className || studentClass,
             answers, status: 'Mengerjakan', startedAt: new Date(deadlineAt - activeExam.duration * 60000).toISOString()
           }, { merge: true });
@@ -241,7 +269,7 @@ export const ExamPage: React.FC = () => {
         const pending = await readOfflineRecords<any>('pending:');
         for (const item of pending) {
           if (cancelled) return;
-          await setDoc(doc(db, 'examAttempts', item.id), { ...item, ownerUid: auth.currentUser.uid }, { merge: true });
+          await setDoc(doc(db, 'examAttempts', item.id), { ...item, ownerUid: auth.currentUser?.uid || '' }, { merge: true });
           await deleteOfflineRecord('pending:' + item.id);
         }
         if (pending.length) setMessage(pending.length + ' hasil ujian offline berhasil disinkronkan ke server.');

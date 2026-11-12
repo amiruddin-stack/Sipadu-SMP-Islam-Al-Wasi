@@ -5,6 +5,7 @@ import { signInAnonymously } from 'firebase/auth';
 import { BookOpen, Clock3, FileUp, Plus, ClipboardList, Trophy, ArrowLeft, CheckCircle2, Link as LinkIcon, Play, Save } from 'lucide-react';
 import { db, auth } from '../firebase/config';
 import { useData } from '../context/DataContext';
+import { useAuth } from '../context/AuthContext';
 
 type Question = { id: string; title: string; subject: string; className: string; academicYear: string; semester: string; prompt: string; options: string[]; answer?: number; points: number };
 type Exam = { id: string; title: string; subject: string; className: string; academicYear: string; semester: string; duration: number; questionIds: string[]; formUrl?: string; status: 'Aktif' | 'Draft'; createdAt: string };
@@ -18,6 +19,8 @@ const btn = 'inline-flex items-center justify-center gap-2 rounded-xl bg-[#16B36
 function classLevel(value: string) { return value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3); }
 export const ExamPage: React.FC = () => {
   const { students, classes, subjects, settings } = useData();
+  const { firebaseUser } = useAuth();
+  const isVerifiedExamAdmin = firebaseUser?.email?.toLowerCase() === 'amiruddin@smpialwasi-maros.sch.id';
   const [examStudents, setExamStudents] = useState(students);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [exams, setExams] = useState<Exam[]>([]);
@@ -94,9 +97,9 @@ export const ExamPage: React.FC = () => {
       const rows = snap.docs.map(d => ({ ...d.data(), id: d.id } as Exam));
       setExams(rows); setOfflineReady(true); void saveOfflineRecord('cache:exams', rows);
     }, e => setMessage('Data ujian belum dapat dibaca: ' + e.message));
-    const unA = onSnapshot(collection(db, 'examAttempts'), snap => setAttempts(snap.docs.map(d => ({ ...d.data(), id: d.id } as Attempt))), e => console.warn(e));
+    const unA = isVerifiedExamAdmin ? onSnapshot(collection(db, 'examAttempts'), snap => setAttempts(snap.docs.map(d => ({ ...d.data(), id: d.id } as Attempt))), e => console.warn(e)) : () => setAttempts([]);
     return () => { active = false; window.removeEventListener('online', setNetwork); window.removeEventListener('offline', setNetwork); unQ(); unE(); unA(); };
-  }, []);
+  }, [isVerifiedExamAdmin]);
 
   const selectedClassNames = useMemo(() => classes.filter(c => classLevel(c) === level), [classes, level]);
   const studentsInClass = useMemo(() => examStudents.filter(s => s.status === 'Aktif' && (studentClass ? s.className === studentClass : classLevel(s.className) === level)).sort((a,b) => a.name.localeCompare(b.name)), [examStudents, studentClass, level]);

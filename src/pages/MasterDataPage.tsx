@@ -7,13 +7,14 @@ interface MasterDataPageProps { initialSubTab?: 'siswa' | 'guru' | 'akademik'; }
 
 export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 'siswa' }) => {
   const { canManageMasterData } = useAuth();
-  const { students, teachers, classes, subjects, addStudent, updateStudent, deleteStudent } = useData();
+  const { students, teachers, classes, subjects, extracurriculars, addStudent, updateStudent, deleteStudent, addTeacher, updateTeacher, deleteTeacher, addClass, deleteClass, addSubject, deleteSubject, addExtracurricular, deleteExtracurricular } = useData();
 
   const [activeSubTab, setActiveSubTab] = useState<'siswa' | 'guru' | 'akademik'>(initialSubTab);
   const [selectedClass, setSelectedClass] = useState<string>('Semua');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showStudentModal, setShowStudentModal] = useState<boolean>(false);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+  const [newMasterName, setNewMasterName] = useState('');
 
   // Student Form
   const [studentForm, setStudentForm] = useState({
@@ -101,7 +102,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-             Data Siswa ({students.length})
+             Siswa ({students.length})
           </button>
           <button
             onClick={() => setActiveSubTab('guru')}
@@ -111,7 +112,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-             Data Guru ({teachers.length})
+             Guru ({teachers.length})
           </button>
           <button
             onClick={() => setActiveSubTab('akademik')}
@@ -123,6 +124,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
           >
              Kelas & Mapel
           </button>
+          <button onClick={() => { const name = prompt('Nama guru:'); if (!name) return; const nip = prompt('NIP:') || ''; const subject = prompt('Mapel / tugas:') || ''; const email = prompt('Email:') || ''; void addTeacher({name,nip,subject,email,role:'guru',status:'Aktif'}); }} className="px-3 py-1.5 text-xs font-bold rounded-lg bg-[#16B364] text-white">Tambah Guru</button>
         </div>
 
         {activeSubTab === 'siswa' && canManageMasterData && (

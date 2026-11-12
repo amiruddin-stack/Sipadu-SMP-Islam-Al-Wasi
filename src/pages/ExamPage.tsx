@@ -42,6 +42,7 @@ export const ExamPage: React.FC = () => {
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [attemptId, setAttemptId] = useState('');
+  const [ownerUid, setOwnerUid] = useState('');
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [deadlineAt, setDeadlineAt] = useState(0);
   const [isOnline, setIsOnline] = useState(typeof navigator === 'undefined' ? true : navigator.onLine);
@@ -73,6 +74,7 @@ export const ExamPage: React.FC = () => {
           setActiveExam(session.exam);
           setAnswers(session.answers || {});
           setAttemptId(session.attemptId);
+          setOwnerUid(session.ownerUid || '');
           setStudentId(session.studentId || '');
           setStudentClass(session.className || '');
           setDeadlineAt(session.deadlineAt);
@@ -192,13 +194,16 @@ export const ExamPage: React.FC = () => {
     const examQuestions = exam.questionIds.map(id => questions.find(q => q.id === id)).filter(Boolean) as Question[];
     if (!examQuestions.length) { setMessage('Soal belum tersimpan di perangkat. Buka halaman ini saat online untuk memuat soal terlebih dahulu.'); return; }
     try {
+      await auth.authStateReady();
       if (navigator.onLine && !auth.currentUser) await signInAnonymously(auth);
+      const sessionOwnerUid = auth.currentUser?.uid || '';
       const id = crypto.randomUUID();
       const startedAt = new Date().toISOString();
       const endAt = Date.now() + exam.duration * 60 * 1000;
-      const attempt = { examId: exam.id, examTitle: exam.title, studentId: student.id, studentName: student.name, className: student.className, answers: {}, ownerUid: auth.currentUser?.uid || '', status: 'Mengerjakan', startedAt };
+      const attempt = { examId: exam.id, examTitle: exam.title, studentId: student.id, studentName: student.name, className: student.className, answers: {}, ownerUid: sessionOwnerUid, status: 'Mengerjakan', startedAt };
       if (navigator.onLine) await setDoc(doc(db, 'examAttempts', id), attempt);
-      await saveOfflineRecord('session:active', { exam, attemptId: id, studentId: student.id, className: student.className, answers: {}, deadlineAt: endAt, studentName: student.name });
+      await saveOfflineRecord('session:active', { exam, attemptId: id, studentId: student.id, className: student.className, answers: {}, deadlineAt: endAt, studentName: student.name, ownerUid: sessionOwnerUid });
+      setOwnerUid(sessionOwnerUid);
       setAttemptId(id); setAnswers({}); setCurrentQuestion(0); setActiveExam(exam); setDeadlineAt(endAt); setSecondsLeft(exam.duration * 60); setSection('take'); setMessage(navigator.onLine ? '' : 'Mode offline aktif. Jawaban disimpan pada perangkat dan akan disinkronkan saat internet kembali.');
     } catch (e) { setMessage('Tidak dapat memulai ujian. Pastikan data ujian sudah tersimpan di perangkat.'); }
   };
@@ -208,13 +213,21 @@ export const ExamPage: React.FC = () => {
     setSaving(true);
     const student = examStudents.find(s => s.id === studentId);
     const submittedAt = new Date().toISOString();
-    const payload = { examId: activeExam.id, examTitle: activeExam.title, studentId, studentName: student?.name || 'Siswa', className: student?.className || studentClass, ownerUid: auth.currentUser?.uid || '', answers, status: 'Selesai', startedAt: new Date(deadlineAt - activeExam.duration * 60 * 1000).toISOString(), submittedAt, autoSubmitted: forced };
+    let stableOwnerUid = ownerUid;
     try {
+      await auth.authStateReady();
+      if (navigator.onLine && !auth.currentUser) await signInAnonymously(auth);
+      const currentUid = auth.currentUser?.uid || '';
+      if (stableOwnerUid && currentUid && stableOwnerUid !== currentUid) throw new Error('Sesi Firebase berubah. Pengiriman dihentikan demi menjaga kepemilikan jawaban.');
+      if (!stableOwnerUid) stableOwnerUid = currentUid;
+      if (stableOwnerUid) setOwnerUid(stableOwnerUid);
+      const payload = { examId: activeExam.id, examTitle: activeExam.title, studentId, studentName: student?.name || 'Siswa', className: student?.className || studentClass, ownerUid: stableOwnerUid, answers, status: 'Selesai', startedAt: new Date(deadlineAt - activeExam.duration * 60 * 1000).toISOString(), submittedAt, autoSubmitted: forced };
       await saveOfflineRecord('pending:' + attemptId, { id: attemptId, ...payload });
       setFinishedResult({ title: activeExam.title, studentName: payload.studentName, className: payload.className });
       if (navigator.onLine) {
         if (!auth.currentUser) await signInAnonymously(auth);
-        await setDoc(doc(db, 'examAttempts', attemptId), { ...payload, ownerUid: auth.currentUser?.uid || '' }, { merge: true });
+        if (!stableOwnerUid) throw new Error('Identitas sesi Firebase belum tersedia.');
+        await setDoc(doc(db, 'examAttempts', attemptId), payload, { merge: true });
         await deleteOfflineRecord('pending:' + attemptId);
         setMessage(forced ? 'Waktu habis. Jawaban terkirim otomatis.' : 'Jawaban berhasil dikirim.');
       } else {
@@ -243,10 +256,10 @@ export const ExamPage: React.FC = () => {
 
   useEffect(() => {
     if (section !== 'take' || !attemptId || !activeExam) return;
-    const session = { exam: activeExam, attemptId, studentId, className: studentClass, answers, deadlineAt };
+    const session = { exam: activeExam, attemptId, studentId, className: studentClass, answers, deadlineAt, ownerUid };
     void saveOfflineRecord('session:active', session);
     const timer = window.setTimeout(() => {
-      if (navigator.onLine) updateDoc(doc(db, 'examAttempts', attemptId), { answers, lastSavedAt: new Date().toISOString() }).catch(() => {});
+      if (navigator.onLine && auth.currentUser?.uid && ownerUid && auth.currentUser.uid === ownerUid) updateDoc(doc(db, 'examAttempts', attemptId), { answers, lastSavedAt: new Date().toISOString() }).catch(() => {});
     }, 500);
     return () => window.clearTimeout(timer);
   }, [answers, section, attemptId, activeExam, studentId, studentClass, deadlineAt]);
@@ -256,11 +269,16 @@ export const ExamPage: React.FC = () => {
     let cancelled = false;
     const syncPending = async () => {
       try {
+        await auth.authStateReady();
         if (!auth.currentUser) await signInAnonymously(auth);
+        const syncUid = auth.currentUser?.uid || '';
+        if (!syncUid) throw new Error('UID Firebase tidak tersedia.');
         if (section === 'take' && activeExam && attemptId) {
+          if (ownerUid && ownerUid !== syncUid) throw new Error('Sesi Firebase berubah; sinkronisasi dihentikan.');
+          if (!ownerUid) { setOwnerUid(syncUid); await saveOfflineRecord('session:active', { exam: activeExam, attemptId, studentId, className: studentClass, answers, deadlineAt, ownerUid: syncUid }); }
           const student = examStudents.find(item => item.id === studentId);
           await setDoc(doc(db, 'examAttempts', attemptId), {
-            examId: activeExam.id, examTitle: activeExam.title, studentId, ownerUid: auth.currentUser?.uid || '',
+            examId: activeExam.id, examTitle: activeExam.title, studentId, ownerUid: syncUid,
             studentName: student?.name || 'Siswa', className: student?.className || studentClass,
             answers, status: 'Mengerjakan', startedAt: new Date(deadlineAt - activeExam.duration * 60000).toISOString()
           }, { merge: true });
@@ -269,7 +287,8 @@ export const ExamPage: React.FC = () => {
         const pending = await readOfflineRecords<any>('pending:');
         for (const item of pending) {
           if (cancelled) return;
-          await setDoc(doc(db, 'examAttempts', item.id), { ...item, ownerUid: auth.currentUser?.uid || '' }, { merge: true });
+          if (item.ownerUid && item.ownerUid !== syncUid) { console.warn('Hasil offline dilewati karena UID tidak cocok:', item.id); continue; }
+          await setDoc(doc(db, 'examAttempts', item.id), { ...item, ownerUid: item.ownerUid || syncUid }, { merge: true });
           await deleteOfflineRecord('pending:' + item.id);
         }
         if (pending.length) setMessage(pending.length + ' hasil ujian offline berhasil disinkronkan ke server.');
@@ -277,7 +296,7 @@ export const ExamPage: React.FC = () => {
     };
     void syncPending();
     return () => { cancelled = true; };
-  }, [isOnline, section, activeExam, attemptId, answers, studentId, studentClass, examStudents, deadlineAt]);
+  }, [isOnline, section, activeExam, attemptId, answers, studentId, studentClass, examStudents, deadlineAt, ownerUid]);
 
   const fmt = (seconds: number) => String(Math.floor(seconds / 60)).padStart(2,'0') + ':' + String(seconds % 60).padStart(2,'0');
   const studentEntry = () => <div className="mx-auto max-w-xl space-y-4">

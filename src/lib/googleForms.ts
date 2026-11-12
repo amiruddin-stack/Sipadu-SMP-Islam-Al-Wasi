@@ -45,7 +45,7 @@ function loadGoogleIdentity(): Promise<void> {
 }
 
 export async function authorizeGoogleForms(clientId: string): Promise<void> {
-  if (!clientId) throw new Error('Google Client ID belum dipasang pada konfigurasi aplikasi.');
+  if (!clientId || clientId === 'ISI_CLIENT_ID_DI_SINI' || !clientId.endsWith('.apps.googleusercontent.com')) throw new Error('OAuth Client ID belum diisi dengan benar. Masukkan Client ID Web dari Google Cloud (akhiran .apps.googleusercontent.com).');
   await loadGoogleIdentity();
   const oauth2 = window.google?.accounts?.oauth2;
   if (!oauth2) throw new Error('Layanan otorisasi Google belum siap.');
@@ -55,13 +55,21 @@ export async function authorizeGoogleForms(clientId: string): Promise<void> {
       scope: 'https://www.googleapis.com/auth/forms.body.readonly',
       callback: response => {
         if (response.error || !response.access_token) {
-          reject(new Error(response.error_description || response.error || 'Izin Google tidak diberikan.'));
+          const code = response.error || '';
+          const detail = response.error_description || '';
+          if (code === 'access_denied') reject(new Error('Akses ditolak. Login menggunakan akun Google sekolah @smpialwasi-maros.sch.id dan berikan izin baca formulir.'));
+          else if (code === 'origin_mismatch' || /origin_mismatch|origin.*not allowed/i.test(detail)) reject(new Error('Alamat aplikasi belum diizinkan di Google Cloud. Tambahkan https://amiruddin-stack.github.io pada Authorized JavaScript origins.'));
+          else reject(new Error(detail || 'Izin Google tidak diberikan. Periksa akun sekolah dan coba lagi.'));
           return;
         }
         activeAccessToken = response.access_token;
         resolve();
       },
-      error_callback: error => reject(new Error(error.message || 'Jendela izin Google tidak dapat dibuka.'))
+      error_callback: error => {
+        if (error.type === 'popup_failed_to_open') reject(new Error('Jendela login Google diblokir browser. Izinkan pop-up untuk SIMPATIK, lalu coba lagi.'));
+        else if (error.type === 'popup_closed') reject(new Error('Jendela login ditutup sebelum izin diberikan. Silakan coba lagi.'));
+        else reject(new Error(error.message || 'Login Google gagal dibuka. Coba izinkan pop-up dan gunakan akun sekolah.'));
+      }
     });
     client.requestAccessToken({ prompt: '' });
   });

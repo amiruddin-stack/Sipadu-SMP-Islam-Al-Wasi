@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 import { deleteOfflineRecord, readOfflineRecord, readOfflineRecords, saveOfflineRecord } from '../lib/examOffline';
 import { signInAnonymously } from 'firebase/auth';
-import { BookOpen, Clock3, Plus, ClipboardList, Trophy, ArrowLeft, CheckCircle2, Link as LinkIcon, Play, Save, Copy, ExternalLink } from 'lucide-react';
+import { BookOpen, Clock3, Plus, ClipboardList, Trophy, ArrowLeft, ChevronRight, CheckCircle2, Link as LinkIcon, Play, Save, Copy, ExternalLink } from 'lucide-react';
 import { db, auth } from '../firebase/config';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
@@ -26,7 +26,7 @@ function makeStudentExamCode() {
   const raw = Array.from(bytes, value => alphabet[value % alphabet.length]).join('');
   return `SW-${raw.slice(0, 4)}-${raw.slice(4, 8)}`;
 }
-export const ExamPage: React.FC = () => {
+export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const { students, classes, settings } = useData();
   const { firebaseUser, currentUser } = useAuth();
   const isVerifiedExamAdmin = firebaseUser?.email?.toLowerCase() === 'amiruddin@smpialwasi-maros.sch.id';
@@ -76,16 +76,21 @@ export const ExamPage: React.FC = () => {
 
     const initialize = async () => {
       try {
-        const [cachedQuestions, cachedExams, session, cachedIdentity] = await Promise.all([
+        const [cachedQuestions, cachedExams, session, cachedIdentity, cachedBundle] = await Promise.all([
           readOfflineRecord<Question[]>('cache:questions'),
           readOfflineRecord<Exam[]>('cache:exams'),
           readOfflineRecord<any>('session:active'),
-          readOfflineRecord<any>('student:identity')
+          readOfflineRecord<any>('student:identity'),
+          linkedExamId ? readOfflineRecord<any>('cache:exam:' + linkedExamId) : Promise.resolve(null)
         ]);
         if (!active) return;
         if (linkedExamId) setSection('student');
         if (cachedQuestions) setQuestions(cachedQuestions);
         if (cachedExams) setExams(cachedExams);
+        if (cachedBundle?.exam && Array.isArray(cachedBundle.questions)) {
+          setExams(current => current.some(item => item.id === cachedBundle.exam.id) ? current : [...current, cachedBundle.exam]);
+          setQuestions(current => [...current.filter(item => !cachedBundle.questions.some((q: Question) => q.id === item.id)), ...cachedBundle.questions]);
+        }
         if (session?.exam && session?.attemptId && session?.deadlineAt && (!linkedExamId || session.exam.id === linkedExamId)) {
           setActiveExam(session.exam);
           setAnswers(session.answers || {});
@@ -219,6 +224,16 @@ export const ExamPage: React.FC = () => {
     return Array.from(groups.values());
   }, [classQuestions]);
 
+  useEffect(() => {
+    if (!questions.length || !exams.length) return;
+    exams.forEach(exam => {
+      const bundleQuestions = exam.questionIds.map(id => questions.find(question => question.id === id)).filter(Boolean) as Question[];
+      if (bundleQuestions.length === exam.questionIds.length && bundleQuestions.length > 0) {
+        void saveOfflineRecord('cache:exam:' + exam.id, { exam, questions: bundleQuestions });
+      }
+    });
+  }, [exams, questions]);
+
   const addQuestion = async () => {
     if (!canManageExamQuestions) { setMessage('Silakan login menggunakan akun guru sekolah untuk menyimpan soal.'); return; }
     if (!questionText.trim() || options.some(o => !o.trim()) || !subject) { setMessage('Lengkapi mapel, pertanyaan, dan semua pilihan jawaban.'); return; }
@@ -292,8 +307,16 @@ export const ExamPage: React.FC = () => {
   const startExam = async (exam: Exam) => {
     const student = examStudents.find(s => s.id === studentId);
     if (!studentId || !verifiedStudentName) { setMessage('Verifikasi ID Ujian siswa terlebih dahulu.'); return; }
-    const examQuestions = exam.questionIds.map(id => questions.find(q => q.id === id)).filter(Boolean) as Question[];
-    if (!examQuestions.length) { setMessage('Soal belum tersimpan di perangkat. Buka halaman ini saat online untuk memuat soal terlebih dahulu.'); return; }
+    let examQuestions = exam.questionIds.map(id => questions.find(q => q.id === id)).filter(Boolean) as Question[];
+    if (examQuestions.length !== exam.questionIds.length) {
+      const cachedBundle = await readOfflineRecord<{ exam: Exam; questions: Question[] }>('cache:exam:' + exam.id);
+      if (cachedBundle?.exam?.id === exam.id && cachedBundle.questions?.length === exam.questionIds.length) {
+        examQuestions = cachedBundle.questions;
+        setQuestions(current => [...current.filter(item => !examQuestions.some(q => q.id === item.id)), ...examQuestions]);
+      }
+    }
+    if (examQuestions.length !== exam.questionIds.length) { setMessage('Paket soal belum lengkap tersimpan di perangkat. Hubungkan internet sekali untuk memuat seluruh soal.'); return; }
+    await saveOfflineRecord('cache:exam:' + exam.id, { exam, questions: examQuestions });
     try {
       await auth.authStateReady();
       if (navigator.onLine && !auth.currentUser) await signInAnonymously(auth);
@@ -427,17 +450,17 @@ export const ExamPage: React.FC = () => {
   }
 
   return <div className="space-y-5">
-    {!linkedExamId&&<div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-wider text-[#0B8F4D]">SIMPATIK · AKADEMIK</p><h2 className="text-2xl font-black text-slate-800">Modul Ujian</h2><p className="mt-1 text-sm text-slate-500">Buat, kelola, dan pantau ujian siswa.</p></div></div>}
-    <div className={`flex flex-wrap items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold ${isOnline ? 'bg-[#E3F7EC] text-[#0B8F4D]' : 'bg-amber-50 text-amber-800'}`}>
-      <span className={`h-2 w-2 rounded-full ${isOnline ? 'bg-[#16B364]' : 'bg-amber-500'}`} />
-      {isOnline ? (offlineReady ? 'Online · Soal dan ujian tersimpan untuk akses offline' : 'Online · Memuat data ujian untuk disimpan di perangkat') : 'Offline · Jawaban disimpan di perangkat dan disinkronkan otomatis'}
-    </div>
+    {!linkedExamId&&<div className="flex items-center gap-3">
+      {onBack&&<button type="button" onClick={onBack} aria-label="Kembali ke beranda" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-[#16B364] hover:bg-[#E3F7EC] hover:text-[#0B8F4D]"><ArrowLeft size={20}/></button>}
+      <div><p className="text-xs font-bold uppercase tracking-wider text-[#0B8F4D]">SIMPATIK · AKADEMIK</p><h2 className="text-2xl font-black text-slate-800">Ujian</h2><p className="mt-1 text-sm text-slate-500">Buat, kelola, dan pantau ujian siswa.</p></div>
+    </div>}
+    {offlineReady&&<div className="flex items-center gap-2 rounded-xl bg-[#E3F7EC] px-3 py-2 text-xs font-semibold text-[#0B8F4D]"><Save size={14}/> Soal dan data ujian tersimpan di perangkat untuk akses tanpa internet.</div>}
     {message&&<div className="rounded-xl bg-[#E3F7EC] p-3 text-sm text-[#076B3A]">{message}</div>}
     {section==='student'&&<div>{!linkedExamId&&<button className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>setSection('home')}><ArrowLeft size={16}/> Kembali</button>}{studentEntry()}</div>}
-    {section==='home'&&<div className="grid gap-3 sm:grid-cols-3">
-      <button className={panel+' text-left hover:border-[#16B364]'} onClick={()=>setSection('create')}><Plus className="text-[#0B8F4D]"/><h3 className="mt-3 font-extrabold">Buat Ujian</h3><p className="mt-1 text-xs text-slate-500">Susun ujian dari paket soal di Bank Soal Mapel.</p></button>
-      <button className={panel+' text-left hover:border-[#16B364]'} onClick={()=>setSection('manage')}><ClipboardList className="text-[#0B8F4D]"/><h3 className="mt-3 font-extrabold">Kelola Ujian</h3><p className="mt-1 text-xs text-slate-500">Atur status ujian dan bagikan tautan pengerjaan.</p></button>
-      <button className={panel+' text-left hover:border-[#16B364]'} onClick={()=>setSection('results')}><Trophy className="text-[#0B8F4D]"/><h3 className="mt-3 font-extrabold">Hasil Ujian</h3><p className="mt-1 text-xs text-slate-500">Pantau peserta dan hasil pengerjaan siswa.</p></button>
+    {section==='home'&&<div className="space-y-3">
+      <button className={panel+' flex w-full items-center gap-4 text-left transition hover:border-[#16B364] hover:shadow-md'} onClick={()=>setSection('create')}><span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#E3F7EC] text-[#0B8F4D]"><Plus size={23}/></span><span className="min-w-0 flex-1"><strong className="block font-extrabold">Buat Ujian</strong><span className="mt-1 block text-xs text-slate-500">Susun ujian dari paket soal di Bank Soal Mapel.</span></span><ChevronRight className="shrink-0 text-slate-400" size={20}/></button>
+      <button className={panel+' flex w-full items-center gap-4 text-left transition hover:border-[#16B364] hover:shadow-md'} onClick={()=>setSection('manage')}><span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#E3F7EC] text-[#0B8F4D]"><ClipboardList size={22}/></span><span className="min-w-0 flex-1"><strong className="block font-extrabold">Kelola Ujian</strong><span className="mt-1 block text-xs text-slate-500">Atur status ujian dan bagikan tautan pengerjaan.</span></span><ChevronRight className="shrink-0 text-slate-400" size={20}/></button>
+      <button className={panel+' flex w-full items-center gap-4 text-left transition hover:border-[#16B364] hover:shadow-md'} onClick={()=>setSection('results')}><span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#E3F7EC] text-[#0B8F4D]"><Trophy size={22}/></span><span className="min-w-0 flex-1"><strong className="block font-extrabold">Hasil Ujian</strong><span className="mt-1 block text-xs text-slate-500">Pantau peserta dan hasil pengerjaan siswa.</span></span><ChevronRight className="shrink-0 text-slate-400" size={20}/></button>
     </div>}    {section==='create'&&<div className={panel}><button className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>setSection('home')}><ArrowLeft size={16}/> Kembali</button><h3 className="mb-4 text-lg font-black">Buat Ujian</h3><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><div><label className="mb-1 block text-xs font-bold">Tahun ajaran</label><input className={field} value={settings.activeAcademicYear} readOnly/></div><div><label className="mb-1 block text-xs font-bold">Semester</label><input className={field} value={settings.activeSemester} readOnly/></div><div><label className="mb-1 block text-xs font-bold">Kelas</label><select className={field} value={level} onChange={e=>setLevel(e.target.value)}>{cls.map(c=><option key={c}>{c}</option>)}</select></div><div><label className="mb-1 block text-xs font-bold">Mata pelajaran</label><select className={field} value={subject} onChange={e=>setSubject(e.target.value)}><option value="">Pilih mapel</option>{SCHOOL_SUBJECTS.map(s=><option key={s}>{s}</option>)}</select></div></div><label className="mb-1 mt-3 block text-xs font-bold">Nama ujian</label><input className={field} value={title} onChange={e=>setTitle(e.target.value)} placeholder="Nama ujian"/><label className="mb-1 mt-3 block text-xs font-bold">Durasi (menit)</label><input type="number" min="1" max="240" className={field+' max-w-40'} value={duration} onChange={e=>setDuration(Math.max(1,Number(e.target.value)))}/><h4 className="mb-2 mt-5 font-extrabold">Pilih soal dari bank soal</h4><div className="max-h-96 space-y-3 overflow-auto rounded-xl border border-slate-200 p-3">{questionPackages.map(pkg=>{const ids=pkg.questions.map(q=>q.id);const allSelected=ids.length>0&&ids.every(id=>selectedQuestions.includes(id));return <div key={pkg.key} className="rounded-xl border border-slate-200 p-3"><label className="flex cursor-pointer items-start gap-3"><input type="checkbox" checked={allSelected} onChange={e=>setSelectedQuestions(current=>e.target.checked?Array.from(new Set([...current,...ids])):current.filter(id=>!ids.includes(id)))}/><span className="min-w-0"><strong className="block text-sm">{pkg.title}</strong><small className="text-slate-500">{pkg.questions.length} soal dalam satu paket · {pkg.questions[0]?.subject} · {pkg.questions[0]?.className}</small></span></label><details className="mt-2"><summary className="cursor-pointer text-xs font-semibold text-[#0B8F4D]">Pratinjau isi paket</summary><ol className="mt-2 list-decimal space-y-1 pl-5 text-xs text-slate-600">{pkg.questions.map(q=><li key={q.id}>{q.prompt}</li>)}</ol></details></div>})}{!questionPackages.length&&<p className="text-sm text-slate-500">Belum ada paket soal untuk kelas dan mapel ini. Impor soal melalui menu Mapel terlebih dahulu.</p>}</div><button className={btn+' mt-4'} disabled={saving} onClick={()=>void createExam()}><Plus size={16}/> Terbitkan Ujian ({selectedQuestions.length} soal)</button></div>}
     {section==='manage'&&<div className={panel}><button className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>setSection('home')}><ArrowLeft size={16}/> Kembali</button><h3 className="mb-3 text-lg font-black">Kelola Ujian</h3><div className="space-y-3">{exams.map(ex=><div key={ex.id} className="rounded-xl border border-slate-200 p-3"><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0"><p className="font-extrabold">{ex.title}</p><p className="mt-1 text-xs text-slate-500">{ex.className} · {ex.subject} · {ex.duration} menit · {ex.questionIds.length} soal</p><span className={'mt-2 inline-flex rounded-full px-3 py-1 text-xs font-bold '+(ex.status==='Aktif'?'bg-[#E3F7EC] text-[#0B8F4D]':'bg-slate-100 text-slate-600')}>{ex.status}</span></div><div className="flex flex-wrap gap-2"><button className="rounded-xl border border-[#16B364] px-3 py-2 text-xs font-bold text-[#0B8F4D]" onClick={()=>{const url=makeExamLink(ex.id);setShareLink(url);setSection('share');}}><Copy size={14} className="mr-1 inline"/>Bagikan link</button><button className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600" onClick={()=>void updateDoc(doc(db,'exams',ex.id),{status:ex.status==='Aktif'?'Draft':'Aktif'})}>{ex.status==='Aktif'?'Nonaktifkan':'Aktifkan'}</button></div></div></div>)}{!exams.length&&<p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Belum ada ujian. Buat ujian terlebih dahulu.</p>}</div>
       {isVerifiedExamAdmin&&<div className="mt-6 border-t border-slate-100 pt-5"><div className="flex flex-wrap items-center justify-between gap-3"><div><h4 className="font-extrabold">ID Ujian Siswa</h4><p className="mt-1 text-xs text-slate-500">Buat ID untuk setiap siswa atau perbarui seluruh siswa aktif.</p></div><button className={btn} onClick={()=>void generateAllStudentCodes()} disabled={saving}>{saving?'Memproses…':'Perbarui Semua ID'}</button></div><div className="mt-3 max-h-96 space-y-2 overflow-auto">{examStudents.filter(s=>s.status==='Aktif').map(student=>{const activeCode=studentCodes.find(item=>item.studentId===student.id&&item.active);return <div key={student.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-100 p-3"><div className="min-w-0"><p className="font-bold">{student.name}</p><p className="text-xs text-slate-500">{student.className} · {activeCode?activeCode.id:'Belum memiliki ID'}</p></div><button className="rounded-xl border border-[#16B364] px-3 py-2 text-xs font-bold text-[#0B8F4D]" onClick={()=>void generateStudentCode(student)}>{activeCode?'Perbarui ID':'Buat ID'}</button></div>})}{!examStudents.length&&<p className="text-sm text-slate-500">Data siswa belum tersedia.</p>}</div><p className="mt-3 text-xs text-slate-500">ID lama otomatis dinonaktifkan. ID baru perlu diverifikasi kembali oleh siswa.</p></div>}

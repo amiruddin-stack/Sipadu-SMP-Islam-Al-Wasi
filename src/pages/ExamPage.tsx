@@ -92,7 +92,7 @@ export const ExamPage: React.FC = () => {
       } catch (e) { console.warn('Student exam access:', e); }
     };
     void prepareStudentAccess();
-    const unQ = onSnapshot(collection(db, 'examQuestions'), snap => {
+    const unQ = onSnapshot(collection(db, 'examPublicQuestions'), snap => {
       const rows = snap.docs.map(d => ({ ...d.data(), id: d.id, answer: undefined } as Question));
       setQuestions(rows); setOfflineReady(true); void saveOfflineRecord('cache:questions', rows);
     }, e => setMessage('Bank soal belum dapat dibaca: ' + e.message));
@@ -114,7 +114,7 @@ export const ExamPage: React.FC = () => {
     if (!questionText.trim() || options.some(o => !o.trim()) || !subject) { setMessage('Lengkapi mapel, pertanyaan, dan semua pilihan jawaban.'); return; }
     setSaving(true);
     try {
-      const questionRef = doc(collection(db, 'examQuestions'));
+      const questionRef = doc(collection(db, 'examPublicQuestions'));
       await setDoc(questionRef, { title: title.trim() || 'Bank Soal ' + subject, subject, className: selectedClassNames[0] || level, academicYear: settings.activeAcademicYear, semester: settings.activeSemester, prompt: questionText.trim(), options, points: 1, createdAt: new Date().toISOString() });
       await setDoc(doc(db, 'examAnswerKeys', questionRef.id), { answer: correct, points: 1, createdAt: new Date().toISOString() });
       setQuestionText(''); setOptions(['','','','']); setCorrect(0); setMessage('Soal berhasil disimpan ke bank soal.');
@@ -142,7 +142,7 @@ export const ExamPage: React.FC = () => {
         points: Number(q.points || 1), createdAt: new Date().toISOString()
       })).filter(q => q.prompt && q.options.length >= 2 && q.options.every(Boolean));
       if (!batch.length) throw new Error('Tidak ada soal valid');
-      await Promise.all(batch.map(async q => { const { answer, ...publicQuestion } = q; const questionRef = doc(collection(db, 'examQuestions')); await setDoc(questionRef, publicQuestion); await setDoc(doc(db, 'examAnswerKeys', questionRef.id), { answer, points: q.points, createdAt: q.createdAt }); }));
+      await Promise.all(batch.map(async q => { const { answer, ...publicQuestion } = q; const questionRef = doc(collection(db, 'examPublicQuestions')); await setDoc(questionRef, publicQuestion); await setDoc(doc(db, 'examAnswerKeys', questionRef.id), { answer, points: q.points, createdAt: q.createdAt }); }));
       setMessage(batch.length + ' soal berhasil diimpor.');
     } catch (e) { setMessage('File tidak terbaca. Gunakan JSON atau CSV titik koma dengan kolom pertanyaan;A;B;C;D;kunci (1-4).'); }
   };

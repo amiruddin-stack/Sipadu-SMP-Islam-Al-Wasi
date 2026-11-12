@@ -73,7 +73,7 @@ export const ExamPage: React.FC = () => {
 
     const initialize = async () => {
       try {
-        const [cachedQuestions, cachedExams, session] = await Promise.all([
+        const [cachedQuestions, cachedExams, session, cachedIdentity] = await Promise.all([
           readOfflineRecord<Question[]>('cache:questions'),
           readOfflineRecord<Exam[]>('cache:exams'),
           readOfflineRecord<any>('session:active'),

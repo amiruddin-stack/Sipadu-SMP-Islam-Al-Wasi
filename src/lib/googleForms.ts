@@ -102,7 +102,7 @@ export async function readGoogleForm(value: string): Promise<{ title: string; is
   for (const item of form.items || []) {
     const question = item.questionItem?.question;
     const choice = question?.choiceQuestion;
-    if (!question || !choice?.options?.length || choice.type === 'CHECKBOX') continue;
+    if (!question || !choice?.options?.length || !['RADIO', 'DROP_DOWN'].includes(choice.type) || !String(item.title || '').trim()) continue;
     const options = choice.options.map((option: { value?: string }) => String(option.value || '').trim()).filter(Boolean);
     if (options.length < 2) continue;
     const correctValues = question.grading?.correctAnswers?.answers || [];

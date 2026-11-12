@@ -30,7 +30,7 @@ jobs:
         with:
           enablement: true
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: npm install --legacy-peer-deps --no-audit --no-fund --fetch-retries=2 --fetch-timeout=120000
       - name: Build PWA
         run: npm run build
       - name: Add SPA fallback

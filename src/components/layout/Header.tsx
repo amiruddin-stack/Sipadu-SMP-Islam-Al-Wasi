@@ -160,7 +160,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
             </div>
             <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Menu utama</p>
             <div className="space-y-1">
-              {([['dashboard','Beranda'],['settings','Profil'],['classes','Kelas'],['subjects','Mapel'],['attendance','Presensi Siswa'],['journal','Jurnal Pembelajaran'],['assessment','Input Nilai Kelas'],['grades','Rekap Nilai'],['ils','ILS'],['counseling','BK'],['exams','Ujian'],['reports','Laporan'],['behavior','Perilaku Siswa'],['master','Data Master']] as [NavTab,string][]).map(([tab,label]) => (
+              {([['dashboard','Beranda'],['settings','Profil'],['classes','Kelas'],['subjects','Mapel'],['attendance','Presensi Siswa'],['journal','Jurnal Pembelajaran'],['assessment','Input Nilai Kelas'],['grades','Rekap Nilai'],['ils','ILS'],['counseling','BK'],['exams','Ujian'],['reports','Laporan'],['behavior','Perilaku Siswa'],['master','Master Data']] as [NavTab,string][]).map(([tab,label]) => (
                 <button key={tab} type="button" onClick={() => navigate(tab)} className={`flex w-full items-center rounded-xl px-3.5 py-3 text-left text-sm font-semibold transition ${activeTab === tab ? "bg-[#E3F7EC] text-[#0B8F4D]" : "text-slate-700 hover:bg-slate-50"}`}>{label}</button>
               ))}
             </div>

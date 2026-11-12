@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import { NavTab } from '../components/layout/Sidebar';
+import { Header } from '../components/layout/Header';
 import { CalendarCheck, PencilLine, Users, BookOpen, ClipboardList, Settings, ArrowRight, FileText, ClipboardCheck, Search } from 'lucide-react';
 
 interface DashboardPageProps {
   onNavigate: (tab: NavTab) => void;
+  activeTab: NavTab;
 }
 
-export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
+export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, activeTab }) => {
   const { currentUser, firebaseUser } = useAuth();
   const [globalSearch, setGlobalSearch] = useState('');
   const handleGlobalSearch = (event: React.FormEvent) => {
@@ -72,8 +74,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
 
   return (
     <div className="min-h-full bg-[#f5f9f8] text-slate-800">
-      <section className="simpatik-hero mx-3 my-4 max-w-[1460px] overflow-hidden rounded-[26px] px-5 py-7 text-white shadow-sm md:mx-auto md:my-6 md:px-9 md:py-8">
-        <div className="relative z-10 mx-auto flex max-w-[1500px] items-center justify-between gap-5">
+      <section className="simpatik-hero mx-3 my-4 max-w-[1460px] overflow-hidden rounded-[26px] text-white shadow-sm md:mx-auto md:my-6">\n        <Header activeTab={activeTab} onNavigate={onNavigate} embedded />
+        <div className="relative z-10 mx-auto flex max-w-[1500px] items-center justify-between gap-5 px-5 py-7 md:px-9 md:py-8">
           <div className="min-w-0">
             <p className="text-sm text-white/85">Selamat datang, <strong>{currentUser?.displayName || firebaseUser?.displayName || 'Pengguna'}</strong></p>
             <h1 className="simpatik-hero-title mt-1 text-5xl font-black leading-none tracking-tight sm:text-6xl lg:text-7xl">SIMPATIK</h1>

@@ -185,9 +185,9 @@ export const GradeSummaryPage: React.FC = () => {
           <span className="text-[11px] font-semibold text-slate-400">Rata-Rata Kelas</span>
           <p className="text-xl font-bold text-[#076B3A] mt-0.5">{overallAvg}</p>
         </div>
-        <div className="p-3.5 rounded-xl bg-bg-[#E3F7EC] border border-border-[#B7E8CD] text-center">
-          <span className="text-[11px] font-semibold text-#076B3A">Tuntas KKM</span>
-          <p className="text-xl font-bold text-#076B3A mt-0.5">
+        <div className="p-3.5 rounded-xl bg-[#E3F7EC] border border-[#B7E8CD] text-center">
+          <span className="text-[11px] font-semibold text-[#076B3A]">Tuntas KKM</span>
+          <p className="text-xl font-bold text-[#076B3A] mt-0.5">
             {tuntasCount} / {classStudents.length} Siswa
           </p>
         </div>
@@ -252,7 +252,7 @@ export const GradeSummaryPage: React.FC = () => {
                     <span
                       className={`inline-block px-2.5 py-0.5 rounded-md font-bold text-xs ${
                         item.predicate === 'A'
-                          ? 'bg-bg-[#E3F7EC] text-#076B3A'
+                          ? 'bg-[#E3F7EC] text-[#076B3A]'
                           : item.predicate === 'B'
                           ? 'bg-blue-100 text-blue-800'
                           : 'bg-amber-100 text-amber-800'
@@ -265,7 +265,7 @@ export const GradeSummaryPage: React.FC = () => {
                     <span
                       className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
                         item.isTuntas
-                          ? 'bg-bg-[#E3F7EC] text-#076B3A border border-border-[#B7E8CD]'
+                          ? 'bg-[#E3F7EC] text-[#076B3A] border border-[#B7E8CD]'
                           : 'bg-rose-50 text-rose-800 border border-rose-200'
                       }`}
                     >
@@ -279,7 +279,7 @@ export const GradeSummaryPage: React.FC = () => {
                           item.average >= 90
                             ? 'bg-[#076B3A]'
                             : item.average >= 75
-                            ? 'bg-#0B8F4D'
+                            ? 'bg-[#0B8F4D]'
                             : 'bg-rose-500'
                         }`}
                         style={{ width: `${Math.min(100, item.average)}%` }}

@@ -107,7 +107,7 @@ export const AssessmentPage: React.FC = () => {
   };
 
   const getPredicate = (score: number) => {
-    if (score >= 90) return { label: 'A', text: 'Sangat Baik', color: 'text-#0B8F4D bg-bg-[#E3F7EC]' };
+    if (score >= 90) return { label: 'A', text: 'Sangat Baik', color: 'text-[#0B8F4D] bg-[#E3F7EC]' };
     if (score >= 80) return { label: 'B', text: 'Baik', color: 'text-blue-700 bg-blue-50' };
     if (score >= 75) return { label: 'C', text: 'Cukup (KKM)', color: 'text-amber-700 bg-amber-50' };
     return { label: 'D', text: 'Perlu Bimbingan', color: 'text-rose-700 bg-rose-50' };
@@ -228,9 +228,9 @@ export const AssessmentPage: React.FC = () => {
           <span className="text-[11px] font-semibold text-slate-400">Rata-Rata Nilai</span>
           <p className="text-xl font-bold text-slate-900">{avgScore}</p>
         </div>
-        <div className="p-3 rounded-xl bg-bg-[#E3F7EC] border border-border-[#B7E8CD] text-center">
-          <span className="text-[11px] font-semibold text-#076B3A">Tuntas KKM (≥{kkm})</span>
-          <p className="text-xl font-bold text-#076B3A">
+        <div className="p-3 rounded-xl bg-[#E3F7EC] border border-[#B7E8CD] text-center">
+          <span className="text-[11px] font-semibold text-[#076B3A]">Tuntas KKM (≥{kkm})</span>
+          <p className="text-xl font-bold text-[#076B3A]">
             {tuntasCount} / {classStudents.length} Siswa
           </p>
         </div>
@@ -245,7 +245,7 @@ export const AssessmentPage: React.FC = () => {
       </div>
 
       {saveSuccess && (
-        <div className="p-3 rounded-xl bg-bg-[#E3F7EC] border border-border-[#B7E8CD] text-#076B3A text-xs font-semibold flex items-center gap-2">
+        <div className="p-3 rounded-xl bg-[#E3F7EC] border border-[#B7E8CD] text-[#076B3A] text-xs font-semibold flex items-center gap-2">
            Nilai {selectedType} untuk {selectedSubject} Kelas {selectedClass} berhasil disimpan ke Firestore!
         </div>
       )}
@@ -312,7 +312,7 @@ export const AssessmentPage: React.FC = () => {
                       <span
                         className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
                           isTuntas
-                            ? 'bg-bg-[#E3F7EC] text-#076B3A'
+                            ? 'bg-[#E3F7EC] text-[#076B3A]'
                             : 'bg-rose-100 text-rose-800'
                         }`}
                       >

@@ -40,8 +40,8 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
   const navClass = (tab: NavTab) =>
     `relative flex min-h-11 shrink-0 items-center px-2.5 md:px-3 text-sm font-semibold transition-colors ${
       activeTab === tab
-        ? 'text-[#0CA678] font-bold'
-        : 'text-slate-700 hover:text-[#0CA678]'
+        ? 'text-[#078A28] font-bold'
+        : 'text-slate-700 hover:text-[#078A28]'
     }`;
 
   const navigate = (tab: NavTab) => {
@@ -56,7 +56,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
         <button
           type="button"
           onClick={() => setMobileMenuOpen((open) => !open)}
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-100 bg-white text-[#0E8B7D] shadow-sm md:hidden"
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-100 bg-white text-[#078A28] shadow-sm md:hidden"
           aria-label={mobileMenuOpen ? "Tutup menu" : "Buka menu"}
           aria-expanded={mobileMenuOpen}
         >
@@ -100,9 +100,9 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
                 setAcademicOpen((v) => !v);
               }}
               aria-expanded={academicOpen}
-              className={`flex min-h-11 items-center gap-1 px-2.5 md:px-3 text-sm font-semibold transition-colors hover:text-[#0CA678] ${
+              className={`flex min-h-11 items-center gap-1 px-2.5 md:px-3 text-sm font-semibold transition-colors hover:text-[#078A28] ${
                 ['attendance', 'journal', 'assessment', 'grades'].includes(activeTab)
-                  ? 'text-[#0CA678] font-bold'
+                  ? 'text-[#078A28] font-bold'
                   : 'text-slate-700'
               }`}
             >
@@ -112,7 +112,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
 
           <button onClick={() => navigate('ils')} className={navClass('ils')}>
             <span>ILS</span>
-            <span className="ml-1 text-[10px] font-semibold text-[#0CA678]">icon</span>
+            <span className="ml-1 text-[10px] font-semibold text-[#078A28]">icon</span>
           </button>
           <button onClick={() => navigate('counseling')} className={navClass('counseling')}>
             BK
@@ -161,7 +161,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
             <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Menu utama</p>
             <div className="space-y-1">
               {([['dashboard','Beranda'],['settings','Profil'],['classes','Kelas'],['subjects','Mapel'],['attendance','Presensi Siswa'],['journal','Jurnal Pembelajaran'],['assessment','Input Nilai Kelas'],['grades','Rekap Nilai'],['ils','ILS'],['counseling','BK'],['exams','Ujian'],['reports','Laporan'],['behavior','Perilaku Siswa'],['master','Data Master']] as [NavTab,string][]).map(([tab,label]) => (
-                <button key={tab} type="button" onClick={() => navigate(tab)} className={`flex w-full items-center rounded-xl px-3.5 py-3 text-left text-sm font-semibold transition ${activeTab === tab ? "bg-[#EAF6ED] text-[#0E8B7D]" : "text-slate-700 hover:bg-slate-50"}`}>{label}</button>
+                <button key={tab} type="button" onClick={() => navigate(tab)} className={`flex w-full items-center rounded-xl px-3.5 py-3 text-left text-sm font-semibold transition ${activeTab === tab ? "bg-[#EAF6ED] text-[#078A28]" : "text-slate-700 hover:bg-slate-50"}`}>{label}</button>
               ))}
             </div>
             <div className="mt-auto border-t border-emerald-100 pt-4">

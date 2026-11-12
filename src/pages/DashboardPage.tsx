@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import { NavTab } from '../components/layout/Sidebar';
-import { CalendarCheck, PencilLine, Users, BookOpen, ClipboardList, Settings, ArrowRight, FileText, ClipboardCheck } from 'lucide-react';
+import { CalendarCheck, PencilLine, Users, BookOpen, ClipboardList, Settings, ArrowRight, FileText, ClipboardCheck, Search } from 'lucide-react';
 
 interface DashboardPageProps {
   onNavigate: (tab: NavTab) => void;
@@ -10,6 +10,27 @@ interface DashboardPageProps {
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
   const { currentUser, firebaseUser } = useAuth();
+  const [globalSearch, setGlobalSearch] = useState('');
+  const handleGlobalSearch = (event: React.FormEvent) => {
+    event.preventDefault();
+    const query = globalSearch.trim().toLowerCase();
+    if (!query) return;
+    const destinations: [string[], NavTab][] = [
+      [['presensi', 'kehadiran', 'absen'], 'attendance'],
+      [['jurnal', 'pembelajaran'], 'journal'],
+      [['nilai', 'penilaian'], 'assessment'],
+      [['kelas'], 'classes'],
+      [['mapel', 'mata pelajaran'], 'subjects'],
+      [['ujian', 'soal'], 'exams'],
+      [['wali', 'rapor', 'rekap'], 'grades'],
+      [['bk', 'konseling'], 'counseling'],
+      [['laporan'], 'reports'],
+      [['siswa', 'guru', 'data master'], 'master'],
+      [['pengaturan', 'profil'], 'settings'],
+    ];
+    const match = destinations.find(([keywords]) => keywords.some(keyword => query.includes(keyword)));
+    if (match) onNavigate(match[1]);
+  };
   const { students, attendances, journals, settings } = useData();
   const today = new Date();
   const todayStr = [today.getFullYear(), String(today.getMonth() + 1).padStart(2, '0'), String(today.getDate()).padStart(2, '0')].join('-');
@@ -70,6 +91,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
       </section>
 
       <main className="mx-auto max-w-[1500px] space-y-5 px-3 py-5 md:px-5 md:py-6">
+        <form onSubmit={handleGlobalSearch} className="flex w-full items-center gap-3 rounded-[20px] border border-[var(--simpatik-green-line)] bg-[#eef8eb] p-3 shadow-sm md:p-4">
+          <Search size={21} className="shrink-0 text-[var(--simpatik-green-primary)]" />
+          <input value={globalSearch} onChange={event => setGlobalSearch(event.target.value)} type="search" aria-label="Cari menu SIMPATIK" placeholder="Search — cari menu atau fitur SIMPATIK..." className="min-w-0 flex-1 bg-transparent py-2 text-sm text-slate-700 outline-none placeholder:text-slate-400" />
+          <button type="submit" className="shrink-0 rounded-xl bg-[var(--simpatik-green-primary)] px-4 py-2.5 text-xs font-bold text-white transition hover:brightness-95">Cari</button>
+        </form>
         <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <article className="min-w-0 overflow-hidden rounded-[20px] border border-[var(--simpatik-green-line)] bg-white shadow-[0_3px_14px_rgba(20,90,100,.05)]">
             <div className="flex items-center justify-between gap-3 bg-[var(--simpatik-green-soft)] px-4 py-3 md:px-5">

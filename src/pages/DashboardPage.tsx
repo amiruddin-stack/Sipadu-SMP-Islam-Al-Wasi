@@ -124,7 +124,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
         </div>
 
         {/* Hero Title & Actions: aligned to dashboard cards and reduced in height */}
-        <div className="relative z-10 mx-auto max-w-[1240px] px-4 pt-5 pb-3 md:px-8 md:pt-6 md:pb-4">
+        <div className="relative z-10 mx-auto max-w-[1240px] px-4 pt-2 pb-3 md:px-8 md:pt-3 md:pb-4">
           <div className="overflow-hidden rounded-[24px] border border-[#D5EADB] bg-gradient-to-br from-white via-[#F4FBF7] to-[#E7F6EF] px-6 py-6 shadow-sm md:px-9 md:py-7">
             <div className="max-w-3xl">
               <h1 className="text-4xl font-black tracking-tight text-[#0E8B7D] sm:text-5xl md:text-6xl">
@@ -164,7 +164,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
       </section>
 
       {/* MAIN CONTENT AREA */}
-      <main className="relative z-10 mx-auto max-w-[1240px] space-y-6 px-4 py-6 md:px-8">
+      <main className="relative z-10 mx-auto max-w-[1240px] space-y-6 px-4 pt-3 pb-6 md:px-8">
         {/* Search Container */}
         <form
           onSubmit={handleGlobalSearch}

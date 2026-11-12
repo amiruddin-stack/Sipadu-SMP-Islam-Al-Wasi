@@ -87,6 +87,7 @@ export const ExamPage: React.FC = () => {
           setAttemptId(session.attemptId);
           setOwnerUid(session.ownerUid || '');
           setStudentId(session.studentId || '');
+          setVerifiedStudentName(session.studentName || '');
           setStudentClass(session.className || '');
           setDeadlineAt(session.deadlineAt);
           setSecondsLeft(Math.max(0, Math.ceil((session.deadlineAt - Date.now()) / 1000)));
@@ -256,7 +257,7 @@ export const ExamPage: React.FC = () => {
       const id = crypto.randomUUID();
       const startedAt = new Date().toISOString();
       const endAt = Date.now() + exam.duration * 60 * 1000;
-      const attempt = { examId: exam.id, examTitle: exam.title, studentId: student.id, studentName: student?.name || verifiedStudentName, className: student?.className || studentClass, answers: {}, ownerUid: sessionOwnerUid, status: 'Mengerjakan', startedAt };
+      const attempt = { examId: exam.id, examTitle: exam.title, studentId, studentName: student?.name || verifiedStudentName, className: student?.className || studentClass, answers: {}, ownerUid: sessionOwnerUid, status: 'Mengerjakan', startedAt };
       if (navigator.onLine) await setDoc(doc(db, 'examAttempts', id), attempt);
       await saveOfflineRecord('session:active', { exam, attemptId: id, studentId, className: student?.className || studentClass, answers: {}, deadlineAt: endAt, studentName: student?.name || verifiedStudentName, ownerUid: sessionOwnerUid });
       setOwnerUid(sessionOwnerUid);
@@ -277,7 +278,7 @@ export const ExamPage: React.FC = () => {
       if (stableOwnerUid && currentUid && stableOwnerUid !== currentUid) throw new Error('Sesi Firebase berubah. Pengiriman dihentikan demi menjaga kepemilikan jawaban.');
       if (!stableOwnerUid) stableOwnerUid = currentUid;
       if (stableOwnerUid) setOwnerUid(stableOwnerUid);
-      const payload = { examId: activeExam.id, examTitle: activeExam.title, studentId, studentName: student?.name || 'Siswa', className: student?.className || studentClass, ownerUid: stableOwnerUid, answers, status: 'Selesai', startedAt: new Date(deadlineAt - activeExam.duration * 60 * 1000).toISOString(), submittedAt, autoSubmitted: forced };
+      const payload = { examId: activeExam.id, examTitle: activeExam.title, studentId, studentName: student?.name || verifiedStudentName || 'Siswa', className: student?.className || studentClass, ownerUid: stableOwnerUid, answers, status: 'Selesai', startedAt: new Date(deadlineAt - activeExam.duration * 60 * 1000).toISOString(), submittedAt, autoSubmitted: forced };
       await saveOfflineRecord('pending:' + attemptId, { id: attemptId, ...payload });
       setFinishedResult({ title: activeExam.title, studentName: payload.studentName, className: payload.className });
       if (navigator.onLine) {
@@ -335,7 +336,7 @@ export const ExamPage: React.FC = () => {
           const student = examStudents.find(item => item.id === studentId);
           await setDoc(doc(db, 'examAttempts', attemptId), {
             examId: activeExam.id, examTitle: activeExam.title, studentId, ownerUid: syncUid,
-            studentName: student?.name || 'Siswa', className: student?.className || studentClass,
+            studentName: student?.name || verifiedStudentName || 'Siswa', className: student?.className || studentClass,
             answers, status: 'Mengerjakan', startedAt: new Date(deadlineAt - activeExam.duration * 60000).toISOString()
           }, { merge: true });
           await updateDoc(doc(db, 'examAttempts', attemptId), { answers, lastSavedAt: new Date().toISOString() });

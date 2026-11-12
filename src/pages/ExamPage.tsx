@@ -113,9 +113,11 @@ export const ExamPage: React.FC = () => {
         if (!isVerifiedExamAdmin && !auth.currentUser) await signInAnonymously(auth);
         if (!active || !auth.currentUser) return;
 
-        const snapshot = await getDocs(collection(db, 'students'));
-        if (active && !snapshot.empty) {
-          setExamStudents(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as typeof students[number])));
+        if (isVerifiedExamAdmin) {
+          const snapshot = await getDocs(collection(db, 'students'));
+          if (active && !snapshot.empty) {
+            setExamStudents(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as typeof students[number])));
+          }
         }
         if (!active) return;
 

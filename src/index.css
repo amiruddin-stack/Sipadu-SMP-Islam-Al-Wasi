@@ -67,15 +67,15 @@ body {
 
 
 :root {
-  --simpatik-green-deep: #1F6B0A;
-  --simpatik-green-bright: #3A9D10;
-  --simpatik-green-primary: #078A28;
-  --simpatik-green-soft: #E8F6E3;
-  --simpatik-green-line: #CDE8C4;
+  --simpatik-green-deep: var(--green-deep);
+  --simpatik-green-bright: var(--green-primary);
+  --simpatik-green-primary: var(--green-primary);
+  --simpatik-green-soft: var(--green-soft);
+  --simpatik-green-line: #B7E8CD;
 }
 
 .simpatik-hero {
-  background: #10b981;
+  background: var(--green-primary);
 }
 
 .simpatik-hero-title {

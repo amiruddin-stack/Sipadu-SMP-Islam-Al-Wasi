@@ -229,7 +229,7 @@ export const JournalPage: React.FC = () => {
                   <span className="text-xs font-bold text-slate-900">
                     {journal.subject}
                   </span>
-                  <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-bg-[#E3F7EC] text-#076B3A border border-border-[#B7E8CD]">
+                  <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-[#E3F7EC] text-[#076B3A] border border-[#B7E8CD]">
                     {journal.className}
                   </span>
                   <span className="text-xs text-slate-500 font-medium">
@@ -241,7 +241,7 @@ export const JournalPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-bg-[#E3F7EC] text-#076B3A">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E3F7EC] text-[#076B3A]">
                     {journal.status}
                   </span>
                   <button

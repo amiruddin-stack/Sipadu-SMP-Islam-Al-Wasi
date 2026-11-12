@@ -52,9 +52,9 @@ function AppContent() {
   };
 
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden bg-[#F4F9F7] font-sans text-slate-800">
+    <div className="min-h-screen w-full bg-[#f8fbf9] font-sans text-slate-800">
       {activeTab !== 'dashboard' && <Header activeTab={activeTab} onNavigate={setActiveTab} />}
-      <main className="min-h-0 flex-1 overflow-y-auto p-0">
+      <main className="w-full p-0">
         <div className={activeTab === 'dashboard' ? 'w-full' : 'mx-auto w-full max-w-7xl px-4 py-5 md:px-6 md:py-6'}>
           {renderCurrentPage()}
         </div>

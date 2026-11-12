@@ -108,7 +108,4 @@ body {
 }
 
 
-[data-embedded="true"] > button,
-[data-embedded="true"] > div > button { color: #ffffff !important; }
-[data-embedded="true"] > button:hover,
-[data-embedded="true"] > div > button:hover { color: #eafff7 !important; }
+

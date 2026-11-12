@@ -64,3 +64,100 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+
+:root {
+  --simpatik-green-deep: #1F6B0A;
+  --simpatik-green-bright: #3A9D10;
+  --simpatik-green-primary: #078A28;
+  --simpatik-green-soft: #E8F6E3;
+  --simpatik-green-line: #CDE8C4;
+}
+
+.simpatik-hero {
+  isolation: isolate;
+  background: linear-gradient(125deg, var(--simpatik-green-deep) 0%, var(--simpatik-green-bright) 100%);
+}
+
+.simpatik-hero-shapes,
+.simpatik-hero-shine {
+  z-index: 0;
+  pointer-events: none;
+}
+
+.simpatik-hero .geo {
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+
+.simpatik-hero .geo-one { animation: simpatik-float-a 17s ease-in-out -2s infinite; }
+.simpatik-hero .geo-two { animation: simpatik-float-b 13s ease-in-out -5s infinite; }
+.simpatik-hero .geo-three { animation: simpatik-float-c 11s ease-in-out -1s infinite; }
+.simpatik-hero .geo-four { animation: simpatik-float-b 19s ease-in-out -8s infinite; }
+.simpatik-hero .geo-five { animation: simpatik-float-a 15s ease-in-out -4s infinite; }
+.simpatik-hero .geo-six { animation: simpatik-float-c 9s ease-in-out -3s infinite; }
+.simpatik-hero .geo-seven { animation: simpatik-float-b 16s ease-in-out -6s infinite; }
+
+.simpatik-hero-shine {
+  z-index: 1;
+  width: 38%;
+  background: linear-gradient(105deg, transparent 0%, rgb(255 255 255 / 0%) 28%, rgb(255 255 255 / 25%) 50%, rgb(255 255 255 / 0%) 72%, transparent 100%);
+  transform: skewX(-18deg);
+  animation: simpatik-shine 7s ease-in-out infinite;
+}
+
+.simpatik-hero-title {
+  text-shadow: 0 2px 18px rgb(224 255 210 / 28%), 0 0 34px rgb(255 255 255 / 12%);
+}
+
+.hero-primary,
+.hero-secondary {
+  position: relative;
+  z-index: 2;
+  transition: box-shadow 220ms ease, transform 220ms ease, background-color 220ms ease;
+}
+
+.hero-primary:hover,
+.hero-primary:focus-visible,
+.hero-primary:active {
+  box-shadow: 0 0 0 3px rgb(255 255 255 / 18%), 0 0 24px rgb(220 255 200 / 65%);
+  transform: translateY(-1px);
+}
+
+.hero-secondary:hover,
+.hero-secondary:focus-visible,
+.hero-secondary:active {
+  box-shadow: 0 0 20px rgb(220 255 200 / 38%);
+}
+
+@keyframes simpatik-float-a {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); opacity: .8; }
+  50% { transform: translate3d(0, -16px, 0) rotate(18deg); opacity: 1; }
+}
+@keyframes simpatik-float-b {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); opacity: .75; }
+  50% { transform: translate3d(0, 13px, 0) rotate(-16deg); opacity: 1; }
+}
+@keyframes simpatik-float-c {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); opacity: .7; }
+  50% { transform: translate3d(0, -11px, 0) rotate(24deg); opacity: .95; }
+}
+@keyframes simpatik-shine {
+  0%, 68% { transform: translateX(-180%) skewX(-18deg); opacity: 0; }
+  72% { opacity: 1; }
+  91% { transform: translateX(440%) skewX(-18deg); opacity: 0; }
+  100% { transform: translateX(440%) skewX(-18deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .simpatik-hero .geo,
+  .simpatik-hero-shine {
+    animation: none !important;
+    will-change: auto;
+  }
+  .hero-primary,
+  .hero-secondary {
+    transition: none !important;
+  }
+}

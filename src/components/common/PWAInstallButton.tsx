@@ -8,7 +8,7 @@ export const PWAInstallButton: React.FC = () => {
   // If already running as an installed standalone PWA, hide the button
   if (isInstalled) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg">
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-[#078A28] bg-emerald-50 border border-emerald-200 rounded-lg">
         
         <span className="hidden sm:inline">PWA Terpasang</span>
       </span>

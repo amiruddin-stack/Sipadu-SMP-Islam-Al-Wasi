@@ -40,8 +40,8 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
   const navClass = (tab: NavTab) =>
     `relative flex min-h-11 shrink-0 items-center px-2.5 md:px-3 text-sm font-semibold transition-colors ${
       activeTab === tab
-        ? 'text-[#078A28] font-bold'
-        : 'text-slate-700 hover:text-[#078A28]'
+        ? 'text-[#0B8F4D] font-bold'
+        : 'text-slate-700 hover:text-[#0B8F4D]'
     }`;
 
   const navigate = (tab: NavTab) => {
@@ -51,12 +51,12 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
   };
 
   return (
-    <header className={embedded ? "relative z-[9999] w-full bg-transparent" : "sticky top-0 z-[9999] w-full border-b border-emerald-100 bg-white/95 backdrop-blur-sm text-slate-800 shadow-xs"}>
+    <header className={embedded ? "relative z-[9999] w-full bg-transparent" : "sticky top-0 z-[9999] w-full border-b border-[#E3F7EC] bg-white/95 backdrop-blur-sm text-slate-800 shadow-xs"}>
       <div className="mx-auto flex min-h-[60px] max-w-[1240px] items-center justify-between gap-3 px-4 md:min-h-[64px] md:px-6">
         <button
           type="button"
           onClick={() => setMobileMenuOpen((open) => !open)}
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-100 bg-white text-[#078A28] shadow-sm md:hidden"
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#E3F7EC] bg-white text-[#0B8F4D] shadow-sm md:hidden"
           aria-label={mobileMenuOpen ? "Tutup menu" : "Buka menu"}
           aria-expanded={mobileMenuOpen}
         >
@@ -100,9 +100,9 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
                 setAcademicOpen((v) => !v);
               }}
               aria-expanded={academicOpen}
-              className={`flex min-h-11 items-center gap-1 px-2.5 md:px-3 text-sm font-semibold transition-colors hover:text-[#078A28] ${
+              className={`flex min-h-11 items-center gap-1 px-2.5 md:px-3 text-sm font-semibold transition-colors hover:text-[#0B8F4D] ${
                 ['attendance', 'journal', 'assessment', 'grades'].includes(activeTab)
-                  ? 'text-[#078A28] font-bold'
+                  ? 'text-[#0B8F4D] font-bold'
                   : 'text-slate-700'
               }`}
             >
@@ -112,7 +112,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
 
           <button onClick={() => navigate('ils')} className={navClass('ils')}>
             <span>ILS</span>
-            <span className="ml-1 text-[10px] font-semibold text-[#078A28]">icon</span>
+            <span className="ml-1 text-[10px] font-semibold text-[#0B8F4D]">icon</span>
           </button>
           <button onClick={() => navigate('counseling')} className={navClass('counseling')}>
             BK
@@ -151,7 +151,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
             className="flex flex-col overflow-y-auto bg-white p-5 shadow-2xl"
             style={{ position: 'fixed', left: 0, top: 0, zIndex: 2147483647, height: '100dvh', width: 'min(82vw, 320px)', maxWidth: 320, overscrollBehavior: 'contain' }}
           >
-            <div className="mb-6 flex items-center justify-between border-b border-emerald-100 pb-4">
+            <div className="mb-6 flex items-center justify-between border-b border-[#E3F7EC] pb-4">
               <div className="flex items-center gap-3">
                 <img src={`${import.meta.env.BASE_URL}logo-alwasi.png`} alt="Logo SMP Islam Al-Wasi" className="h-10 w-10 object-contain" />
                 <div><p className="text-sm font-extrabold text-slate-900">SIMPATIK</p><p className="text-[10px] font-medium text-slate-500">SMP ISLAM AL-WASI</p></div>
@@ -161,10 +161,10 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
             <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Menu utama</p>
             <div className="space-y-1">
               {([['dashboard','Beranda'],['settings','Profil'],['classes','Kelas'],['subjects','Mapel'],['attendance','Presensi Siswa'],['journal','Jurnal Pembelajaran'],['assessment','Input Nilai Kelas'],['grades','Rekap Nilai'],['ils','ILS'],['counseling','BK'],['exams','Ujian'],['reports','Laporan'],['behavior','Perilaku Siswa'],['master','Data Master']] as [NavTab,string][]).map(([tab,label]) => (
-                <button key={tab} type="button" onClick={() => navigate(tab)} className={`flex w-full items-center rounded-xl px-3.5 py-3 text-left text-sm font-semibold transition ${activeTab === tab ? "bg-[#EAF6ED] text-[#078A28]" : "text-slate-700 hover:bg-slate-50"}`}>{label}</button>
+                <button key={tab} type="button" onClick={() => navigate(tab)} className={`flex w-full items-center rounded-xl px-3.5 py-3 text-left text-sm font-semibold transition ${activeTab === tab ? "bg-[#E3F7EC] text-[#0B8F4D]" : "text-slate-700 hover:bg-slate-50"}`}>{label}</button>
               ))}
             </div>
-            <div className="mt-auto border-t border-emerald-100 pt-4">
+            <div className="mt-auto border-t border-[#E3F7EC] pt-4">
               {currentUser?.displayName && <p className="truncate text-xs font-semibold text-slate-500">{currentUser.displayName}</p>}
               <p className="mt-1 text-[10px] text-slate-400">Qurani, Ramah Anak dan Berkarakter</p>
             </div>
@@ -177,7 +177,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
         <div
           ref={academicMenuRef}
           style={{ left: academicPosition.left, top: academicPosition.top }}
-          className="fixed z-[70] w-56 rounded-2xl border border-emerald-100 bg-white p-2 text-slate-700 shadow-xl"
+          className="fixed z-[70] w-56 rounded-2xl border border-[#E3F7EC] bg-white p-2 text-slate-700 shadow-xl"
         >
           {([
             ['attendance', 'Presensi Siswa'],
@@ -188,8 +188,8 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
             <button
               key={tab}
               onClick={() => navigate(tab)}
-              className={`block w-full rounded-xl px-3.5 py-2.5 text-left text-sm transition hover:bg-emerald-50 ${
-                activeTab === tab ? 'bg-emerald-50 font-bold text-emerald-800' : ''
+              className={`block w-full rounded-xl px-3.5 py-2.5 text-left text-sm transition hover:bg-[#E3F7EC] ${
+                activeTab === tab ? 'bg-[#E3F7EC] font-bold text-[#076B3A]' : ''
               }`}
             >
               {label}

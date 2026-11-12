@@ -20,7 +20,9 @@ interface DashboardPageProps {
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, activeTab }) => {
   const [globalSearch, setGlobalSearch] = useState('');
-  const { students, attendances, journals, settings } = useData();
+  const [attendancePeriod, setAttendancePeriod] = useState<'week'|'1'|'2'|'3'|'4'|'semester'>('week');
+  const [attendanceClass, setAttendanceClass] = useState('Semua Kelas');
+  const { students, classes, attendances, journals, settings } = useData();
 
   const handleGlobalSearch = (event: React.FormEvent) => {
     event.preventDefault();
@@ -45,34 +47,38 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
   };
 
   const today = new Date();
-  const todayStr = [
-    today.getFullYear(),
-    String(today.getMonth() + 1).padStart(2, '0'),
-    String(today.getDate()).padStart(2, '0'),
-  ].join('-');
-
-  const relevantAttendances = attendances.filter(
-    (record) =>
-      record.academicYear === settings.activeAcademicYear && record.semester === settings.activeSemester
+  const todayStr = [today.getFullYear(), String(today.getMonth() + 1).padStart(2, '0'), String(today.getDate()).padStart(2, '0')].join('-');
+  const periodStart = new Date(today);
+  if (attendancePeriod === 'week') periodStart.setDate(periodStart.getDate() - 6);
+  else if (attendancePeriod === 'semester') periodStart.setMonth(periodStart.getMonth() - 5);
+  else periodStart.setMonth(periodStart.getMonth() - Number(attendancePeriod));
+  const periodStartStr = [periodStart.getFullYear(), String(periodStart.getMonth() + 1).padStart(2, '0'), String(periodStart.getDate()).padStart(2, '0')].join('-');
+  const relevantAttendances = attendances.filter(record =>
+    record.academicYear === settings.activeAcademicYear &&
+    record.semester === settings.activeSemester &&
+    record.date >= periodStartStr && record.date <= todayStr &&
+    (attendanceClass === 'Semua Kelas' || record.className === attendanceClass)
   );
-  const attendanceDate = relevantAttendances.some((record) => record.date === todayStr)
-    ? todayStr
-    : relevantAttendances.reduce((latest, record) => (record.date > latest ? record.date : latest), '');
-  const latestAttendances = relevantAttendances.filter((record) => record.date === attendanceDate);
-
   const realTotals = { Hadir: 0, Izin: 0, Sakit: 0, Alpa: 0 };
-  latestAttendances.forEach((record) =>
-    Object.values(record.records || {}).forEach((status) => {
+  const absentByStudent = new Map<string, { student: typeof students[number]; status: string; count: number }>();
+  relevantAttendances.forEach(record => {
+    Object.entries(record.records || {}).forEach(([studentId, status]) => {
       if (status in realTotals) realTotals[status as keyof typeof realTotals]++;
-    })
-  );
-  const realTotalCount = Object.values(realTotals).reduce((sum, value) => sum + value, 0);
-
-  // Exact numbers from the reference design mockup:
-  // Hadir: 10 (83%), Izin: 1 (8%), Sakit: 1 (8%), Alpa: 0 (0%)
-  const totals = realTotalCount > 0 ? realTotals : { Hadir: 10, Izin: 1, Sakit: 1, Alpa: 0 };
-  const totalRecorded = Object.values(totals).reduce((sum, value) => sum + value, 0);
-  const attendancePercent = totalRecorded > 0 ? Math.round((totals.Hadir / totalRecorded) * 100) : 83;
+      if (status !== 'Hadir') {
+        const student = students.find(item => item.id === studentId);
+        if (student) {
+          const key = studentId + ':' + status;
+          const previous = absentByStudent.get(key);
+          absentByStudent.set(key, { student, status, count: (previous?.count || 0) + 1 });
+        }
+      }
+    });
+  });
+  const totalRecorded = Object.values(realTotals).reduce((sum, value) => sum + value, 0);
+  const totals = realTotals;
+  const attendancePercent = totalRecorded > 0 ? Math.round((totals.Hadir / totalRecorded) * 100) : 0;
+  const absentStudents = Array.from(absentByStudent.values()).sort((a,b) => a.student.name.localeCompare(b.student.name));
+  const attendancePeriodLabel = attendancePeriod === 'week' ? '7 hari terakhir' : attendancePeriod === 'semester' ? 'Semester berjalan' : attendancePeriod + ' bulan terakhir';
 
   const currentMonthCount = journals.filter(
     (journal) => typeof journal.date === 'string' && journal.date.slice(0, 7) === todayStr.slice(0, 7)
@@ -83,8 +89,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
 
   // Conic gradient matching reference donut chart:
   // Yellow at top (0% to 8.3%), Green clockwise (8.3% to 91.7%), Red at top-left (91.7% to 100%)
-  const donutGradient =
-    'conic-gradient(#f2b705 0% 8.33%, #16B364 8.33% 91.67%, #f05b62 91.67% 100%)';
+  const hadirPct = totalRecorded ? totals.Hadir / totalRecorded * 100 : 0;
+  const izinPct = totalRecorded ? totals.Izin / totalRecorded * 100 : 0;
+  const sakitPct = totalRecorded ? totals.Sakit / totalRecorded * 100 : 0;
+  const donutGradient = `conic-gradient(#16B364 0% ${hadirPct}%, #f2b705 ${hadirPct}% ${hadirPct + izinPct}%, #3b82f6 ${hadirPct + izinPct}% ${hadirPct + izinPct + sakitPct}%, #f05b62 ${hadirPct + izinPct + sakitPct}% 100%)`;
 
   return (
     <div className="min-h-screen w-full bg-[#f8fbf9] font-sans text-slate-800 antialiased">
@@ -197,6 +205,20 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
           </button>
         </form>
 
+        <section className="overflow-hidden rounded-[24px] border border-[#D5EADB] bg-white shadow-xs">
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-[#E3F7EC] px-5 py-4">
+            <div><h2 className="text-lg font-extrabold text-[#076B3A]">Rekap Presensi Siswa</h2><p className="text-xs text-slate-500">{attendancePeriodLabel} · {settings.activeAcademicYear} · {settings.activeSemester}</p></div>
+            <select value={attendanceClass} onChange={e=>setAttendanceClass(e.target.value)} className="rounded-xl border border-[#B7E8CD] bg-white px-3 py-2 text-sm font-semibold text-slate-700"><option>Semua Kelas</option>{classes.map(cls=><option key={cls} value={cls}>{cls}</option>)}</select>
+          </div>
+          <div className="space-y-4 p-4 md:p-5">
+            <div className="flex flex-wrap gap-2">{[{v:'week',t:'1 Pekan'},{v:'1',t:'1 Bulan'},{v:'2',t:'2 Bulan'},{v:'3',t:'3 Bulan'},{v:'4',t:'4 Bulan'},{v:'semester',t:'1 Semester'}].map(item=><button key={item.v} onClick={()=>setAttendancePeriod(item.v as typeof attendancePeriod)} className={'rounded-xl px-3 py-2 text-xs font-bold '+(attendancePeriod===item.v?'bg-[#0B8F4D] text-white':'bg-slate-100 text-slate-600 hover:bg-[#E3F7EC]')}>{item.t}</button>)}</div>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">{[{label:'Hadir',value:totals.Hadir,color:'text-[#0B8F4D]',bg:'bg-[#E3F7EC]'},{label:'Sakit',value:totals.Sakit,color:'text-blue-700',bg:'bg-blue-50'},{label:'Izin',value:totals.Izin,color:'text-amber-700',bg:'bg-amber-50'},{label:'Alpa',value:totals.Alpa,color:'text-rose-700',bg:'bg-rose-50'}].map(item=><div key={item.label} className={'rounded-2xl p-4 '+item.bg}><p className={'text-xs font-bold '+item.color}>{item.label}</p><p className={'mt-1 text-2xl font-black '+item.color}>{item.value}</p></div>)}</div>
+            <div><div className="mb-2 flex items-center justify-between"><h3 className="font-bold text-slate-800">Siswa tidak hadir</h3><span className="text-xs text-slate-500">{absentStudents.length} catatan siswa</span></div>
+              {absentStudents.length ? <div className="max-h-72 overflow-auto rounded-xl border border-slate-100"><table className="w-full text-left text-sm"><thead className="sticky top-0 bg-slate-50 text-xs text-slate-500"><tr><th className="p-3">Nama siswa</th><th className="p-3">Kelas</th><th className="p-3">Status</th><th className="p-3 text-right">Jumlah</th></tr></thead><tbody className="divide-y divide-slate-100">{absentStudents.map(item=><tr key={item.student.id+item.status}><td className="p-3 font-semibold">{item.student.name}</td><td className="p-3">{item.student.className}</td><td className="p-3"><span className={'rounded-full px-2 py-1 text-xs font-bold '+(item.status==='Sakit'?'bg-blue-50 text-blue-700':item.status==='Izin'?'bg-amber-50 text-amber-700':'bg-rose-50 text-rose-700')}>{item.status}</span></td><td className="p-3 text-right font-bold">{item.count}×</td></tr>)}</tbody></table></div> : <p className="rounded-xl bg-slate-50 p-5 text-center text-sm text-slate-500">Belum ada catatan siswa sakit, izin, atau alpa pada periode ini.</p>}
+            </div>
+          </div>
+        </section>
+
         {/* Two Main Cards Grid: Kehadiran Siswa & Jurnal Pembelajaran */}
         <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* CARD 1: Kehadiran Siswa */}
@@ -211,7 +233,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
                   <h2 className="text-base font-bold text-[#076B3A] md:text-lg">
                     Kehadiran Siswa
                   </h2>
-                  <p className="text-[11px] text-slate-500">10 November 2026</p>
+                  <p className="text-[11px] text-slate-500">{attendanceDate || todayStr}</p>
                 </div>
               </div>
               <button

@@ -43,8 +43,8 @@ function AppContent() {
       case 'assessment': return <AssessmentPage />;
       case 'grades': return <GradeSummaryPage />;
       case 'master': return <MasterDataPage />;
-      case 'classes': return <MasterDataPage initialSubTab="akademik" />;
-      case 'subjects': return <MasterDataPage initialSubTab="akademik" />;
+      case 'classes': return <MasterDataPage initialSubTab="kelas" />;
+      case 'subjects': return <MasterDataPage initialSubTab="mapel" />;
       case 'reports': return <ReportsPage />;
       case 'settings': return <SettingsPage />;
       case 'exams': return <ExamPage />;

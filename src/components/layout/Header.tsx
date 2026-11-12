@@ -6,9 +6,10 @@ import { NavTab } from './Sidebar';
 interface HeaderProps {
   activeTab: NavTab;
   onNavigate: (tab: NavTab) => void;
+  embedded?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate }) => {
+export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded = false }) => {
   const { currentUser, firebaseUser } = useAuth();
   const [academicOpen, setAcademicOpen] = useState(false);
   const academicRef = useRef<HTMLDivElement>(null);
@@ -40,14 +41,14 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate }) => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white text-slate-800 shadow-sm">
-      <div className="mx-auto flex min-h-[68px] w-full flex-nowrap items-center gap-3 overflow-hidden px-3 md:px-5">
+    <header className={embedded ? "relative z-20 w-full bg-transparent text-white" : "sticky top-0 z-50 w-full border-b border-slate-200 bg-white text-slate-800 shadow-sm"}>
+      <div className={`mx-auto flex min-h-[68px] w-full flex-nowrap items-center gap-3 overflow-hidden px-3 md:px-5 ${embedded ? "border-b border-white/20" : ""}`}>
         <button onClick={() => navigate('dashboard')} className="flex shrink-0 items-center gap-2.5 rounded-lg text-left" aria-label="SIMPATIK - Beranda">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white"><img src={`${import.meta.env.BASE_URL}Helmi%20hawari_20261111_083840_0000.png?v=2`} alt="Logo SMP Islam Al-Wasi’" className="h-full w-full object-contain" /></span>
           <span className="whitespace-nowrap bg-gradient-to-r from-[#078A78] via-[#0E9F83] to-[#25B56F] bg-clip-text text-base font-extrabold tracking-wide text-transparent md:text-lg">SIMPATIK</span>
         </button>
 
-        <nav aria-label="Navigasi utama" className="ml-1 flex h-[68px] min-w-0 flex-1 flex-nowrap items-center gap-0.5 overflow-x-auto whitespace-nowrap [scrollbar-width:thin] [overscroll-behavior-x:contain]">
+        <nav data-embedded={embedded} aria-label="Navigasi utama" className="ml-1 flex h-[68px] min-w-0 flex-1 flex-nowrap items-center gap-0.5 overflow-x-auto whitespace-nowrap [scrollbar-width:thin] [overscroll-behavior-x:contain]">
           <button onClick={() => navigate('dashboard')} className={navClass('dashboard')}>Beranda</button>
           <button onClick={() => navigate('settings')} className={navClass('settings')}>Profil</button>
           <button onClick={() => navigate('classes')} className={navClass('classes')}>Kelas</button>

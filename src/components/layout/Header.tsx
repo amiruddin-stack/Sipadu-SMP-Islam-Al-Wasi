@@ -12,7 +12,7 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded = false }) => {
-  const { currentUser, firebaseUser } = useAuth();
+  const { currentUser, firebaseUser, loading, loginWithGoogle, logout } = useAuth();
   const [academicOpen, setAcademicOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const academicRef = useRef<HTMLDivElement>(null);
@@ -127,10 +127,29 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
 
         <div className="flex shrink-0 items-center gap-2">
           {!embedded && <PWAInstallButton />}
-          {!embedded && currentUser?.displayName && (
-            <span className="hidden max-w-32 truncate text-right text-xs font-semibold text-slate-600 lg:block">
-              {currentUser.displayName}
-            </span>
+          {firebaseUser && !firebaseUser.isAnonymous && currentUser ? (
+            <div className="flex items-center gap-2">
+              <span className="hidden max-w-44 truncate text-right text-xs font-semibold text-slate-600 sm:block">
+                {currentUser.displayName}
+                <span className="block text-[10px] font-normal text-slate-400">{currentUser.role === 'super_admin' ? 'Admin Utama' : currentUser.email}</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => void logout()}
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50"
+              >
+                Keluar
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => void loginWithGoogle()}
+              disabled={loading}
+              className="rounded-xl bg-[#0B8F4D] px-3 py-2 text-xs font-bold text-white hover:bg-[#076B3A] disabled:opacity-60"
+            >
+              {loading ? 'Memeriksa…' : 'Login Google Sekolah'}
+            </button>
           )}
         </div>
       </div>

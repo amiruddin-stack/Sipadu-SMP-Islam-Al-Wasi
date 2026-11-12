@@ -237,9 +237,9 @@ export const AttendancePage: React.FC = () => {
           <span className="text-[11px] font-semibold text-slate-500">Total Siswa</span>
           <p className="text-lg font-bold text-slate-900">{totalStudents}</p>
         </div>
-        <div className="p-3 rounded-xl bg-bg-[#E3F7EC] border border-border-[#B7E8CD] text-center">
-          <span className="text-[11px] font-semibold text-#076B3A">Hadir</span>
-          <p className="text-lg font-bold text-#076B3A">{hadirCount}</p>
+        <div className="p-3 rounded-xl bg-[#E3F7EC] border border-[#B7E8CD] text-center">
+          <span className="text-[11px] font-semibold text-[#076B3A]">Hadir</span>
+          <p className="text-lg font-bold text-[#076B3A]">{hadirCount}</p>
         </div>
         <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-center">
           <span className="text-[11px] font-semibold text-blue-800">Sakit</span>
@@ -272,7 +272,7 @@ export const AttendancePage: React.FC = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleSetAllPresent}
-                className="px-3 py-1.5 text-xs font-semibold text-#076B3A bg-bg-[#E3F7EC] hover:bg-bg-[#E3F7EC] border border-border-[#B7E8CD] rounded-lg transition-colors"
+                className="px-3 py-1.5 text-xs font-semibold text-[#076B3A] bg-[#E3F7EC] hover:bg-[#E3F7EC] border border-[#B7E8CD] rounded-lg transition-colors"
                 title="Tandai semua siswa hadir"
               >
                 ✓ Setel Semua Hadir
@@ -289,7 +289,7 @@ export const AttendancePage: React.FC = () => {
           </div>
 
           {savedSuccess && (
-            <div className="m-4 p-3 rounded-xl bg-bg-[#E3F7EC] border border-border-[#B7E8CD] text-#076B3A text-xs font-semibold flex items-center gap-2">
+            <div className="m-4 p-3 rounded-xl bg-[#E3F7EC] border border-[#B7E8CD] text-[#076B3A] text-xs font-semibold flex items-center gap-2">
                Presensi Kelas {selectedClass} berhasil disimpan ke Firestore!
             </div>
           )}
@@ -347,7 +347,7 @@ export const AttendancePage: React.FC = () => {
                                 const buttonColors: Record<AttendanceStatus, string> = {
                                   Hadir: isSelected
                                     ? 'bg-[#076B3A] text-white border-[#076B3A]'
-                                    : 'bg-white text-slate-700 border-slate-200 hover:bg-bg-[#E3F7EC]',
+                                    : 'bg-white text-slate-700 border-slate-200 hover:bg-[#E3F7EC]',
                                   Sakit: isSelected
                                     ? 'bg-blue-600 text-white border-blue-600'
                                     : 'bg-white text-slate-700 border-slate-200 hover:bg-blue-50',
@@ -445,7 +445,7 @@ export const AttendancePage: React.FC = () => {
                     <tr key={std.id} className="hover:bg-slate-50">
                       <td className="py-2.5 px-3 text-center text-slate-400">{idx + 1}</td>
                       <td className="py-2.5 px-3 font-semibold text-slate-900">{std.name}</td>
-                      <td className="py-2.5 px-3 text-center text-#0B8F4D font-medium">{h}</td>
+                      <td className="py-2.5 px-3 text-center text-[#0B8F4D] font-medium">{h}</td>
                       <td className="py-2.5 px-3 text-center text-blue-700 font-medium">{s}</td>
                       <td className="py-2.5 px-3 text-center text-amber-700 font-medium">{i}</td>
                       <td className="py-2.5 px-3 text-center text-rose-700 font-medium">{a}</td>
@@ -454,7 +454,7 @@ export const AttendancePage: React.FC = () => {
                         <span
                           className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                             pct >= 90
-                              ? 'bg-bg-[#E3F7EC] text-#076B3A'
+                              ? 'bg-[#E3F7EC] text-[#076B3A]'
                               : pct >= 75
                               ? 'bg-amber-100 text-amber-800'
                               : 'bg-rose-100 text-rose-800'

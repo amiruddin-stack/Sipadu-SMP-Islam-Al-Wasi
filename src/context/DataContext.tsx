@@ -7,6 +7,7 @@ import {
   deleteDoc,
 } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../firebase/config';
+import { useAuth } from './AuthContext';
 import {
   initialAssessments,
   initialAttendances,
@@ -90,6 +91,7 @@ function saveLocal<T>(key: string, data: T) {
 }
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { firebaseUser, currentUser } = useAuth();
   const [students, setStudents] = useState<Student[]>(() => loadLocal('students', initialStudents));
   const [teachers, setTeachers] = useState<Teacher[]>(() => loadLocal('teachers', initialTeachers));
   const [classes, setClasses] = useState<string[]>(() => loadLocal('classes', initialClasses));
@@ -115,8 +117,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
   const [isSyncing, setIsSyncing] = useState(false);
 
-  // Sync with Firestore in real-time if online
+  // Sync with Firestore only after a verified school account has logged in
   useEffect(() => {
+    if (!firebaseUser || firebaseUser.isAnonymous || !currentUser) {
+      setIsSyncing(false);
+      return;
+    }
     setIsSyncing(true);
 
     // Listen to Attendance collection
@@ -236,7 +242,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       unsubSubjects();
       unsubExtracurriculars();
     };
-  }, []);
+  }, [firebaseUser?.uid, firebaseUser?.isAnonymous, currentUser?.role]);
 
   // Save Attendance
   const saveAttendance = async (record: AttendanceRecord) => {

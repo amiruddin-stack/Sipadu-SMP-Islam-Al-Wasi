@@ -262,7 +262,7 @@ export const ExamPage: React.FC = () => {
       if (navigator.onLine && auth.currentUser?.uid && ownerUid && auth.currentUser.uid === ownerUid) updateDoc(doc(db, 'examAttempts', attemptId), { answers, lastSavedAt: new Date().toISOString() }).catch(() => {});
     }, 500);
     return () => window.clearTimeout(timer);
-  }, [answers, section, attemptId, activeExam, studentId, studentClass, deadlineAt]);
+  }, [answers, section, attemptId, activeExam, studentId, studentClass, deadlineAt, ownerUid]);
 
   useEffect(() => {
     if (!isOnline) return;

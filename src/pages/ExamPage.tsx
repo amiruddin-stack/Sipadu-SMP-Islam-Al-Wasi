@@ -180,7 +180,8 @@ export const ExamPage: React.FC = () => {
           let score = 0;
           let total = 0;
           exam.questionIds.forEach((questionId, index) => {
-            const key = keySnapshots[index].data();
+            const key = keySnapshots[index]?.data();
+            if (!key) return;
             const points = Number(key.points) || 1;
             total += points;
             if (attempt.answers?.[questionId] === key.answer) score += points;

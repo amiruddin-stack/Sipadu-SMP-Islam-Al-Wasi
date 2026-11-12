@@ -207,7 +207,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
                         {std.className}
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-bg-[#E3F7EC] text-#076B3A">
+                        <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#E3F7EC] text-[#076B3A]">
                           {std.status}
                         </span>
                       </td>
@@ -289,7 +289,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
                     </td>
                     <td className="py-3 px-4 font-mono text-slate-500">{tch.email}</td>
                     <td className="py-3 px-4 text-center">
-                      <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-bg-[#E3F7EC] text-#076B3A">
+                      <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#E3F7EC] text-[#076B3A]">
                         {tch.status}
                       </span>
                     </td>
@@ -319,7 +319,7 @@ export const MasterDataPage: React.FC<MasterDataPageProps> = ({ initialSubTab = 
                   className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between"
                 >
                   <span className="text-xs font-bold text-slate-800">Kelas {c}</span>
-                  <span className="text-[10px] font-semibold text-#076B3A bg-bg-[#E3F7EC] px-2 py-0.5 rounded-md">
+                  <span className="text-[10px] font-semibold text-[#076B3A] bg-[#E3F7EC] px-2 py-0.5 rounded-md">
                     {students.filter((s) => s.className === c).length} Siswa
                   </span>
                 </div>

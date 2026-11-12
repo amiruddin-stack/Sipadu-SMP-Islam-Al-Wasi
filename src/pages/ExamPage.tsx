@@ -8,7 +8,7 @@ import { useData } from '../context/DataContext';
 
 type Question = { id: string; title: string; subject: string; className: string; academicYear: string; semester: string; prompt: string; options: string[]; answer?: number; points: number };
 type Exam = { id: string; title: string; subject: string; className: string; academicYear: string; semester: string; duration: number; questionIds: string[]; formUrl?: string; status: 'Aktif' | 'Draft'; createdAt: string };
-type Attempt = { id: string; examId: string; examTitle: string; studentId: string; studentName: string; className: string; answers: Record<string, number>; score: number; total: number; status: 'Mengerjakan' | 'Selesai'; startedAt: string; submittedAt?: string };
+type Attempt = { id: string; examId: string; examTitle: string; studentId: string; studentName: string; className: string; answers: Record<string, number>; score?: number; total?: number; status: 'Mengerjakan' | 'Selesai'; startedAt: string; submittedAt?: string };
 
 const cls = ['VII', 'VIII', 'IX'];
 const panel = 'rounded-2xl border border-slate-200 bg-white p-4 shadow-sm';
@@ -16,12 +16,6 @@ const field = 'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 te
 const btn = 'inline-flex items-center justify-center gap-2 rounded-xl bg-[#16B364] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#0B8F4D] disabled:cursor-not-allowed disabled:opacity-50';
 
 function classLevel(value: string) { return value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3); }
-function scoreAttempt(questions: Question[], answers: Record<string, number>) {
-  const total = questions.reduce((sum, q) => sum + q.points, 0);
-  const score = questions.reduce((sum, q) => sum + (answers[q.id] === q.answer ? q.points : 0), 0);
-  return { score, total, percent: total ? Math.round(score / total * 100) : 0 };
-}
-
 export const ExamPage: React.FC = () => {
   const { students, classes, subjects, settings } = useData();
   const [examStudents, setExamStudents] = useState(students);
@@ -168,7 +162,7 @@ export const ExamPage: React.FC = () => {
       const id = crypto.randomUUID();
       const startedAt = new Date().toISOString();
       const endAt = Date.now() + exam.duration * 60 * 1000;
-      const attempt = { examId: exam.id, examTitle: exam.title, studentId: student.id, studentName: student.name, className: student.className, answers: {}, score: 0, total: 0, status: 'Mengerjakan', startedAt };
+      const attempt = { examId: exam.id, examTitle: exam.title, studentId: student.id, studentName: student.name, className: student.className, answers: {}, ownerUid: auth.currentUser?.uid || '', status: 'Mengerjakan', startedAt };
       if (navigator.onLine) await setDoc(doc(db, 'examAttempts', id), attempt);
       await saveOfflineRecord('session:active', { exam, attemptId: id, studentId: student.id, className: student.className, answers: {}, deadlineAt: endAt, studentName: student.name });
       setAttemptId(id); setAnswers({}); setCurrentQuestion(0); setActiveExam(exam); setDeadlineAt(endAt); setSecondsLeft(exam.duration * 60); setSection('take'); setMessage(navigator.onLine ? '' : 'Mode offline aktif. Jawaban disimpan pada perangkat dan akan disinkronkan saat internet kembali.');
@@ -177,17 +171,16 @@ export const ExamPage: React.FC = () => {
 
   const finishExam = async (forced = false) => {
     if (!activeExam || !attemptId || saving) return;
-    const result = { score: 0, total: 0, percent: 0 };
     setSaving(true);
     const student = examStudents.find(s => s.id === studentId);
     const submittedAt = new Date().toISOString();
-    const payload = { examId: activeExam.id, examTitle: activeExam.title, studentId, studentName: student?.name || 'Siswa', className: student?.className || studentClass, answers, status: 'Selesai', startedAt: new Date(deadlineAt - activeExam.duration * 60 * 1000).toISOString(), submittedAt, autoSubmitted: forced };
+    const payload = { examId: activeExam.id, examTitle: activeExam.title, studentId, studentName: student?.name || 'Siswa', className: student?.className || studentClass, ownerUid: auth.currentUser?.uid || '', answers, status: 'Selesai', startedAt: new Date(deadlineAt - activeExam.duration * 60 * 1000).toISOString(), submittedAt, autoSubmitted: forced };
     try {
       await saveOfflineRecord('pending:' + attemptId, { id: attemptId, ...payload });
       setFinishedResult({ title: activeExam.title, studentName: payload.studentName, className: payload.className });
       if (navigator.onLine) {
         if (!auth.currentUser) await signInAnonymously(auth);
-        await setDoc(doc(db, 'examAttempts', attemptId), payload, { merge: true });
+        await setDoc(doc(db, 'examAttempts', attemptId), { ...payload, ownerUid: auth.currentUser.uid }, { merge: true });
         await deleteOfflineRecord('pending:' + attemptId);
         setMessage(forced ? 'Waktu habis. Jawaban terkirim otomatis.' : 'Jawaban berhasil dikirim.');
       } else {
@@ -233,7 +226,7 @@ export const ExamPage: React.FC = () => {
         if (section === 'take' && activeExam && attemptId) {
           const student = examStudents.find(item => item.id === studentId);
           await setDoc(doc(db, 'examAttempts', attemptId), {
-            examId: activeExam.id, examTitle: activeExam.title, studentId,
+            examId: activeExam.id, examTitle: activeExam.title, studentId, ownerUid: auth.currentUser.uid,
             studentName: student?.name || 'Siswa', className: student?.className || studentClass,
             answers, status: 'Mengerjakan', startedAt: new Date(deadlineAt - activeExam.duration * 60000).toISOString()
           }, { merge: true });
@@ -242,7 +235,7 @@ export const ExamPage: React.FC = () => {
         const pending = await readOfflineRecords<any>('pending:');
         for (const item of pending) {
           if (cancelled) return;
-          await setDoc(doc(db, 'examAttempts', item.id), item, { merge: true });
+          await setDoc(doc(db, 'examAttempts', item.id), { ...item, ownerUid: auth.currentUser.uid }, { merge: true });
           await deleteOfflineRecord('pending:' + item.id);
         }
         if (pending.length) setMessage(pending.length + ' hasil ujian offline berhasil disinkronkan ke server.');

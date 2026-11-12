@@ -10,6 +10,10 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function incoming() {
+      return request.resource.data;
+    }
+
     function isSchoolGoogleAccount() {
       return isSignedIn() &&
         request.auth.token.email_verified == true &&

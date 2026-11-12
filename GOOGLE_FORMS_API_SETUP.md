@@ -1,6 +1,6 @@
 # Mengaktifkan Impor Google Forms di SIMPATIK
 
-Integrasi menggunakan Google Forms API v1 dan Google Identity Services. Aplikasi meminta scope baca saja: `https://www.googleapis.com/auth/forms.body.readonly`. Token akses disimpan sementara di memori browser dan tidak ditulis ke Firestore atau local storage.
+Integrasi menggunakan Google Forms API v1 dan Google Identity Services. Aplikasi meminta scope baca saja: `https://www.googleapis.com/auth/forms.body.readonly`. Token akses disimpan sementara di memori browser dan tidak ditulis ke Firestore atau local storage. Aplikasi tidak membaca respons/jawaban siswa.
 
 ## 1. Aktifkan Google Forms API
 
@@ -26,22 +26,17 @@ Google dapat meminta proses verifikasi OAuth sebelum aplikasi eksternal dipakai 
 3. Nama client: `SIMPATIK GitHub Pages`.
 4. Tambahkan **Authorized JavaScript origins**:
    - `https://amiruddin-stack.github.io`
-   - `http://localhost:3000` untuk pengujian lokal.
+   - `http://localhost:3000` hanya jika pengujian lokal diperlukan.
 5. GIS token flow yang dipakai aplikasi ini tidak membutuhkan Authorized redirect URI.
 6. Buat client, lalu salin **Client ID** yang berakhiran `.apps.googleusercontent.com`.
 
 Jangan membuat atau menaruh Client Secret di aplikasi frontend. SIMPATIK hanya menggunakan Client ID publik.
 
-## 4. Masukkan Client ID ke GitHub
+## 4. Konfigurasi Client ID
 
-1. Buka repository `amiruddin-stack/Sipadu-SMP-Islam-Al-Wasi`.
-2. Masuk ke **Settings → Secrets and variables → Actions**.
-3. Pilih **New repository secret**.
-4. Nama secret harus persis: `VITE_GOOGLE_CLIENT_ID`.
-5. Isi nilainya dengan OAuth Client ID dari Google Cloud.
-6. Simpan.
+Client ID Web disimpan langsung pada `src/lib/googleFormsConfig.ts`. Tidak perlu membuat GitHub Secret `VITE_GOOGLE_CLIENT_ID`. Client ID bersifat publik; jangan pernah menyimpan Client Secret pada aplikasi frontend atau repository.
 
-Workflow GitHub Pages sudah disiapkan untuk membaca secret tersebut saat membangun aplikasi. Perubahan baru tampil di situs setelah perubahan kode masuk ke branch `main` dan workflow deploy berjalan.
+Untuk perubahan berikutnya, perbarui nilai `GOOGLE_FORMS_CLIENT_ID` pada file konfigurasi tersebut.
 
 ## 5. Cara guru mengimpor
 

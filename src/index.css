@@ -37,7 +37,7 @@ html, body, #root, button, input, textarea, select, option {
 }
 
 body {
-  background: #F3F7F5;
+  background: #FFFFFF;
   color: #172B22;
 }
 
@@ -175,7 +175,7 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: linear-gradient(135deg, #e3f6ec, #d3f0e1);
+  background: #FFFFFF;
   box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
 }
 

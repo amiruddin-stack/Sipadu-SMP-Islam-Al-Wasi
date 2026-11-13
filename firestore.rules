@@ -31,7 +31,7 @@ service cloud.firestore {
 
     function isGuruOrAdmin() {
       return userProfileExists()
-        && userRole() in ['super_admin', 'guru'];
+        && userRole() in ['super_admin', 'kepala_sekolah', 'operator', 'guru', 'wali_kelas'];
     }
 
     function validProfile(userId) {
@@ -91,8 +91,8 @@ service cloud.firestore {
     }
 
     match /students/{studentId} {
-      // Daftar lengkap siswa hanya untuk admin. Guru dan akun anonim tidak dapat membaca.
-      allow read: if isAdmin();
+      // Guru dan admin boleh membaca data siswa; akun anonim tetap ditolak.
+      allow read: if isGuruOrAdmin();
       // Impor Excel memakai setDoc(..., {merge:true}); admin perlu create dan update.
       allow create: if isAdmin() || validStudentRegistration(studentId);
       allow update, delete: if isAdmin();

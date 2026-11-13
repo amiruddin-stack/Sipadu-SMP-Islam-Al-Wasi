@@ -48,7 +48,101 @@ service cloud.firestore {
     }
 
     match /students/{studentId} {
+      allow read, update, delete: if isSchoolGoogleAccount();
+      allow create: if isSchoolGoogleAccount() || (
+        isSignedIn() &&
+        request.auth.token.firebase.sign_in_provider == 'anonymous' &&
+        studentId.matches('^std-[a-f0-9]{64}
+    match /attendance/{attendanceId} {
       allow read, write: if isSchoolGoogleAccount();
+    }
+    match /journals/{journalId} {
+      allow read, write: if isSchoolGoogleAccount();
+    }
+    match /behaviors/{behaviorId} {
+      allow read, write: if isSchoolGoogleAccount();
+    }
+    match /counseling/{counselingId} {
+      allow read, write: if isSchoolGoogleAccount();
+    }
+    match /assessments/{assessmentId} {
+      allow read, write: if isSchoolGoogleAccount();
+    }
+    match /settings/{settingId} {
+      allow read, write: if isSchoolGoogleAccount();
+    }
+    match /teachers/{teacherId} {
+      allow read, write: if isSchoolGoogleAccount();
+    }
+    match /master_classes/{classId} {
+      allow read, write: if isSchoolGoogleAccount();
+    }
+    match /master_subjects/{subjectId} {
+      allow read, write: if isSchoolGoogleAccount();
+    }
+    match /extracurriculars/{itemId} {
+      allow read, write: if isSchoolGoogleAccount();
+    }
+    match /attendance_history/{historyId} {
+      allow read, write: if isSchoolGoogleAccount();
+    }
+
+    match /examQuestions/{questionId} {
+      allow read, write: if isAdmin();
+    }
+    match /examPublicQuestions/{questionId} {
+      allow read: if isSignedIn();
+      allow create, update: if canManageExamQuestions() && !('answer' in request.resource.data);
+      allow delete: if canManageExamQuestions();
+    }
+    match /examAnswerKeys/{questionId} {
+      allow read: if isAdmin();
+      allow create, update, delete: if canManageExamQuestions();
+    }
+    match /exams/{examId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+    match /examStudentCodes/{code} {
+      allow get: if isSignedIn() && resource.data.active == true &&
+        (resource.data.ownerUid == null || resource.data.ownerUid == request.auth.uid);
+      allow list: if isAdmin();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() ||
+        (isSignedIn() && resource.data.active == true &&
+          resource.data.ownerUid == null &&
+          request.resource.data.ownerUid == request.auth.uid &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ownerUid']));
+    }
+    match /examAttempts/{attemptId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.ownerUid == request.auth.uid);
+      allow create: if isSignedIn() &&
+        incoming().ownerUid == request.auth.uid &&
+        !('score' in incoming()) && !('total' in incoming()) && !('percent' in incoming());
+      allow update: if isAdmin() ||
+        (isSignedIn() &&
+          resource.data.ownerUid == request.auth.uid &&
+          request.resource.data.ownerUid == request.auth.uid &&
+          resource.data.status == 'Mengerjakan' &&
+          !('score' in request.resource.data) &&
+          !('total' in request.resource.data) &&
+          !('percent' in request.resource.data));
+      allow delete: if isAdmin();
+    }
+  }
+}) &&
+        incoming().id == studentId &&
+        incoming().name is string &&
+        incoming().name.size() >= 3 &&
+        incoming().name.size() <= 100 &&
+        incoming().nis == '' &&
+        incoming().nisn == '' &&
+        incoming().gender == 'L' &&
+        incoming().status == 'Aktif' &&
+        incoming().className in ['VII (Tujuh)', 'VIII (Delapan)', 'IX (Sembilan)'] &&
+        incoming().registrationSource == 'public_form' &&
+        !exists(/databases/$(database)/documents/students/$(studentId))
+      );
     }
     match /attendance/{attendanceId} {
       allow read, write: if isSchoolGoogleAccount();

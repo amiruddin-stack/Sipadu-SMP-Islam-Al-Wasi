@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Bell } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { NavTab } from '../components/layout/Sidebar';
 import { Header } from '../components/layout/Header';
@@ -96,36 +97,18 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
   const donutGradient = `conic-gradient(#16B364 0% ${hadirPct}%, #f2b705 ${hadirPct}% ${hadirPct + izinPct}%, #3b82f6 ${hadirPct + izinPct}% ${hadirPct + izinPct + sakitPct}%, #f05b62 ${hadirPct + izinPct + sakitPct}% 100%)`;
 
   return (
-    <div className="min-h-screen w-full bg-[#f8fbf9] font-sans text-slate-800 antialiased">
+    <div className="min-h-screen w-full bg-white font-sans text-slate-800 antialiased">
       {/* HERO SECTION with compact aligned card and integrated top navbar */}
-      <section className="relative w-full overflow-hidden pb-3 pt-0 bg-[#f4faf7]">
-        {/* Soft pastel mint watercolor wash background effect */}
-        <div
-          className="pointer-events-none absolute inset-0 z-0 opacity-70"
-          style={{
-            backgroundImage: `
-              radial-gradient(circle at 82% 16%, rgba(160, 226, 206, 0.45) 0%, rgba(198, 240, 226, 0.25) 30%, transparent 60%),
-              radial-gradient(circle at 66% 40%, rgba(182, 232, 220, 0.38) 0%, rgba(220, 246, 238, 0.15) 28%, transparent 55%),
-              radial-gradient(circle at 12% 26%, rgba(192, 238, 222, 0.35) 0%, transparent 45%),
-              radial-gradient(circle at 50% 12%, rgba(215, 246, 238, 0.45) 0%, transparent 55%),
-              linear-gradient(180deg, #F5FAF8 0%, #FFFFFF 100%)
-            `,
-          }}
-        />
-
-        {/* Subtle watercolor blob circles in the top right to match the image */}
-        <div
-          className="pointer-events-none absolute right-[-40px] top-[10px] h-[340px] w-[340px] rounded-full blur-2xl"
-          style={{
-            background: 'radial-gradient(circle, rgba(164, 225, 208, 0.35) 0%, rgba(200, 240, 228, 0.1) 70%, transparent 100%)',
-          }}
-        />
-        <div
-          className="pointer-events-none absolute right-[180px] top-[140px] h-[220px] w-[220px] rounded-full blur-xl"
-          style={{
-            background: 'radial-gradient(circle, rgba(188, 234, 222, 0.28) 0%, transparent 70%)',
-          }}
-        />
+      <section className="relative w-full overflow-hidden pb-3 pt-0 bg-white">
+        <div className="relative z-10 mx-auto flex w-full max-w-[1240px] items-center justify-between border-b border-slate-100 bg-white px-4 py-3 md:px-8">
+          <div className="flex min-w-0 items-center gap-3">
+            <img src={`${import.meta.env.BASE_URL}logo-alwasi.png`} alt="Logo SMP Islam Al-Wasi’" className="h-10 w-10 shrink-0 object-contain" />
+            <span className="truncate text-sm font-extrabold tracking-tight text-slate-900 sm:text-base">SMP Islam Al-Wasi’</span>
+          </div>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600" aria-label="Notifikasi">
+            <Bell size={19} strokeWidth={1.8} />
+          </div>
+        </div>
 
         {/* Embedded Top Navigation Bar */}
         <div className="relative z-10 md:hidden">
@@ -134,7 +117,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
 
         {/* Full-width hero card with illustration beside unchanged hero text */}
         <div className="relative z-10 mx-auto max-w-[1240px] px-4 pt-2 pb-3 md:px-8 md:pt-3 md:pb-4">
-          <div className="hero flex w-full flex-col items-center justify-between gap-5 overflow-hidden rounded-[24px] border border-[#D5EADB] bg-gradient-to-br from-white via-[#E3F7EC] to-[#E7F6EF] px-6 py-6 shadow-sm md:flex-row md:gap-8 md:px-9 md:py-7">
+          <div className="hero flex w-full flex-col items-center justify-between gap-5 overflow-hidden rounded-[24px] border border-slate-200 bg-white px-6 py-6 shadow-sm md:flex-row md:gap-8 md:px-9 md:py-7">
             <div className="min-w-0 w-full max-w-3xl flex-1">
               <h1 className="font-black tracking-tight text-[#0B8F4D]">
                 SIMPATIK
@@ -181,7 +164,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
         {/* Search Container */}
         <form
           onSubmit={handleGlobalSearch}
-          className="flex w-full items-center justify-between gap-3 rounded-[22px] border border-[#D5EADB] bg-[#E3F7EC] px-4 py-3 shadow-2xs"
+          className="flex w-full items-center justify-between gap-3 rounded-[22px] border border-[#D5EADB] bg-white px-4 py-3 shadow-2xs"
         >
           <div className="flex min-w-0 flex-1 items-center gap-3">
             <Search size={20} className="shrink-0 text-[#16B364]" />
@@ -205,7 +188,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
         <section className="overflow-hidden rounded-[24px] border border-[#D5EADB] bg-white shadow-xs">
           <div className="flex flex-wrap items-center justify-between gap-3 bg-[#E3F7EC] px-5 py-4">
             <div><h2 className="text-lg font-extrabold text-[#076B3A]">Rekap Presensi Siswa</h2><p className="text-xs text-slate-500">{attendancePeriodLabel} · {settings.activeAcademicYear} · {settings.activeSemester}</p></div>
-            <select value={attendanceClass} onChange={e=>setAttendanceClass(e.target.value)} className="rounded-xl border border-[#B7E8CD] bg-white px-3 py-2 text-sm font-semibold text-slate-700"><option>Semua Kelas</option>{classes.map(cls=><option key={cls} value={cls}>{cls}</option>)}</select>
+            <select value={attendanceClass} onChange={e=>setAttendanceClass(e.target.value)} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700"><option>Semua Kelas</option>{classes.map(cls=><option key={cls} value={cls}>{cls}</option>)}</select>
           </div>
           <div className="space-y-4 p-4 md:p-5">
             <div className="flex flex-wrap gap-2">{[{v:'week',t:'1 Pekan'},{v:'1',t:'1 Bulan'},{v:'2',t:'2 Bulan'},{v:'3',t:'3 Bulan'},{v:'4',t:'4 Bulan'},{v:'semester',t:'1 Semester'}].map(item=><button key={item.v} onClick={()=>setAttendancePeriod(item.v as typeof attendancePeriod)} className={'rounded-xl px-3 py-2 text-xs font-bold '+(attendancePeriod===item.v?'bg-[#0B8F4D] text-white':'bg-slate-100 text-slate-600 hover:bg-[#E3F7EC]')}>{item.t}</button>)}</div>

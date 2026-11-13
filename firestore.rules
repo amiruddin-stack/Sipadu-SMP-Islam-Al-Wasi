@@ -93,8 +93,8 @@ service cloud.firestore {
       // Daftar lengkap siswa hanya untuk admin. Guru dan akun anonim tidak dapat membaca.
       allow read: if isAdmin();
       // Impor Excel memakai setDoc(..., {merge:true}); admin perlu create dan update.
-      allow create, update, delete: if isAdmin()
-        || (request.method == 'create' && validStudentRegistration(studentId));
+      allow create: if isAdmin() || validStudentRegistration(studentId);
+      allow update, delete: if isAdmin();
     }
 
     match /attendance/{id} {

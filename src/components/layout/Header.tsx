@@ -55,11 +55,10 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
   const isAcademicActive = academicItems.some(([tab]) => tab === activeTab);
 
   return (
-    <header className={embedded ? 'relative z-[9999] w-full bg-transparent' : 'sticky top-0 z-[9999] w-full border-b border-[#D5EADB] bg-white/95 text-slate-800 shadow-xs backdrop-blur-sm'}>
+    <header className={embedded ? 'relative z-[9999] w-full bg-transparent' : 'sticky top-0 z-[9999] w-full border-b border-slate-100 bg-white text-slate-800 shadow-xs'}>
       <div className="mx-auto flex min-h-[68px] max-w-[1240px] items-center gap-3 px-4 md:px-6">
-        <button type="button" onClick={() => navigate('dashboard')} className="flex min-w-0 shrink-0 items-center gap-2.5 text-left" aria-label="Beranda SMP Islam Al-Wasi">
-          <img src={`${import.meta.env.BASE_URL}logo-alwasi.png`} alt="Logo sekolah" className="h-10 w-10 shrink-0 object-contain" />
-          <span className="max-w-[150px] text-[11px] font-extrabold leading-tight tracking-tight text-slate-900 sm:max-w-none sm:text-xs md:text-sm">SMP ISLAM AL-WASI’</span>
+        <button type="button" onClick={() => navigate('dashboard')} className="flex min-w-0 shrink-0 items-center gap-2.5 text-left" aria-label="Akun guru">
+          <span className="max-w-[190px] truncate text-xs font-extrabold leading-tight tracking-tight text-slate-900 sm:text-sm">{currentUser?.displayName || currentUser?.email || 'Guru'}</span>
         </button>
 
         <nav aria-label="Navigasi utama" className="hidden min-w-0 flex-1 items-center justify-center gap-1 lg:flex">
@@ -89,7 +88,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
           ) : (
             <button type="button" onClick={() => void loginWithGoogle()} disabled={loading} className="rounded-xl bg-[#0B8F4D] px-3 py-2 text-xs font-bold text-white hover:bg-[#076B3A] disabled:opacity-60">{loading ? 'Memeriksa…' : 'Login'}</button>
           )}
-          <button type="button" onClick={() => setMobileMenuOpen(value => !value)} className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#D5EADB] bg-white text-[#0B8F4D] lg:hidden" aria-label={mobileMenuOpen ? 'Tutup menu' : 'Buka menu'} aria-expanded={mobileMenuOpen}>{mobileMenuOpen ? <X size={20}/> : <Menu size={20}/>}</button>
+          <button type="button" onClick={() => setMobileMenuOpen(value => !value)} className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-[#0B8F4D] lg:hidden" aria-label={mobileMenuOpen ? 'Tutup menu' : 'Buka menu'} aria-expanded={mobileMenuOpen}>{mobileMenuOpen ? <X size={20}/> : <Menu size={20}/>}</button>
         </div>
       </div>
 
@@ -103,8 +102,8 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
         <div className="lg:hidden" style={{ position: 'fixed', inset: 0, zIndex: 2147483647, isolation: 'isolate' }}>
           <button type="button" aria-label="Tutup menu" onClick={() => setMobileMenuOpen(false)} className="bg-slate-950/45" style={{ position: 'fixed', inset: 0, zIndex: 2147483646, width: '100%', height: '100%', border: 0 }}/>
           <aside className="flex flex-col overflow-y-auto bg-white p-5 shadow-2xl" style={{ position: 'fixed', left: 0, top: 0, zIndex: 2147483647, height: '100dvh', width: 'min(86vw, 340px)', maxWidth: 340, overscrollBehavior: 'contain' }}>
-            <div className="mb-5 flex items-center justify-between border-b border-[#E3F7EC] pb-4">
-              <div className="flex items-center gap-3"><img src={`${import.meta.env.BASE_URL}logo-alwasi.png`} alt="Logo sekolah" className="h-10 w-10 object-contain"/><div><p className="text-sm font-extrabold text-slate-900">SMP ISLAM AL-WASI’</p><p className="text-[10px] text-slate-500">SIMPATIK</p></div></div>
+            <div className="mb-5 flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="min-w-0"><p className="truncate text-sm font-extrabold text-slate-900">{currentUser?.displayName || currentUser?.email || 'Guru'}</p><p className="text-[10px] text-slate-500">SIMPATIK</p></div>
               <button type="button" onClick={() => setMobileMenuOpen(false)} className="rounded-lg p-2 text-slate-500" aria-label="Tutup menu"><X size={21}/></button>
             </div>
             <div className="space-y-1">

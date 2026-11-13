@@ -20,7 +20,16 @@ const field = 'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 te
 const btn = 'inline-flex items-center justify-center gap-2 rounded-xl bg-[#16B364] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#0B8F4D] disabled:cursor-not-allowed disabled:opacity-50';
 const GRADING_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyw5E1QakV5saHXbqKV_vcD8HWz06F5h6YpVhVaHmySROaxrvwqlJSc16DkXNB1Us5O/exec';
 
-function classLevel(value: string) { const normalized = value.trim().toUpperCase().replace(/^KELAS\\s+/, ''); const match = normalized.match(/^(VIII|VII|IX)(?=$|[\\s(-])/); return match ? match[1] : normalized.replace(/[^A-Z]/g, ''); }
+function classLevel(value: string) {
+  const normalized = value.trim().toUpperCase().replace(/^KELAS\\s+/, '');
+  const match = normalized.match(/^(VIII|VII|IX)(?=$|[\\s(-])/);
+  return match ? match[1] : normalized.replace(/[^A-Z]/g, '');
+}
+function classDisplayName(value: string) {
+  const level = classLevel(value);
+  const labels: Record<string, string> = { VII: 'VII (Tujuh)', VIII: 'VIII (Delapan)', IX: 'IX (Sembilan)' };
+  return labels[level] || value.trim();
+}
 export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const { classes, settings } = useData();
   const { firebaseUser, currentUser } = useAuth();
@@ -242,7 +251,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const enterGuestMode = async () => {
     const selectedStudent = examStudents.find(s => s.id === selectedRosterStudentId);
     if (!selectedStudent) { setMessage('Pilih nama siswa dari daftar terlebih dahulu.'); return; }
-    if (!studentClass || (linkedExamId ? classLevel(selectedStudent.className) !== classLevel(studentClass) : selectedStudent.className.trim() !== studentClass.trim())) { setMessage('Nama siswa tidak sesuai dengan kelas yang dipilih.'); return; }
+    if (!studentClass || classLevel(selectedStudent.className || '') !== classLevel(studentClass)) { setMessage('Nama siswa tidak sesuai dengan kelas yang dipilih.'); return; }
     const name = selectedStudent.name;
     try {
       await auth.authStateReady();
@@ -413,9 +422,9 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   }, [isOnline, section, activeExam, attemptId, answers, studentId, studentClass, examStudents, deadlineAt, ownerUid]);
 
   const fmt = (seconds: number) => String(Math.floor(seconds / 60)).padStart(2,'0') + ':' + String(seconds % 60).padStart(2,'0');
-  const rosterClasses = Array.from(new Set(examStudents.map(s => s.className?.trim()).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'id'));
+  const rosterClasses = Array.from(new Set(examStudents.map(s => classLevel(s.className || '')).filter(Boolean))).map(classLevel => classDisplayName(classLevel)).sort((a,b)=>a.localeCompare(b,'id'));
   const rosterNames = examStudents
-    .filter(s => linkedExamId ? classLevel(s.className) === classLevel(studentClass) : s.className?.trim() === studentClass.trim())
+    .filter(s => classLevel(s.className || '') === classLevel(studentClass))
     .sort((a,b)=>a.name.localeCompare(b.name,'id'));
   const studentEntry = () => <div className="mx-auto max-w-xl space-y-4">
     <div className="text-center"><div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E3F7EC] text-[#16B364]"><BookOpen size={30}/></div><h2 className="text-2xl font-black text-slate-800">Ruang Ujian Siswa</h2><p className="mt-1 text-sm text-slate-500">Masuk sebagai tamu. Tidak perlu login Google atau membuat akun.</p></div>

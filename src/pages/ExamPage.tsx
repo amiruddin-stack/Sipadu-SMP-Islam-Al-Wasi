@@ -172,7 +172,8 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
           let score = 0;
           let total = 0;
           exam.questionIds.forEach((questionId, index) => {
-            const key = keySnapshots[index].data();
+            const key = keySnapshots[index]?.data();
+            if (!key) return;
             const points = Math.max(1, Number(key.points) || 1);
             total += points;
             if (attempt.answers?.[questionId] === key.answer) score += points;

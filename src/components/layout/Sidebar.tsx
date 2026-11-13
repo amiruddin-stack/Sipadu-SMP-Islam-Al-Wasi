@@ -55,13 +55,11 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({ activeTab, onNav
 
   return (
     <aside className="sticky top-0 hidden h-screen w-[258px] shrink-0 flex-col border-r border-[#D5EADB] bg-white px-4 py-5 md:flex">
-      <button type="button" onClick={() => onNavigate('dashboard')} className="mb-7 flex items-center gap-3 px-2 text-left">
-        <img src={`${import.meta.env.BASE_URL}logo-alwasi.png`} alt="Logo sekolah" className="h-11 w-11 shrink-0 object-contain" />
-        <span className="min-w-0">
-          <span className="block text-sm font-extrabold tracking-tight text-slate-900">SMP ISLAM AL-WASI’</span>
-          <span className="mt-0.5 block text-[10px] font-bold tracking-[0.16em] text-[#0B8F4D]">SIMPATIK MOBILE</span>
-        </span>
-      </button>
+      <div className="mb-7 border-b border-slate-100 px-2 pb-5">
+        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Guru</p>
+        <p className="mt-1 truncate text-base font-extrabold tracking-tight text-slate-900">{currentUser?.displayName || currentUser?.email || 'Nama Guru'}</p>
+        <p className="mt-0.5 text-[10px] font-semibold text-slate-400">{currentUser?.role === 'super_admin' ? 'Admin Utama' : 'Guru'}</p>
+      </div>
 
       <nav aria-label="Navigasi utama" className="min-h-0 flex-1 space-y-1 overflow-y-auto">
         {primaryItems.map(({ tab, label, icon: Icon }) => (

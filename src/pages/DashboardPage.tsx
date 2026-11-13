@@ -117,7 +117,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
 
         {/* Full-width hero card with illustration beside unchanged hero text */}
         <div className="relative z-10 mx-auto max-w-[1240px] px-4 pt-2 pb-3 md:px-8 md:pt-3 md:pb-4">
-          <div className="hero flex w-full flex-col items-center justify-between gap-5 overflow-hidden rounded-[24px] border border-slate-200 bg-white px-6 py-6 shadow-sm md:flex-row md:gap-8 md:px-9 md:py-7">
+          <div className="hero flex w-full flex-col items-center justify-between gap-5 overflow-hidden rounded-[24px] border border-[#D5EADB] bg-gradient-to-br from-white via-[#E3F7EC] to-[#E7F6EF] px-6 py-6 shadow-sm md:flex-row md:gap-8 md:px-9 md:py-7">
             <div className="min-w-0 w-full max-w-3xl flex-1">
               <h1 className="font-black tracking-tight text-[#0B8F4D]">
                 SIMPATIK

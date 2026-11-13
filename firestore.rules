@@ -31,7 +31,7 @@ service cloud.firestore {
 
     function isGuruOrAdmin() {
       return userProfileExists()
-        && userRole() in ['super_admin', 'kepala_sekolah', 'operator', 'guru', 'wali_kelas'];
+        && userRole() in ['super_admin', 'guru'];
     }
 
     function validProfile(userId) {

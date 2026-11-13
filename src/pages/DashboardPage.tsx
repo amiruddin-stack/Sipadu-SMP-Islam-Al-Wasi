@@ -164,7 +164,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
                 </button>
               </div>
             </div>
-            <div className="flex w-full shrink-0 items-center justify-center md:mr-4 md:w-[32%] md:self-stretch">
+            <div className="flex w-full shrink-0 items-center justify-center md:mr-0 md:w-[32%] md:translate-x-2 md:self-stretch">
               <img
                 src="./images/Desain%20tanpa%20judul_20261112_110817_0000.png"
                 alt="Ilustrasi struktur manajemen SIMPATIK"

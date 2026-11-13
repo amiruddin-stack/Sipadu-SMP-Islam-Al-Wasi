@@ -128,7 +128,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
         />
 
         {/* Embedded Top Navigation Bar */}
-        <div className="relative z-10 lg:hidden">
+        <div className="relative z-10 md:hidden">
           <Header activeTab={activeTab} onNavigate={onNavigate} embedded />
         </div>
 

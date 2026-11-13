@@ -17,6 +17,7 @@ const makeExamLink = (id: string) => { const url = new URL(window.location.href)
 const panel = 'rounded-2xl border border-slate-200 bg-white p-4 shadow-sm';
 const field = 'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#16B364] focus:ring-2 focus:ring-bg-[#E3F7EC]';
 const btn = 'inline-flex items-center justify-center gap-2 rounded-xl bg-[#16B364] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#0B8F4D] disabled:cursor-not-allowed disabled:opacity-50';
+const GRADING_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyw5E1QakV5saHXbqKV_vcD8HWz06F5h6YpVhVaHmySROaxrvwqlJSc16DkXNB1Us5O/exec';
 
 function classLevel(value: string) { return value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3); }
 export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
@@ -52,7 +53,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const [isOnline, setIsOnline] = useState(typeof navigator === 'undefined' ? true : navigator.onLine);
   const [offlineReady, setOfflineReady] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [finishedResult, setFinishedResult] = useState<{ title: string; studentName: string; className: string } | null>(null);
+  const [finishedResult, setFinishedResult] = useState<{ title: string; studentName: string; className: string; score?: number; total?: number; percent?: number } | null>(null);
   const [selectedResultExamId, setSelectedResultExamId] = useState('');
   const [message, setMessage] = useState('');
 
@@ -145,56 +146,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     };
   }, [isVerifiedExamAdmin]);
 
-  useEffect(() => {
-    if (!isVerifiedExamAdmin || !attempts.length || !exams.length) return;
-    let cancelled = false;
-    const gradeCompletedAttempts = async () => {
-      const pending = attempts.filter(attempt =>
-        attempt.status === 'Selesai' &&
-        (typeof attempt.score !== 'number' || typeof attempt.total !== 'number')
-      );
-      for (const attempt of pending) {
-        if (cancelled) return;
-        const exam = exams.find(item => item.id === attempt.examId);
-        if (!exam || !exam.questionIds.length) continue;
-        try {
-          const keySnapshots = await Promise.all(
-            exam.questionIds.map(questionId => getDoc(doc(db, 'examAnswerKeys', questionId)))
-          );
-          const missingCount = keySnapshots.filter(snapshot => !snapshot.exists()).length;
-          if (missingCount > 0) {
-            const issue = missingCount + ' dari ' + exam.questionIds.length + ' soal belum memiliki kunci jawaban.';
-            if (!cancelled && attempt.gradingIssue !== issue) {
-              await updateDoc(doc(db, 'examAttempts', attempt.id), { gradingIssue: issue });
-            }
-            continue;
-          }
-          let score = 0;
-          let total = 0;
-          exam.questionIds.forEach((questionId, index) => {
-            const key = keySnapshots[index]?.data();
-            if (!key) return;
-            const points = Math.max(1, Number(key.points) || 1);
-            total += points;
-            if (attempt.answers?.[questionId] === key.answer) score += points;
-          });
-          if (!cancelled && total > 0) {
-            await updateDoc(doc(db, 'examAttempts', attempt.id), {
-              score,
-              total,
-              percent: Math.round((score / total) * 100),
-              gradingIssue: '',
-              gradedAt: new Date().toISOString()
-            });
-          }
-        } catch (error) {
-          console.error('Penilaian otomatis ujian gagal:', attempt.id, error);
-        }
-      }
-    };
-    void gradeCompletedAttempts();
-    return () => { cancelled = true; };
-  }, [isVerifiedExamAdmin, attempts, exams]);
+
 
   useEffect(() => {
     if (!linkedExamId || !exams.length || studentId) return;
@@ -293,9 +245,25 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     }
   };
 
+  const requestAutomaticGrade = async (id: string) => {
+    const user = auth.currentUser;
+    if (!user) throw new Error('Sesi Firebase siswa tidak tersedia.');
+    const idToken = await user.getIdToken(true);
+    const response = await fetch(GRADING_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ idToken, attemptId: id })
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success) throw new Error(result.message || 'Penilaian otomatis belum berhasil.');
+    if (typeof result.score !== 'number' || typeof result.total !== 'number') throw new Error('Respons penilaian belum memuat skor.');
+    return { score: result.score, total: result.total, percent: typeof result.percent === 'number' ? result.percent : Math.round((result.score / Math.max(1, result.total)) * 100) };
+  };
+
   const startExam = async (exam: Exam) => {
     const student = examStudents.find(s => s.id === studentId);
     if (!studentId || !verifiedStudentName) { setMessage('Verifikasi ID Ujian siswa terlebih dahulu.'); return; }
+    if (!navigator.onLine) { setMessage('Koneksi internet diperlukan untuk memulai ujian agar sistem dapat mencegah pengerjaan ulang.'); return; }
     let examQuestions = exam.questionIds.map(id => questions.find(q => q.id === id)).filter(Boolean) as Question[];
     if (examQuestions.length !== exam.questionIds.length) {
       const cachedBundle = await readOfflineRecord<{ exam: Exam; questions: Question[] }>('cache:exam:' + exam.id);
@@ -310,13 +278,12 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       await auth.authStateReady();
       if (navigator.onLine && !auth.currentUser) await signInAnonymously(auth);
       const sessionOwnerUid = auth.currentUser?.uid || '';
-      if (navigator.onLine && sessionOwnerUid) {
+      if (sessionOwnerUid) {
         const priorAttempts = await getDocs(query(
           collection(db, 'examAttempts'),
-          where('examId', '==', exam.id),
           where('ownerUid', '==', sessionOwnerUid)
         ));
-        const alreadyFinished = priorAttempts.docs.some(snapshot => snapshot.data().status === 'Selesai');
+        const alreadyFinished = priorAttempts.docs.some(snapshot => snapshot.data().examId === exam.id && snapshot.data().status === 'Selesai');
         if (alreadyFinished) {
           setMessage('Anda sudah mengerjakan soal ini. Anda tidak dapat mengerjakan ujian yang sama untuk kedua kalinya.');
           return;
@@ -353,8 +320,15 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
         if (!auth.currentUser) await signInAnonymously(auth);
         if (!stableOwnerUid) throw new Error('Identitas sesi Firebase belum tersedia.');
         await setDoc(doc(db, 'examAttempts', attemptId), payload, { merge: true });
-        await deleteOfflineRecord('pending:' + attemptId);
-        setMessage(forced ? 'Waktu habis. Jawaban terkirim otomatis.' : 'Jawaban berhasil dikirim.');
+        try {
+          const grade = await requestAutomaticGrade(attemptId);
+          setFinishedResult(current => current ? { ...current, ...grade } : current);
+          await deleteOfflineRecord('pending:' + attemptId);
+          setMessage((forced ? 'Waktu habis. ' : '') + 'Jawaban terkirim dan dinilai otomatis. Nilai Anda: ' + grade.percent + '.');
+        } catch (gradingError) {
+          const reason = gradingError instanceof Error ? gradingError.message : 'Penilaian otomatis tertunda.';
+          setMessage('Jawaban berhasil dikirim, tetapi penilaian otomatis belum selesai: ' + reason + ' Sistem akan mencoba kembali saat tersambung.');
+        }
       } else {
         setMessage('Ujian selesai secara offline. Hasil tersimpan di perangkat dan akan dikirim otomatis saat internet kembali.');
       }
@@ -414,6 +388,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
           if (cancelled) return;
           if (item.ownerUid && item.ownerUid !== syncUid) { console.warn('Hasil offline dilewati karena UID tidak cocok:', item.id); continue; }
           await setDoc(doc(db, 'examAttempts', item.id), { ...item, ownerUid: item.ownerUid || syncUid }, { merge: true });
+          await requestAutomaticGrade(item.id);
           await deleteOfflineRecord('pending:' + item.id);
         }
         if (pending.length) setMessage(pending.length + ' hasil ujian offline berhasil disinkronkan ke server.');
@@ -447,7 +422,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
 
   if (section === 'results' && !activeExam && finishedResult) {
     const result = finishedResult;
-    return <div className="mx-auto max-w-xl space-y-4"><div className={panel+' text-center'}><Trophy size={42} className="mx-auto text-amber-500"/><h2 className="mt-3 text-2xl font-black">Hasil Ujian</h2>{result?<><p className="mt-2 font-bold">{result.title}</p><p className="mt-1 text-sm text-slate-500">{result.studentName} · {result.className}</p><p className="my-5 text-lg font-bold text-[#0B8F4D]">Jawaban berhasil disimpan</p><p className="text-sm text-slate-600">Nilai menunggu pemeriksaan guru.</p></>:<p className="mt-3 text-sm text-slate-500">Hasil sedang disimpan.</p>}<button className={btn+' mt-5'} onClick={()=>{setSection('student');setAttemptId('');setFinishedResult(null);}}>Kembali</button></div></div>;
+    return <div className="mx-auto max-w-xl space-y-4"><div className={panel+' text-center'}><Trophy size={42} className="mx-auto text-amber-500"/><h2 className="mt-3 text-2xl font-black">Hasil Ujian</h2>{result?<><p className="mt-2 font-bold">{result.title}</p><p className="mt-1 text-sm text-slate-500">{result.studentName} · {result.className}</p>{typeof result.score === 'number' && typeof result.total === 'number' ? <><p className="my-5 text-3xl font-black text-[#0B8F4D]">{result.percent ?? Math.round((result.score / Math.max(1,result.total))*100)}</p><p className="text-sm font-bold text-slate-600">Skor: {result.score} / {result.total}</p><p className="mt-2 text-sm text-slate-600">Nilai telah dihitung otomatis.</p></> : <><p className="my-5 text-lg font-bold text-[#0B8F4D]">Jawaban berhasil disimpan</p><p className="text-sm text-slate-600">Penilaian otomatis sedang diproses.</p></>}</>:<p className="mt-3 text-sm text-slate-500">Hasil sedang disimpan.</p>}<button className={btn+' mt-5'} onClick={()=>{setSection('student');setAttemptId('');setFinishedResult(null);}}>Kembali</button></div></div>;
   }
 
   return <div className="space-y-5">
@@ -469,6 +444,6 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     {section==='manage'&&<div className={panel}><button className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>setSection('home')}><ArrowLeft size={16}/> Kembali</button><h3 className="mb-3 text-lg font-black">Kelola Ujian</h3><div className="space-y-3">{exams.map(ex=><div key={ex.id} className="rounded-xl border border-slate-200 p-3"><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0"><p className="font-extrabold">{ex.title}</p><p className="mt-1 text-xs text-slate-500">{ex.className} · {ex.subject} · {ex.duration} menit · {ex.questionIds.length} soal</p><span className={'mt-2 inline-flex rounded-full px-3 py-1 text-xs font-bold '+(ex.status==='Aktif'?'bg-[#E3F7EC] text-[#0B8F4D]':'bg-slate-100 text-slate-600')}>{ex.status}</span></div><div className="flex flex-wrap gap-2"><button className="rounded-xl border border-[#16B364] px-3 py-2 text-xs font-bold text-[#0B8F4D]" onClick={()=>{const url=makeExamLink(ex.id);setShareLink(url);setSection('share');}}><Copy size={14} className="mr-1 inline"/>Bagikan link</button><button className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600" onClick={()=>void updateDoc(doc(db,'exams',ex.id),{status:ex.status==='Aktif'?'Draft':'Aktif'})}>{ex.status==='Aktif'?'Nonaktifkan':'Aktifkan'}</button></div></div></div>)}{!exams.length&&<p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Belum ada ujian. Buat ujian terlebih dahulu.</p>}</div>
     </div>}
     {section==='share'&&<div className={panel+' mx-auto max-w-2xl'}><div className="text-center"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E3F7EC] text-[#0B8F4D]"><LinkIcon size={28}/></div><h3 className="mt-3 text-xl font-black">Ujian berhasil dibuat</h3><p className="mt-1 text-sm text-slate-500">Bagikan tautan ini kepada siswa. Saat dibuka, siswa langsung masuk ke halaman ujian.</p></div><label className="mb-2 mt-5 block text-xs font-bold">Link pengerjaan siswa</label><div className="flex flex-col gap-2 sm:flex-row"><input className={field+' min-w-0'} readOnly value={shareLink}/><button className={btn+' shrink-0'} onClick={()=>void navigator.clipboard.writeText(shareLink)}><Copy size={15}/> Salin link</button></div><a href={shareLink} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[#0B8F4D]">Buka halaman siswa <ExternalLink size={14}/></a><div className="mt-5 flex flex-wrap gap-2"><button className={btn} onClick={()=>setSection('manage')}>Ke Kelola Ujian</button><button className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-600" onClick={()=>setSection('home')}>Kembali ke menu</button></div></div>}
-    {section==='results'&&<div className={panel}><div className="mb-4 flex items-center justify-between gap-3"><button className="flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>selectedResultExamId?setSelectedResultExamId(''):setSection('home')}><ArrowLeft size={16}/> {selectedResultExamId?'Daftar Ujian':'Kembali'}</button>{selectedResultExam&&<span className="rounded-full bg-[#E3F7EC] px-3 py-1 text-xs font-bold text-[#0B8F4D]">{selectedResultAttempts.length} peserta</span>}</div><h3 className="mb-3 text-lg font-black">{selectedResultExam?selectedResultExam.title:'Hasil Ujian'}</h3>{!selectedResultExam?<div className="space-y-3">{resultExamGroups.map(exam=><button key={exam.id} onClick={()=>setSelectedResultExamId(exam.id)} className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 p-4 text-left transition hover:border-[#16B364] hover:bg-[#F7FCF9]"><span className="min-w-0"><strong className="block truncate">{exam.title}</strong><span className="mt-1 block text-xs text-slate-500">{exam.subject?exam.subject+' · ':''}{exam.className} · {exam.attempts.length} peserta</span></span><ChevronRight className="shrink-0 text-[#0B8F4D]"/></button>)}{!resultExamGroups.length&&<p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Belum ada ujian atau hasil pengerjaan siswa.</p>}</div>:<><p className="mb-3 text-sm text-slate-500">{selectedResultExam.subject} · {selectedResultExam.className}</p><div className="overflow-x-auto"><table className="w-full min-w-[560px] text-left text-sm"><thead><tr className="border-b bg-slate-50 text-xs text-slate-500"><th className="p-3">Nama Siswa</th><th className="p-3">Kelas</th><th className="p-3">Skor</th><th className="p-3">Nilai</th><th className="p-3">Status</th></tr></thead><tbody>{selectedResultAttempts.map(a=><tr key={a.id} className="border-b border-slate-100"><td className="p-3 font-semibold">{a.studentName}</td><td className="p-3">{a.className}</td><td className="p-3 font-bold">{a.status==='Selesai'&&typeof a.score==='number'&&typeof a.total==='number'?a.score+' / '+a.total:'—'}</td><td className="p-3 font-bold text-[#0B8F4D]">{a.status==='Selesai'?typeof a.score==='number'&&typeof a.total==='number'?Math.round(a.score/Math.max(1,a.total)*100):'Sedang diperiksa':'—'}</td><td className="p-3">{a.status!=='Selesai'?a.status:typeof a.score==='number'?'Selesai':a.gradingIssue||'Menunggu penilaian admin'}</td></tr>)}</tbody></table></div>{!selectedResultAttempts.length&&<p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Belum ada siswa yang mengerjakan ujian ini.</p>}</>}</div>}
+    {section==='results'&&<div className={panel}><div className="mb-4 flex items-center justify-between gap-3"><button className="flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>selectedResultExamId?setSelectedResultExamId(''):setSection('home')}><ArrowLeft size={16}/> {selectedResultExamId?'Daftar Ujian':'Kembali'}</button>{selectedResultExam&&<span className="rounded-full bg-[#E3F7EC] px-3 py-1 text-xs font-bold text-[#0B8F4D]">{selectedResultAttempts.length} peserta</span>}</div><h3 className="mb-3 text-lg font-black">{selectedResultExam?selectedResultExam.title:'Hasil Ujian'}</h3>{!selectedResultExam?<div className="space-y-3">{resultExamGroups.map(exam=><button key={exam.id} onClick={()=>setSelectedResultExamId(exam.id)} className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 p-4 text-left transition hover:border-[#16B364] hover:bg-[#F7FCF9]"><span className="min-w-0"><strong className="block truncate">{exam.title}</strong><span className="mt-1 block text-xs text-slate-500">{exam.subject?exam.subject+' · ':''}{exam.className} · {exam.attempts.length} peserta</span></span><ChevronRight className="shrink-0 text-[#0B8F4D]"/></button>)}{!resultExamGroups.length&&<p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Belum ada ujian atau hasil pengerjaan siswa.</p>}</div>:<><p className="mb-3 text-sm text-slate-500">{selectedResultExam.subject} · {selectedResultExam.className}</p><div className="overflow-x-auto"><table className="w-full min-w-[560px] text-left text-sm"><thead><tr className="border-b bg-slate-50 text-xs text-slate-500"><th className="p-3">Nama Siswa</th><th className="p-3">Kelas</th><th className="p-3">Skor</th><th className="p-3">Nilai</th><th className="p-3">Status</th></tr></thead><tbody>{selectedResultAttempts.map(a=><tr key={a.id} className="border-b border-slate-100"><td className="p-3 font-semibold">{a.studentName}</td><td className="p-3">{a.className}</td><td className="p-3 font-bold">{a.status==='Selesai'&&typeof a.score==='number'&&typeof a.total==='number'?a.score+' / '+a.total:'—'}</td><td className="p-3 font-bold text-[#0B8F4D]">{a.status==='Selesai'?typeof a.score==='number'&&typeof a.total==='number'?Math.round(a.score/Math.max(1,a.total)*100):'Sedang diperiksa':'—'}</td><td className="p-3">{a.status!=='Selesai'?a.status:typeof a.score==='number'?'Selesai':a.gradingIssue||'Menunggu penilaian otomatis'}</td></tr>)}</tbody></table></div>{!selectedResultAttempts.length&&<p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Belum ada siswa yang mengerjakan ujian ini.</p>}</>}</div>}
   </div>;
 };

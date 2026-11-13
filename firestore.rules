@@ -118,16 +118,20 @@ service cloud.firestore {
       allow read, write: if isGuruOrAdmin();
     }
     match /settings/{id} {
-      allow read, write: if isAdmin();
+      allow read: if isGuruOrAdmin();
+      allow write: if isAdmin();
     }
     match /teachers/{id} {
-      allow read, write: if isAdmin();
+      allow read: if isGuruOrAdmin();
+      allow write: if isAdmin();
     }
     match /master_classes/{id} {
-      allow read, write: if isAdmin();
+      allow read: if isGuruOrAdmin();
+      allow write: if isAdmin();
     }
     match /master_subjects/{id} {
-      allow read, write: if isAdmin();
+      allow read: if isGuruOrAdmin();
+      allow write: if isAdmin();
     }
     match /extracurriculars/{id} {
       allow read, write: if isGuruOrAdmin();

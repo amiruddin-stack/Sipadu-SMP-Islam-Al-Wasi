@@ -3,7 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
 import { Header } from './components/layout/Header';
 import { PageBanner } from './components/layout/PageBanner';
-import { NavTab } from './components/layout/Sidebar';
+import { NavTab, DesktopSidebar } from './components/layout/Sidebar';
 import { OfflineIndicator } from './components/common/OfflineIndicator';
 import { DashboardPage } from './pages/DashboardPage';
 import { AttendancePage } from './pages/AttendancePage';
@@ -89,13 +89,18 @@ function AppContent() {
 
   return (
     <div className="min-h-screen w-full font-sans text-slate-800" style={{ backgroundColor: '#FFFFFF', backgroundImage: 'radial-gradient(circle at 82% 16%, rgba(160, 226, 206, 0.30) 0%, rgba(198, 240, 226, 0.16) 30%, transparent 60%), radial-gradient(circle at 12% 26%, rgba(192, 238, 222, 0.24) 0%, transparent 45%), radial-gradient(circle at 50% 12%, rgba(215, 246, 238, 0.28) 0%, transparent 55%), linear-gradient(180deg, #F5FAF8 0%, #FFFFFF 100%)' }}>
-      {activeTab !== 'dashboard' && <Header activeTab={activeTab} onNavigate={setActiveTab} />}
-      <main className="w-full p-0">
-        <div className={activeTab === 'dashboard' ? 'w-full' : 'mx-auto w-full max-w-7xl px-4 py-5 md:px-6 md:py-6'}>
-          {activeTab !== 'dashboard' && activeTab !== 'subjects' && <PageBanner activeTab={activeTab} onBack={() => { if (window.history.length > 1) window.history.back(); else setActiveTab('dashboard'); }} />}
-          {renderCurrentPage()}
+      <div className="flex min-h-screen w-full">
+        <DesktopSidebar activeTab={activeTab} onNavigate={setActiveTab} />
+        <div className="min-w-0 flex-1">
+          {activeTab !== 'dashboard' && <div className="lg:hidden"><Header activeTab={activeTab} onNavigate={setActiveTab} /></div>}
+          <main className="min-h-screen w-full p-0">
+            <div className={activeTab === 'dashboard' ? 'w-full' : 'mx-auto w-full max-w-7xl px-4 py-5 md:px-6 md:py-6'}>
+              {activeTab !== 'dashboard' && activeTab !== 'subjects' && <PageBanner activeTab={activeTab} onBack={() => { if (window.history.length > 1) window.history.back(); else setActiveTab('dashboard'); }} />}
+              {renderCurrentPage()}
+            </div>
+          </main>
         </div>
-      </main>
+      </div>
       <OfflineIndicator />
     </div>
   );

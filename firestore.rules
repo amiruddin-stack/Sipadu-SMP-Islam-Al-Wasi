@@ -90,6 +90,19 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    match /studentExamDirectory/{studentId} {
+      // Ruang ujian hanya menerima identitas minimum siswa aktif.
+      allow read: if signedIn()
+        && request.auth.token.firebase.sign_in_provider == 'anonymous';
+      allow create, update, delete: if isGuruOrAdmin()
+        && request.resource.data.keys().hasOnly(['studentId', 'name', 'className'])
+        && request.resource.data.studentId == studentId
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 3
+        && request.resource.data.name.size() <= 100
+        && request.resource.data.className in ['VII (Tujuh)', 'VIII (Delapan)', 'IX (Sembilan)'];
+    }
+
     match /students/{studentId} {
       // Guru dan admin boleh membaca data siswa; akun anonim tetap ditolak.
       allow read: if isGuruOrAdmin();

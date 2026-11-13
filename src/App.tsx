@@ -32,7 +32,21 @@ function ComingSoonPage() {
 
 function AppContent() {
   const { currentUser, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
+  const [activeTab, setActiveTabState] = useState<NavTab>(() => (new URLSearchParams(window.location.search).get('page') as NavTab) || 'dashboard');
+  const setActiveTab = (tab: NavTab) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', tab);
+    window.history.pushState({ simpatikTab: tab }, '', url);
+    setActiveTabState(tab);
+  };
+  React.useEffect(() => {
+    const restore = () => {
+      const tab = (window.history.state?.simpatikTab || new URLSearchParams(window.location.search).get('page') || 'dashboard') as NavTab;
+      setActiveTabState(tab);
+    };
+    window.addEventListener('popstate', restore);
+    return () => window.removeEventListener('popstate', restore);
+  }, []);
 
   if (loading) {
     return (
@@ -78,7 +92,7 @@ function AppContent() {
       {activeTab !== 'dashboard' && <Header activeTab={activeTab} onNavigate={setActiveTab} />}
       <main className="w-full p-0">
         <div className={activeTab === 'dashboard' ? 'w-full' : 'mx-auto w-full max-w-7xl px-4 py-5 md:px-6 md:py-6'}>
-          {activeTab !== 'dashboard' && <PageBanner activeTab={activeTab} onBack={() => setActiveTab('dashboard')} />}
+          {activeTab !== 'dashboard' && activeTab !== 'subjects' && <PageBanner activeTab={activeTab} onBack={() => { if (window.history.length > 1) window.history.back(); else setActiveTab('dashboard'); }} />}
           {renderCurrentPage()}
         </div>
       </main>

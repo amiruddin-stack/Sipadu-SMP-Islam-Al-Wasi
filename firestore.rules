@@ -101,7 +101,7 @@ service cloud.firestore {
         && request.resource.data.name.size() >= 3
         && request.resource.data.name.size() <= 100
         && request.resource.data.className is string
-        && request.resource.data.className.matches('^(VII|VIII|IX)(-[A-Z0-9]+| \\(Tujuh\\)| \\(Delapan\\)| \\(Sembilan\\))?
+        && request.resource.data.className.matches('^(VII|VIII|IX)(-[A-Z0-9]+| \\(Tujuh\\)| \\(Delapan\\)| \\(Sembilan\\))?$');
       allow delete: if isGuruOrAdmin();
     }
 

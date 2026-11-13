@@ -141,11 +141,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
               </h1>
 
               <div className="mt-2 space-y-0.5">
-                <h2 className="font-extrabold tracking-tight text-[#17334B]">
-                  Sistem Informasi Manajemen Pendidikan dan Akademik
+                <h2 className="whitespace-nowrap font-extrabold tracking-tight text-black text-[10px] min-[380px]:text-[11px] sm:text-sm md:text-lg">
+                  Sistem Informasi Manajemen Pendidikan dan akademik
                 </h2>
-                <h2 className="font-extrabold tracking-tight text-[#0B8F4D]">
-                  yang Terpadu, Interaktif dan Kolaboratif
+                <h2 className="whitespace-nowrap font-extrabold tracking-tight text-black text-[11px] min-[380px]:text-xs sm:text-sm md:text-lg">
+                  yang terpadu, Interaktif dan Kolaboratif.
                 </h2>
               </div>
 

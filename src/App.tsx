@@ -62,10 +62,10 @@ function AppContent() {
   const sharedExamLink = new URLSearchParams(window.location.search).has('ujian');
   if (sharedExamLink) return <ExamPage />;
 
-  if (!currentUser) return <LoginPage />;
-
   const registrationType = new URLSearchParams(window.location.search).get('daftar');
   if (registrationType === 'guru' || registrationType === 'siswa') return <RegistrationPage type={registrationType} />;
+
+  if (!currentUser) return <LoginPage />;
 
   const renderCurrentPage = () => {
     switch (activeTab) {

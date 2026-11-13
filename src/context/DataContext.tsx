@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
   collection,
   doc,
+  getDocs,
   onSnapshot,
   setDoc,
   deleteDoc,
@@ -218,9 +219,25 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       collection(db, 'students'),
       (snapshot) => {
         if (!snapshot.empty) {
-          const list = snapshot.docs.map((d) => d.data() as Student);
+          const list = snapshot.docs.map((d) => ({ ...d.data(), id: d.id } as Student));
           setStudents(list);
           saveLocal('students', list);
+          void (async () => {
+            try {
+              const activeRoster = list.filter(student => student.status === 'Aktif' && student.name?.trim() && student.className?.trim());
+              const directoryRef = collection(db, 'studentExamDirectory');
+              const existing = await getDocs(directoryRef);
+              const activeIds = new Set(activeRoster.map(student => student.id));
+              await Promise.all(existing.docs.filter(item => !activeIds.has(item.id)).map(item => deleteDoc(item.ref)));
+              await Promise.all(activeRoster.map(student => setDoc(doc(db, 'studentExamDirectory', student.id), {
+                studentId: student.id,
+                name: student.name.trim().toUpperCase(),
+                className: student.className.trim(),
+              })));
+            } catch (error) {
+              console.warn('Sinkronisasi daftar siswa ruang ujian:', error);
+            }
+          })();
         }
       },
       (error) => {

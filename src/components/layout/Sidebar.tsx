@@ -54,7 +54,7 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({ activeTab, onNav
     }`;
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-[258px] shrink-0 flex-col border-r border-[#D5EADB] bg-white px-4 py-5 lg:flex">
+    <aside className="sticky top-0 hidden h-screen w-[258px] shrink-0 flex-col border-r border-[#D5EADB] bg-white px-4 py-5 md:flex">
       <button type="button" onClick={() => onNavigate('dashboard')} className="mb-7 flex items-center gap-3 px-2 text-left">
         <img src={`${import.meta.env.BASE_URL}logo-alwasi.png`} alt="Logo sekolah" className="h-11 w-11 shrink-0 object-contain" />
         <span className="min-w-0">

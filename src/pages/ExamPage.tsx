@@ -53,7 +53,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const [isOnline, setIsOnline] = useState(typeof navigator === 'undefined' ? true : navigator.onLine);
   const [offlineReady, setOfflineReady] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [finishedResult, setFinishedResult] = useState<{ title: string; studentName: string; className: string; score?: number; total?: number; percent?: number } | null>(null);
+  const [finishedResult, setFinishedResult] = useState<{ title: string; studentName: string; className: string; score?: number; total?: number; percent?: number; gradingIssue?: string } | null>(null);
   const [selectedResultExamId, setSelectedResultExamId] = useState('');
   const [message, setMessage] = useState('');
 
@@ -211,12 +211,6 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     if (!title.trim() || !subject || !selectedQuestions.length) { setMessage('Isi nama ujian, mapel, dan pilih minimal satu soal.'); return; }
     setSaving(true);
     try {
-      const answerKeys = await Promise.all(selectedQuestions.map(questionId => getDoc(doc(db, 'examAnswerKeys', questionId))));
-      const missingKeys = answerKeys.filter(snapshot => !snapshot.exists()).length;
-      if (missingKeys > 0) {
-        setMessage(missingKeys + ' soal belum memiliki kunci jawaban. Perbaiki atau impor ulang soal dengan kunci jawaban lengkap sebelum menerbitkan ujian.');
-        return;
-      }
       const created = await addDoc(collection(db, 'exams'), { title: title.trim(), subject, className: selectedClassNames[0] || level, academicYear: settings.activeAcademicYear, semester: settings.activeSemester, duration, questionIds: selectedQuestions, status: 'Aktif', createdAt: new Date().toISOString() });
       setShareLink(makeExamLink(created.id));
       setMessage('Ujian berhasil dibuat. Bagikan tautan ini kepada siswa.');
@@ -257,7 +251,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     const result = await response.json();
     if (!response.ok || !result.success) throw new Error(result.message || 'Penilaian otomatis belum berhasil.');
     if (typeof result.score !== 'number' || typeof result.total !== 'number') throw new Error('Respons penilaian belum memuat skor.');
-    return { score: result.score, total: result.total, percent: typeof result.percent === 'number' ? result.percent : Math.round((result.score / Math.max(1, result.total)) * 100) };
+    return { score: result.score, total: result.total, percent: typeof result.percent === 'number' ? result.percent : Math.round((result.score / Math.max(1, result.total)) * 100), gradingIssue: typeof result.gradingIssue === 'string' ? result.gradingIssue : '' };
   };
 
   const startExam = async (exam: Exam) => {
@@ -422,7 +416,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
 
   if (section === 'results' && !activeExam && finishedResult) {
     const result = finishedResult;
-    return <div className="mx-auto max-w-xl space-y-4"><div className={panel+' text-center'}><Trophy size={42} className="mx-auto text-amber-500"/><h2 className="mt-3 text-2xl font-black">Hasil Ujian</h2>{result?<><p className="mt-2 font-bold">{result.title}</p><p className="mt-1 text-sm text-slate-500">{result.studentName} · {result.className}</p>{typeof result.score === 'number' && typeof result.total === 'number' ? <><p className="my-5 text-3xl font-black text-[#0B8F4D]">{result.percent ?? Math.round((result.score / Math.max(1,result.total))*100)}</p><p className="text-sm font-bold text-slate-600">Skor: {result.score} / {result.total}</p><p className="mt-2 text-sm text-slate-600">Nilai telah dihitung otomatis.</p></> : <><p className="my-5 text-lg font-bold text-[#0B8F4D]">Jawaban berhasil disimpan</p><p className="text-sm text-slate-600">Penilaian otomatis sedang diproses.</p></>}</>:<p className="mt-3 text-sm text-slate-500">Hasil sedang disimpan.</p>}<button className={btn+' mt-5'} onClick={()=>{setSection('student');setAttemptId('');setFinishedResult(null);}}>Kembali</button></div></div>;
+    return <div className="mx-auto max-w-xl space-y-4"><div className={panel+' text-center'}><Trophy size={42} className="mx-auto text-amber-500"/><h2 className="mt-3 text-2xl font-black">Hasil Ujian</h2>{result?<><p className="mt-2 font-bold">{result.title}</p><p className="mt-1 text-sm text-slate-500">{result.studentName} · {result.className}</p>{typeof result.score === 'number' && typeof result.total === 'number' && result.total > 0 ? <><p className="my-5 text-3xl font-black text-[#0B8F4D]">{result.percent ?? Math.round((result.score / Math.max(1,result.total))*100)}</p><p className="text-sm font-bold text-slate-600">Skor: {result.score} / {result.total}</p><p className="mt-2 text-sm text-slate-600">Nilai dihitung dari soal yang sudah memiliki kunci jawaban.</p>{result.gradingIssue&&<p className="mt-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-800">{result.gradingIssue}</p>}</> : result.gradingIssue ? <><p className="my-5 text-lg font-bold text-[#0B8F4D]">Jawaban berhasil disimpan</p><p className="text-sm text-slate-600">Belum ada soal yang dapat dinilai karena kunci jawaban belum tersedia.</p><p className="mt-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-800">{result.gradingIssue}</p></> : <><p className="my-5 text-lg font-bold text-[#0B8F4D]">Jawaban berhasil disimpan</p><p className="text-sm text-slate-600">Penilaian otomatis sedang diproses.</p></>}</>:<p className="mt-3 text-sm text-slate-500">Hasil sedang disimpan.</p>}<button className={btn+' mt-5'} onClick={()=>{setSection('student');setAttemptId('');setFinishedResult(null);}}>Kembali</button></div></div>;
   }
 
   return <div className="space-y-5">

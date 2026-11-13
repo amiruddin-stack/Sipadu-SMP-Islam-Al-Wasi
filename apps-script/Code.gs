@@ -26,7 +26,7 @@ function doPost(e) {
     if (attempt.ownerUid !== identity.uid) throw new Error('Akses pengerjaan ditolak.');
     if (attempt.status !== 'Selesai') throw new Error('Siswa belum menyelesaikan ujian.');
 
-    if (typeof attempt.score === 'number' && typeof attempt.total === 'number') {
+    if (typeof attempt.score === 'number' && typeof attempt.total === 'number' && !attempt.gradingIssue) {
       return output_({ success: true, alreadyGraded: true, score: attempt.score, total: attempt.total, percent: attempt.percent });
     }
 
@@ -50,18 +50,15 @@ function doPost(e) {
       if (Number(given) === Number(key.answer)) score += points;
     });
 
-    if (missing.length) {
-      const issue = missing.length + ' dari ' + exam.questionIds.length + ' soal belum memiliki kunci jawaban.';
-      patchDocument_('examAttempts', attemptId, { gradingIssue: issue });
-      return output_({ success: false, code: 'MISSING_ANSWER_KEYS', message: issue });
-    }
-    if (!total) throw new Error('Tidak ada soal yang dapat dinilai.');
+    const issue = missing.length
+      ? missing.length + ' dari ' + exam.questionIds.length + ' soal belum memiliki kunci jawaban. Nilai sementara hanya menghitung soal yang sudah memiliki kunci.'
+      : '';
 
     const result = {
       score: score,
       total: total,
-      percent: Math.round((score / total) * 100),
-      gradingIssue: '',
+      percent: total > 0 ? Math.round((score / total) * 100) : 0,
+      gradingIssue: issue,
       gradedAt: new Date().toISOString()
     };
     patchDocument_('examAttempts', attemptId, result);

@@ -26,7 +26,7 @@ function doPost(e) {
     if (attempt.ownerUid !== identity.uid) throw new Error('Akses pengerjaan ditolak.');
     if (attempt.status !== 'Selesai') throw new Error('Siswa belum menyelesaikan ujian.');
 
-    if (typeof attempt.score === 'number' && typeof attempt.total === 'number') {
+    if (typeof attempt.score === 'number' && typeof attempt.total === 'number' && !attempt.gradingIssue) {
       return output_({ success: true, alreadyGraded: true, score: attempt.score, total: attempt.total, percent: attempt.percent });
     }
 

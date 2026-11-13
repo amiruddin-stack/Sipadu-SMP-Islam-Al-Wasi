@@ -92,7 +92,7 @@ function AppContent() {
       <div className="flex min-h-screen w-full">
         <DesktopSidebar activeTab={activeTab} onNavigate={setActiveTab} />
         <div className="min-w-0 flex-1">
-          {activeTab !== 'dashboard' && <div className="lg:hidden"><Header activeTab={activeTab} onNavigate={setActiveTab} /></div>}
+          {activeTab !== 'dashboard' && <div className="md:hidden"><Header activeTab={activeTab} onNavigate={setActiveTab} /></div>}
           <main className="min-h-screen w-full p-0">
             <div className={activeTab === 'dashboard' ? 'w-full' : 'mx-auto w-full max-w-7xl px-4 py-5 md:px-6 md:py-6'}>
               {activeTab !== 'dashboard' && activeTab !== 'subjects' && <PageBanner activeTab={activeTab} onBack={() => { if (window.history.length > 1) window.history.back(); else setActiveTab('dashboard'); }} />}

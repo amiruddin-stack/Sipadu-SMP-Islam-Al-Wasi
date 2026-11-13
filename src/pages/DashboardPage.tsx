@@ -134,29 +134,29 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
 
         {/* Full-width hero card with illustration beside unchanged hero text */}
         <div className="relative z-10 mx-auto max-w-[1240px] px-4 pt-2 pb-3 md:px-8 md:pt-3 md:pb-4">
-          <div className="flex w-full flex-col items-center justify-between gap-5 overflow-hidden rounded-[24px] border border-[#D5EADB] bg-gradient-to-br from-white via-[#E3F7EC] to-[#E7F6EF] px-6 py-6 shadow-sm md:flex-row md:gap-8 md:px-9 md:py-7">
+          <div className="hero flex w-full flex-col items-center justify-between gap-5 overflow-hidden rounded-[24px] border border-[#D5EADB] bg-gradient-to-br from-white via-[#E3F7EC] to-[#E7F6EF] px-6 py-6 shadow-sm md:flex-row md:gap-8 md:px-9 md:py-7">
             <div className="min-w-0 w-full max-w-3xl flex-1">
-              <h1 className="text-4xl font-black tracking-tight text-[#0B8F4D] sm:text-5xl md:text-6xl">
+              <h1 className="font-black tracking-tight text-[#0B8F4D]">
                 SIMPATIK
               </h1>
 
               <div className="mt-2 space-y-0.5">
-                <p className="text-2xl font-extrabold leading-tight tracking-tight text-[#17334B] sm:text-3xl lg:text-4xl">
+                <h2 className="font-extrabold tracking-tight text-[#17334B]">
                   Sistem Informasi Manajemen
-                </p>
-                <p className="text-2xl font-extrabold leading-tight tracking-tight text-[#17334B] sm:text-3xl lg:text-4xl">
+                </h2>
+                <h2 className="font-extrabold tracking-tight text-[#17334B]">
                   Pendidikan dan Akademik
-                </p>
+                </h2>
               </div>
 
-              <p className="mt-3 text-base font-bold text-[#0B8F4D] sm:text-lg">
+              <p className="tagline mt-3 font-bold text-[#0B8F4D]">
                 Terpadu - Interaktif - Kolaboratif
               </p>
 
               <div className="mt-5 flex flex-wrap items-center gap-3">
                 <button
                   onClick={() => onNavigate('attendance')}
-                  className="rounded-xl border border-slate-200/90 bg-white px-6 py-2 text-sm font-semibold text-slate-800 shadow-xs transition hover:bg-slate-50 hover:shadow-sm focus:outline-none"
+                  className="btn rounded-xl border border-slate-200/90 bg-white px-6 py-2 text-sm font-semibold text-slate-800 shadow-xs transition hover:bg-slate-50 hover:shadow-sm focus:outline-none"
                 >
                   Isi Presensi
                 </button>
@@ -172,7 +172,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
               <img
                 src="./images/Desain%20tanpa%20judul_20261112_110817_0000.png"
                 alt="Ilustrasi struktur manajemen SIMPATIK"
-                className="h-auto max-h-[230px] w-full max-w-[330px] object-contain"
+                className="hero-illustration h-auto object-contain"
                 loading="eager"
               />
             </div>

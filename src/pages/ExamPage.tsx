@@ -27,6 +27,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const isVerifiedExamAdmin = firebaseUser?.email?.toLowerCase() === 'amiruddin@smpialwasi-maros.sch.id';
   const canManageExamQuestions = Boolean(firebaseUser && !firebaseUser.isAnonymous && ['super_admin', 'kepala_sekolah', 'operator', 'guru', 'wali_kelas'].includes(currentUser?.role || ''));
   const [examStudents, setExamStudents] = useState<ExamStudent[]>([]);
+  const [rosterLoadState, setRosterLoadState] = useState<'loading' | 'ready' | 'empty' | 'error'>('loading');
   const [selectedRosterStudentId, setSelectedRosterStudentId] = useState('');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [exams, setExams] = useState<Exam[]>([]);
@@ -116,8 +117,17 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
 
         unS = onSnapshot(collection(db, 'studentExamDirectory'), snap => {
           const rows = snap.docs.map(d => ({ ...d.data(), id: d.id } as ExamStudent));
-          setExamStudents(rows.filter(s => s.name && s.className));
-        }, e => setMessage('Daftar siswa belum dapat dimuat. Pastikan data siswa sekolah sudah tersinkron.'));
+          const validRows = rows.filter(s => s.name && s.className && s.status === 'Aktif');
+          setExamStudents(validRows);
+          setRosterLoadState(validRows.length ? 'ready' : 'empty');
+          if (!validRows.length) setMessage('Daftar siswa belum tersedia. Hubungi admin sekolah.');
+          else setMessage('');
+        }, e => {
+          console.error('Gagal memuat direktori siswa:', e);
+          setExamStudents([]);
+          setRosterLoadState('error');
+          setMessage('Daftar siswa belum tersedia. Hubungi admin sekolah.');
+        });
         
         unQ = onSnapshot(collection(db, 'examPublicQuestions'), snap => {
           const rows = snap.docs.map(d => ({ ...d.data(), id: d.id, answer: undefined } as Question));
@@ -413,7 +423,8 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       <div><label className="mb-1 block text-xs font-bold text-slate-600">Kelas</label>{linkedExamId?<input className={field} value={studentClass || 'Memuat kelas ujian…'} readOnly/>:<select className={field} value={studentClass} onChange={e=>{setStudentClass(e.target.value);setSelectedRosterStudentId('');setVerifiedStudentName('')}} disabled={Boolean(studentId)}><option value="">Pilih kelas</option>{rosterClasses.map(item=><option key={item} value={item}>{item}</option>)}</select>}</div>
       <div><label className="mb-1 block text-xs font-bold text-slate-600">Nama siswa</label><select className={field} value={selectedRosterStudentId} onChange={e=>{const found=examStudents.find(s=>s.id===e.target.value);setSelectedRosterStudentId(e.target.value);setVerifiedStudentName(found?.name||'')}} disabled={Boolean(studentId)||!studentClass}><option value="">Pilih nama siswa</option>{rosterNames.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></div>
       {studentId?<div className="rounded-xl border border-[#B7E8CD] bg-[#F7FCF9] p-3"><p className="text-xs font-bold text-[#0B8F4D]">IDENTITAS SISWA TERVERIFIKASI DARI DATA SIMPATIK</p><p className="mt-1 font-extrabold">{verifiedStudentName}</p><p className="text-sm text-slate-500">{studentClass}</p><button className="mt-3 text-xs font-bold text-rose-600" onClick={()=>{setStudentId('');setSelectedRosterStudentId('');setVerifiedStudentName('');void deleteOfflineRecord('student:identity');}}>Ganti identitas</button></div>:<button className={btn+' w-full'} disabled={!selectedRosterStudentId||!studentClass||!examStudents.length} onClick={()=>void enterGuestMode()}>Lanjutkan sebagai siswa</button>}
-      {!examStudents.length&&<p className="rounded-xl bg-amber-50 p-3 text-xs text-amber-800">Daftar siswa belum tersedia. Data perlu disinkronkan dari akun guru/admin SIMPATIK terlebih dahulu.</p>}
+      {rosterLoadState === 'loading' && <p role="status" className="rounded-xl bg-slate-50 p-3 text-xs text-slate-600">Memuat daftar siswa…</p>}
+      {(rosterLoadState === 'empty' || rosterLoadState === 'error') && <p role="alert" className="rounded-xl bg-amber-50 p-3 text-xs text-amber-800">Daftar siswa belum tersedia, hubungi admin sekolah.</p>}
     </div>
     {studentId && <div className="space-y-3"><h3 className="font-bold text-slate-700">Ujian tersedia</h3>{availableExams.map(ex=><div key={ex.id} className={panel}><div className="flex items-start justify-between gap-3"><div><h4 className="font-extrabold">{ex.title}</h4><p className="mt-1 text-xs text-slate-500">{ex.subject} · {ex.duration} menit · {ex.questionIds.length} soal</p></div><button className={btn} onClick={()=>void startExam(ex)}><Play size={15}/> Mulai</button></div></div>)}{!availableExams.length&&<p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Belum ada ujian aktif untuk kelas ini.</p>}</div>}
   </div>;

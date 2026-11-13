@@ -5,7 +5,36 @@ const CONFIG = {
 };
 
 function doGet() {
-  return output_({ success: true, service: 'SIMPATIK_AUTO_GRADING', version: 1 });
+  return output_({ success: true, service: 'SIMPATIK_AUTO_GRADING', version: 2 });
+}
+
+function normalizeKeyIndex_(rawAnswer) {
+  if (rawAnswer === undefined || rawAnswer === null) return null;
+  if (typeof rawAnswer === 'number') {
+    return Number.isInteger(rawAnswer) && rawAnswer >= 0 ? rawAnswer : null;
+  }
+  const text = String(rawAnswer).trim();
+  if (!text) return null;
+  if (/^\d+$/.test(text)) {
+    const parsed = Number(text);
+    return Number.isInteger(parsed) && parsed >= 0 ? parsed : null;
+  }
+  const upper = text.toUpperCase();
+  if (/^[A-Z]$/.test(upper)) {
+    return upper.charCodeAt(0) - 65;
+  }
+  return null;
+}
+
+function normalizeStudentAnswer_(rawGiven) {
+  if (rawGiven === undefined || rawGiven === null) return null;
+  if (typeof rawGiven === 'number') {
+    return Number.isInteger(rawGiven) && rawGiven >= 0 ? rawGiven : null;
+  }
+  const text = String(rawGiven).trim();
+  if (!text || !/^\d+$/.test(text)) return null;
+  const parsed = Number(text);
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : null;
 }
 
 function doPost(e) {
@@ -26,8 +55,8 @@ function doPost(e) {
     if (attempt.ownerUid !== identity.uid) throw new Error('Akses pengerjaan ditolak.');
     if (attempt.status !== 'Selesai') throw new Error('Siswa belum menyelesaikan ujian.');
 
-    if (typeof attempt.score === 'number' && typeof attempt.total === 'number' && !attempt.gradingIssue) {
-      return output_({ success: true, alreadyGraded: true, score: attempt.score, total: attempt.total, percent: attempt.percent });
+    if (typeof attempt.score === 'number' && typeof attempt.total === 'number' && attempt.total > 0 && !attempt.gradingIssue) {
+      return output_({ success: true, alreadyGraded: true, score: attempt.score, total: attempt.total, percent: attempt.percent, gradingIssue: '' });
     }
 
     const examId = String(attempt.examId || '');
@@ -39,20 +68,33 @@ function doPost(e) {
     let total = 0;
     const missing = [];
     exam.questionIds.forEach(function(questionId) {
-      const key = getDocument_('examAnswerKeys', String(questionId));
-      if (!key || key.answer === undefined || key.answer === null) {
-        missing.push(String(questionId));
+      const qid = String(questionId);
+      let key = getDocument_('examAnswerKeys', qid);
+      let keyIndex = key ? normalizeKeyIndex_(key.answer) : null;
+      if (keyIndex === null) {
+        const legacy = getDocument_('examQuestions', qid);
+        if (legacy) {
+          key = legacy;
+          keyIndex = normalizeKeyIndex_(legacy.answer);
+        }
+      }
+      if (keyIndex === null) {
+        missing.push(qid);
         return;
       }
-      const points = Math.max(1, Number(key.points) || 1);
+      const rawPoints = Number(key && key.points);
+      const points = Number.isFinite(rawPoints) && rawPoints > 0 ? rawPoints : 1;
       total += points;
-      const given = attempt.answers && attempt.answers[questionId];
-      if (Number(given) === Number(key.answer)) score += points;
+      const given = normalizeStudentAnswer_(attempt.answers && attempt.answers[qid]);
+      if (given !== null && given === keyIndex) score += points;
     });
 
-    const issue = missing.length
-      ? missing.length + ' dari ' + exam.questionIds.length + ' soal belum memiliki kunci jawaban. Nilai sementara hanya menghitung soal yang sudah memiliki kunci.'
-      : '';
+    const gradedCount = exam.questionIds.length - missing.length;
+    const issue = gradedCount === 0
+      ? 'Belum ada kunci jawaban untuk soal pada ujian ini. Menunggu kunci jawaban dari guru.'
+      : missing.length
+        ? missing.length + ' dari ' + exam.questionIds.length + ' soal belum memiliki kunci jawaban. Nilai sementara hanya menghitung ' + gradedCount + ' soal yang sudah memiliki kunci.'
+        : '';
 
     const result = {
       score: score,
@@ -62,7 +104,7 @@ function doPost(e) {
       gradedAt: new Date().toISOString()
     };
     patchDocument_('examAttempts', attemptId, result);
-    return output_({ success: true, ...result });
+    return output_(Object.assign({ success: true }, result));
   } catch (error) {
     return output_({ success: false, message: error && error.message ? error.message : String(error) });
   } finally {

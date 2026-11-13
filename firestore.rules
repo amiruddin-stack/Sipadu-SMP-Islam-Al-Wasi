@@ -112,7 +112,7 @@ service cloud.firestore {
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ownerUid']));
     }
     match /examAttempts/{attemptId} {
-      allow read: if isAdmin();
+      allow read: if isAdmin() || (isSignedIn() && resource.data.ownerUid == request.auth.uid);
       allow create: if isSignedIn() &&
         incoming().ownerUid == request.auth.uid &&
         !('score' in incoming()) && !('total' in incoming()) && !('percent' in incoming());

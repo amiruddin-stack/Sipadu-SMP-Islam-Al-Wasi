@@ -10,7 +10,7 @@ import { SCHOOL_SUBJECTS } from '../data/subjects';
 
 type Question = { id: string; title: string; subject: string; className: string; academicYear: string; semester: string; prompt: string; options: string[]; answer?: number; points: number; sourceFormId?: string };
 type Exam = { id: string; title: string; subject: string; className: string; academicYear: string; semester: string; duration: number; questionIds: string[]; formUrl?: string; status: 'Aktif' | 'Draft'; createdAt: string };
-type Attempt = { id: string; examId: string; examTitle: string; studentId: string; studentName: string; className: string; answers: Record<string, number>; score?: number; total?: number; status: 'Mengerjakan' | 'Selesai'; startedAt: string; submittedAt?: string };
+type Attempt = { id: string; examId: string; examTitle: string; studentId: string; studentName: string; className: string; answers: Record<string, number>; score?: number; total?: number; gradingIssue?: string; status: 'Mengerjakan' | 'Selesai'; startedAt: string; submittedAt?: string };
 
 const cls = ['VII', 'VIII', 'IX'];
 const makeExamLink = (id: string) => { const url = new URL(window.location.href); url.search = ''; url.searchParams.set('ujian', id); return url.toString(); };
@@ -161,13 +161,19 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
           const keySnapshots = await Promise.all(
             exam.questionIds.map(questionId => getDoc(doc(db, 'examAnswerKeys', questionId)))
           );
-          if (keySnapshots.some(snapshot => !snapshot.exists())) continue;
+          const missingCount = keySnapshots.filter(snapshot => !snapshot.exists()).length;
+          if (missingCount > 0) {
+            const issue = missingCount + ' dari ' + exam.questionIds.length + ' soal belum memiliki kunci jawaban.';
+            if (!cancelled && attempt.gradingIssue !== issue) {
+              await updateDoc(doc(db, 'examAttempts', attempt.id), { gradingIssue: issue });
+            }
+            continue;
+          }
           let score = 0;
           let total = 0;
           exam.questionIds.forEach((questionId, index) => {
-            const key = keySnapshots[index]?.data();
-            if (!key) return;
-            const points = Number(key.points) || 1;
+            const key = keySnapshots[index].data();
+            const points = Math.max(1, Number(key.points) || 1);
             total += points;
             if (attempt.answers?.[questionId] === key.answer) score += points;
           });
@@ -176,6 +182,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
               score,
               total,
               percent: Math.round((score / total) * 100),
+              gradingIssue: '',
               gradedAt: new Date().toISOString()
             });
           }
@@ -251,6 +258,12 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     if (!title.trim() || !subject || !selectedQuestions.length) { setMessage('Isi nama ujian, mapel, dan pilih minimal satu soal.'); return; }
     setSaving(true);
     try {
+      const answerKeys = await Promise.all(selectedQuestions.map(questionId => getDoc(doc(db, 'examAnswerKeys', questionId))));
+      const missingKeys = answerKeys.filter(snapshot => !snapshot.exists()).length;
+      if (missingKeys > 0) {
+        setMessage(missingKeys + ' soal belum memiliki kunci jawaban. Perbaiki atau impor ulang soal dengan kunci jawaban lengkap sebelum menerbitkan ujian.');
+        return;
+      }
       const created = await addDoc(collection(db, 'exams'), { title: title.trim(), subject, className: selectedClassNames[0] || level, academicYear: settings.activeAcademicYear, semester: settings.activeSemester, duration, questionIds: selectedQuestions, status: 'Aktif', createdAt: new Date().toISOString() });
       setShareLink(makeExamLink(created.id));
       setMessage('Ujian berhasil dibuat. Bagikan tautan ini kepada siswa.');
@@ -443,6 +456,6 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     {section==='manage'&&<div className={panel}><button className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>setSection('home')}><ArrowLeft size={16}/> Kembali</button><h3 className="mb-3 text-lg font-black">Kelola Ujian</h3><div className="space-y-3">{exams.map(ex=><div key={ex.id} className="rounded-xl border border-slate-200 p-3"><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0"><p className="font-extrabold">{ex.title}</p><p className="mt-1 text-xs text-slate-500">{ex.className} · {ex.subject} · {ex.duration} menit · {ex.questionIds.length} soal</p><span className={'mt-2 inline-flex rounded-full px-3 py-1 text-xs font-bold '+(ex.status==='Aktif'?'bg-[#E3F7EC] text-[#0B8F4D]':'bg-slate-100 text-slate-600')}>{ex.status}</span></div><div className="flex flex-wrap gap-2"><button className="rounded-xl border border-[#16B364] px-3 py-2 text-xs font-bold text-[#0B8F4D]" onClick={()=>{const url=makeExamLink(ex.id);setShareLink(url);setSection('share');}}><Copy size={14} className="mr-1 inline"/>Bagikan link</button><button className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600" onClick={()=>void updateDoc(doc(db,'exams',ex.id),{status:ex.status==='Aktif'?'Draft':'Aktif'})}>{ex.status==='Aktif'?'Nonaktifkan':'Aktifkan'}</button></div></div></div>)}{!exams.length&&<p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Belum ada ujian. Buat ujian terlebih dahulu.</p>}</div>
     </div>}
     {section==='share'&&<div className={panel+' mx-auto max-w-2xl'}><div className="text-center"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E3F7EC] text-[#0B8F4D]"><LinkIcon size={28}/></div><h3 className="mt-3 text-xl font-black">Ujian berhasil dibuat</h3><p className="mt-1 text-sm text-slate-500">Bagikan tautan ini kepada siswa. Saat dibuka, siswa langsung masuk ke halaman ujian.</p></div><label className="mb-2 mt-5 block text-xs font-bold">Link pengerjaan siswa</label><div className="flex flex-col gap-2 sm:flex-row"><input className={field+' min-w-0'} readOnly value={shareLink}/><button className={btn+' shrink-0'} onClick={()=>void navigator.clipboard.writeText(shareLink)}><Copy size={15}/> Salin link</button></div><a href={shareLink} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[#0B8F4D]">Buka halaman siswa <ExternalLink size={14}/></a><div className="mt-5 flex flex-wrap gap-2"><button className={btn} onClick={()=>setSection('manage')}>Ke Kelola Ujian</button><button className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-600" onClick={()=>setSection('home')}>Kembali ke menu</button></div></div>}
-    {section==='results'&&<div className={panel}><div className="mb-4 flex items-center justify-between gap-3"><button className="flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>selectedResultExamId?setSelectedResultExamId(''):setSection('home')}><ArrowLeft size={16}/> {selectedResultExamId?'Daftar Ujian':'Kembali'}</button>{selectedResultExam&&<span className="rounded-full bg-[#E3F7EC] px-3 py-1 text-xs font-bold text-[#0B8F4D]">{selectedResultAttempts.length} peserta</span>}</div><h3 className="mb-3 text-lg font-black">{selectedResultExam?selectedResultExam.title:'Hasil Ujian'}</h3>{!selectedResultExam?<div className="space-y-3">{resultExamGroups.map(exam=><button key={exam.id} onClick={()=>setSelectedResultExamId(exam.id)} className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 p-4 text-left transition hover:border-[#16B364] hover:bg-[#F7FCF9]"><span className="min-w-0"><strong className="block truncate">{exam.title}</strong><span className="mt-1 block text-xs text-slate-500">{exam.subject?exam.subject+' · ':''}{exam.className} · {exam.attempts.length} peserta</span></span><ChevronRight className="shrink-0 text-[#0B8F4D]"/></button>)}{!resultExamGroups.length&&<p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Belum ada ujian atau hasil pengerjaan siswa.</p>}</div>:<><p className="mb-3 text-sm text-slate-500">{selectedResultExam.subject} · {selectedResultExam.className}</p><div className="overflow-x-auto"><table className="w-full min-w-[560px] text-left text-sm"><thead><tr className="border-b bg-slate-50 text-xs text-slate-500"><th className="p-3">Nama Siswa</th><th className="p-3">Kelas</th><th className="p-3">Skor</th><th className="p-3">Nilai</th><th className="p-3">Status</th></tr></thead><tbody>{selectedResultAttempts.map(a=><tr key={a.id} className="border-b border-slate-100"><td className="p-3 font-semibold">{a.studentName}</td><td className="p-3">{a.className}</td><td className="p-3 font-bold">{a.status==='Selesai'&&typeof a.score==='number'&&typeof a.total==='number'?a.score+' / '+a.total:'—'}</td><td className="p-3 font-bold text-[#0B8F4D]">{a.status==='Selesai'?typeof a.score==='number'&&typeof a.total==='number'?Math.round(a.score/Math.max(1,a.total)*100):'Sedang diperiksa':'—'}</td><td className="p-3">{a.status==='Selesai'?(typeof a.score==='number'?'Selesai':'Menunggu pemeriksaan'):a.status}</td></tr>)}</tbody></table></div>{!selectedResultAttempts.length&&<p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Belum ada siswa yang mengerjakan ujian ini.</p>}</>}</div>}
+    {section==='results'&&<div className={panel}><div className="mb-4 flex items-center justify-between gap-3"><button className="flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>selectedResultExamId?setSelectedResultExamId(''):setSection('home')}><ArrowLeft size={16}/> {selectedResultExamId?'Daftar Ujian':'Kembali'}</button>{selectedResultExam&&<span className="rounded-full bg-[#E3F7EC] px-3 py-1 text-xs font-bold text-[#0B8F4D]">{selectedResultAttempts.length} peserta</span>}</div><h3 className="mb-3 text-lg font-black">{selectedResultExam?selectedResultExam.title:'Hasil Ujian'}</h3>{!selectedResultExam?<div className="space-y-3">{resultExamGroups.map(exam=><button key={exam.id} onClick={()=>setSelectedResultExamId(exam.id)} className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 p-4 text-left transition hover:border-[#16B364] hover:bg-[#F7FCF9]"><span className="min-w-0"><strong className="block truncate">{exam.title}</strong><span className="mt-1 block text-xs text-slate-500">{exam.subject?exam.subject+' · ':''}{exam.className} · {exam.attempts.length} peserta</span></span><ChevronRight className="shrink-0 text-[#0B8F4D]"/></button>)}{!resultExamGroups.length&&<p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Belum ada ujian atau hasil pengerjaan siswa.</p>}</div>:<><p className="mb-3 text-sm text-slate-500">{selectedResultExam.subject} · {selectedResultExam.className}</p><div className="overflow-x-auto"><table className="w-full min-w-[560px] text-left text-sm"><thead><tr className="border-b bg-slate-50 text-xs text-slate-500"><th className="p-3">Nama Siswa</th><th className="p-3">Kelas</th><th className="p-3">Skor</th><th className="p-3">Nilai</th><th className="p-3">Status</th></tr></thead><tbody>{selectedResultAttempts.map(a=><tr key={a.id} className="border-b border-slate-100"><td className="p-3 font-semibold">{a.studentName}</td><td className="p-3">{a.className}</td><td className="p-3 font-bold">{a.status==='Selesai'&&typeof a.score==='number'&&typeof a.total==='number'?a.score+' / '+a.total:'—'}</td><td className="p-3 font-bold text-[#0B8F4D]">{a.status==='Selesai'?typeof a.score==='number'&&typeof a.total==='number'?Math.round(a.score/Math.max(1,a.total)*100):'Sedang diperiksa':'—'}</td><td className="p-3">{a.status!=='Selesai'?a.status:typeof a.score==='number'?'Selesai':a.gradingIssue||'Menunggu penilaian admin'}</td></tr>)}</tbody></table></div>{!selectedResultAttempts.length&&<p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Belum ada siswa yang mengerjakan ujian ini.</p>}</>}</div>}
   </div>;
 };

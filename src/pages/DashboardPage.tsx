@@ -144,7 +144,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
                 <h2 className="whitespace-nowrap font-extrabold tracking-tight text-black text-[10px] min-[380px]:text-xs sm:text-base md:text-lg">
                   Sistem Informasi Manajemen
                 </h2>
-                <h2 className="whitespace-nowrap font-black tracking-tight text-[#0B8F4D] text-base min-[380px]:text-lg sm:text-2xl md:text-3xl">
+                <h2 className="whitespace-nowrap font-black tracking-tight text-[#0B8F4D] text-[22px] min-[380px]:text-[26px] sm:text-[32px] md:text-[40px]">
                   Pendidikan dan Asesmen
                 </h2>
                 <h2 className="whitespace-nowrap font-extrabold tracking-tight text-black text-[9px] min-[380px]:text-[10px] sm:text-sm md:text-lg">

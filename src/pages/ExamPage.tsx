@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, query, setDoc, updateDoc, where } from 'firebase/firestore';
 import { deleteOfflineRecord, readOfflineRecord, readOfflineRecords, saveOfflineRecord } from '../lib/examOffline';
 import { signInAnonymously, signOut } from 'firebase/auth';
 import { BookOpen, Clock3, Plus, ClipboardList, Trophy, ArrowLeft, ChevronRight, CheckCircle2, Link as LinkIcon, Play, Save, Copy, ExternalLink } from 'lucide-react';
@@ -310,6 +310,18 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       await auth.authStateReady();
       if (navigator.onLine && !auth.currentUser) await signInAnonymously(auth);
       const sessionOwnerUid = auth.currentUser?.uid || '';
+      if (navigator.onLine && sessionOwnerUid) {
+        const priorAttempts = await getDocs(query(
+          collection(db, 'examAttempts'),
+          where('examId', '==', exam.id),
+          where('ownerUid', '==', sessionOwnerUid)
+        ));
+        const alreadyFinished = priorAttempts.docs.some(snapshot => snapshot.data().status === 'Selesai');
+        if (alreadyFinished) {
+          setMessage('Anda sudah mengerjakan soal ini. Anda tidak dapat mengerjakan ujian yang sama untuk kedua kalinya.');
+          return;
+        }
+      }
       const id = crypto.randomUUID();
       const startedAt = new Date().toISOString();
       const endAt = Date.now() + exam.duration * 60 * 1000;

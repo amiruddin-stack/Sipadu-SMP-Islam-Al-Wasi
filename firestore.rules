@@ -175,14 +175,14 @@ service cloud.firestore {
         || (signedIn()
           && request.auth.token.firebase.sign_in_provider == 'anonymous'
           && resource.data.active == true
-          && (resource.data.ownerUid == null || resource.data.ownerUid == request.auth.uid));
+          && (!('ownerUid' in resource.data) || resource.data.ownerUid == null || resource.data.ownerUid == request.auth.uid));
       allow list: if isAdmin();
       allow create, delete: if isAdmin();
       allow update: if isAdmin()
         || (signedIn()
           && request.auth.token.firebase.sign_in_provider == 'anonymous'
           && resource.data.active == true
-          && resource.data.ownerUid == null
+          && (!('ownerUid' in resource.data) || resource.data.ownerUid == null)
           && request.resource.data.ownerUid == request.auth.uid
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ownerUid']));
     }

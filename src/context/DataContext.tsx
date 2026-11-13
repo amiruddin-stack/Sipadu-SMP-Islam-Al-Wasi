@@ -474,17 +474,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateStudent = async (id: string, partial: Partial<Student>) => {
+    await setDoc(doc(db, 'students', id), partial, { merge: true });
     setStudents((prev) => {
       const updated = prev.map((s) => (s.id === id ? { ...s, ...partial } : s));
       saveLocal('students', updated);
       return updated;
     });
-
-    try {
-      await setDoc(doc(db, 'students', id), partial, { merge: true });
-    } catch (e) {
-      console.warn('Updated student locally:', e);
-    }
   };
 
   const deleteStudent = async (id: string) => {

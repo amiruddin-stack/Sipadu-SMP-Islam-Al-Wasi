@@ -483,17 +483,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const deleteStudent = async (id: string) => {
+    await deleteDoc(doc(db, 'students', id));
     setStudents((prev) => {
       const updated = prev.filter((s) => s.id !== id);
       saveLocal('students', updated);
       return updated;
     });
-
-    try {
-      await deleteDoc(doc(db, 'students', id));
-    } catch (e) {
-      console.warn('Deleted student locally:', e);
-    }
   };
 
   // Settings

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 import { deleteOfflineRecord, readOfflineRecord, readOfflineRecords, saveOfflineRecord } from '../lib/examOffline';
-import { signInAnonymously } from 'firebase/auth';
+import { signInAnonymously, signOut } from 'firebase/auth';
 import { BookOpen, Clock3, Plus, ClipboardList, Trophy, ArrowLeft, ChevronRight, CheckCircle2, Link as LinkIcon, Play, Save, Copy, ExternalLink } from 'lucide-react';
 import { db, auth } from '../firebase/config';
 import { useData } from '../context/DataContext';
@@ -265,6 +265,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     if (!studentClass) { setMessage('Pilih kelas terlebih dahulu.'); return; }
     try {
       await auth.authStateReady();
+      if (auth.currentUser && !auth.currentUser.isAnonymous) await signOut(auth);
       if (!auth.currentUser) await signInAnonymously(auth);
       const uid = auth.currentUser?.uid;
       if (!uid || !auth.currentUser?.isAnonymous) throw new Error('Mode tamu belum tersedia. Coba buka kembali tautan ujian.');

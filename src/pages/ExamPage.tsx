@@ -22,7 +22,7 @@ const GRADING_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyw5E1QakV5
 
 function classLevel(value: string) { return value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3); }
 export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
-  const { students, classes, settings } = useData();
+  const { classes, settings } = useData();
   const { firebaseUser, currentUser } = useAuth();
   const isVerifiedExamAdmin = firebaseUser?.email?.toLowerCase() === 'amiruddin@smpialwasi-maros.sch.id';
   const canManageExamQuestions = Boolean(firebaseUser && !firebaseUser.isAnonymous && ['super_admin', 'kepala_sekolah', 'operator', 'guru', 'wali_kelas'].includes(currentUser?.role || ''));

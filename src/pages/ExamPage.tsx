@@ -232,7 +232,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const enterGuestMode = async () => {
     const selectedStudent = examStudents.find(s => s.id === selectedRosterStudentId);
     if (!selectedStudent) { setMessage('Pilih nama siswa dari daftar terlebih dahulu.'); return; }
-    if (!studentClass || classLevel(selectedStudent.className) !== classLevel(studentClass)) { setMessage('Nama siswa tidak sesuai dengan kelas yang dipilih.'); return; }
+    if (!studentClass || (linkedExamId ? classLevel(selectedStudent.className) !== classLevel(studentClass) : selectedStudent.className.trim() !== studentClass.trim())) { setMessage('Nama siswa tidak sesuai dengan kelas yang dipilih.'); return; }
     const name = selectedStudent.name;
     try {
       await auth.authStateReady();
@@ -403,8 +403,10 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   }, [isOnline, section, activeExam, attemptId, answers, studentId, studentClass, examStudents, deadlineAt, ownerUid]);
 
   const fmt = (seconds: number) => String(Math.floor(seconds / 60)).padStart(2,'0') + ':' + String(seconds % 60).padStart(2,'0');
-  const rosterClasses = Array.from(new Set(examStudents.map(s => s.className))).sort((a,b)=>a.localeCompare(b,'id'));
-  const rosterNames = examStudents.filter(s => classLevel(s.className) === classLevel(studentClass)).sort((a,b)=>a.name.localeCompare(b.name,'id'));
+  const rosterClasses = Array.from(new Set(examStudents.map(s => s.className?.trim()).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'id'));
+  const rosterNames = examStudents
+    .filter(s => linkedExamId ? classLevel(s.className) === classLevel(studentClass) : s.className?.trim() === studentClass.trim())
+    .sort((a,b)=>a.name.localeCompare(b.name,'id'));
   const studentEntry = () => <div className="mx-auto max-w-xl space-y-4">
     <div className="text-center"><div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E3F7EC] text-[#16B364]"><BookOpen size={30}/></div><h2 className="text-2xl font-black text-slate-800">Ruang Ujian Siswa</h2><p className="mt-1 text-sm text-slate-500">Masuk sebagai tamu. Tidak perlu login Google atau membuat akun.</p></div>
     <div className={panel+' space-y-3'}>

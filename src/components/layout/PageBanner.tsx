@@ -35,10 +35,9 @@ export const PageBanner: React.FC<PageBannerProps> = ({ activeTab, onBack, title
   const details = pageDetails[activeTab];
   const Icon = icon || details.icon;
   return (
-    <section className="relative mb-5 flex min-h-[104px] w-full items-center justify-between gap-4 overflow-hidden rounded-[24px] border border-[#D5EADB] bg-gradient-to-br from-white via-[#E3F7EC] to-[#E7F6EF] px-4 py-4 shadow-sm sm:min-h-[116px] sm:px-6 md:px-7">
-      <div className="pointer-events-none absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 82% 16%, rgba(160, 226, 206, 0.45) 0%, rgba(198, 240, 226, 0.25) 30%, transparent 60%), radial-gradient(circle at 12% 26%, rgba(192, 238, 222, 0.35) 0%, transparent 45%), linear-gradient(180deg, rgba(245,250,248,0.55) 0%, rgba(255,255,255,0.15) 100%)' }} />
+    <section className="relative mb-5 flex min-h-[104px] w-full items-center justify-between gap-4 overflow-hidden rounded-[24px] border border-slate-200 bg-white px-4 py-4 shadow-sm sm:min-h-[116px] sm:px-6 md:px-7">
       <div className="relative z-10 flex min-w-0 items-center gap-3 sm:gap-4">
-        <button type="button" onClick={onBack} aria-label="Kembali ke Beranda" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#B7E8CD] bg-white/90 text-[#0B8F4D] shadow-sm transition hover:bg-[#0B8F4D] hover:text-white sm:h-11 sm:w-11">
+        <button type="button" onClick={onBack} aria-label="Kembali ke Beranda" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-[#0B8F4D] shadow-sm transition hover:bg-[#0B8F4D] hover:text-white sm:h-11 sm:w-11">
           <ArrowLeft size={20}/>
         </button>
         <div className="min-w-0">
@@ -47,7 +46,7 @@ export const PageBanner: React.FC<PageBannerProps> = ({ activeTab, onBack, title
           <p className="mt-0.5 line-clamp-1 text-[11px] font-medium text-slate-500 sm:text-xs">{description || details.description}</p>
         </div>
       </div>
-      <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/80 bg-white/75 text-[#0B8F4D] shadow-sm sm:h-14 sm:w-14">
+      <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/80 bg-white text-[#0B8F4D] shadow-sm sm:h-14 sm:w-14">
         <Icon size={25} strokeWidth={1.9}/>
       </div>
     </section>

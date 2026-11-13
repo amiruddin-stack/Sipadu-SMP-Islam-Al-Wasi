@@ -20,7 +20,7 @@ const field = 'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 te
 const btn = 'inline-flex items-center justify-center gap-2 rounded-xl bg-[#16B364] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#0B8F4D] disabled:cursor-not-allowed disabled:opacity-50';
 const GRADING_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyw5E1QakV5saHXbqKV_vcD8HWz06F5h6YpVhVaHmySROaxrvwqlJSc16DkXNB1Us5O/exec';
 
-function classLevel(value: string) { return value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3); }
+function classLevel(value: string) { const normalized = value.trim().toUpperCase().replace(/^KELAS\\s+/, ''); const match = normalized.match(/^(VIII|VII|IX)(?=$|[\\s(-])/); return match ? match[1] : normalized.replace(/[^A-Z]/g, ''); }
 export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const { classes, settings } = useData();
   const { firebaseUser, currentUser } = useAuth();

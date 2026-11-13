@@ -21,8 +21,8 @@ const btn = 'inline-flex items-center justify-center gap-2 rounded-xl bg-[#16B36
 const GRADING_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyw5E1QakV5saHXbqKV_vcD8HWz06F5h6YpVhVaHmySROaxrvwqlJSc16DkXNB1Us5O/exec';
 
 function classLevel(value: string) {
-  const normalized = value.trim().toUpperCase().replace(/^KELAS\\s+/, '');
-  const match = normalized.match(/^(VIII|VII|IX)(?=$|[\\s(-])/);
+  const normalized = value.trim().toUpperCase().replace(/^KELAS\s+/, '');
+  const match = normalized.match(/^(VIII|VII|IX)(?=$|[\s(-])/);
   return match ? match[1] : normalized.replace(/[^A-Z]/g, '');
 }
 function classDisplayName(value: string) {

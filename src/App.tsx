@@ -88,7 +88,7 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen w-full font-sans text-slate-800" style={{ backgroundColor: '#FFFFFF', backgroundImage: 'radial-gradient(circle at 82% 16%, rgba(160, 226, 206, 0.30) 0%, rgba(198, 240, 226, 0.16) 30%, transparent 60%), radial-gradient(circle at 12% 26%, rgba(192, 238, 222, 0.24) 0%, transparent 45%), radial-gradient(circle at 50% 12%, rgba(215, 246, 238, 0.28) 0%, transparent 55%), linear-gradient(180deg, #F5FAF8 0%, #FFFFFF 100%)' }}>
+    <div className="min-h-screen w-full font-sans text-slate-800" style={{ backgroundColor: '#FFFFFF' }}>
       <div className="flex min-h-screen w-full">
         <DesktopSidebar activeTab={activeTab} onNavigate={setActiveTab} />
         <div className="min-w-0 flex-1">

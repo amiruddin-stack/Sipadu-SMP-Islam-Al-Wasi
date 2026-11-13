@@ -2,237 +2,236 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    match /{document=**} {
-      allow read, write: if false;
-    }
-
-    function isSignedIn() {
+    function signedIn() {
       return request.auth != null;
     }
 
-    function incoming() {
-      return request.resource.data;
+    function isSchoolIdentity() {
+      return signedIn()
+        && request.auth.token.email is string
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.matches('^[^@]+@smpialwasi-maros\\.sch\\.id$')
+        && request.auth.token.firebase.sign_in_provider in ['password', 'google.com'];
     }
 
-    function isSchoolGoogleAccount() {
-      return isSignedIn() &&
-        request.auth.token.email_verified == true &&
-        request.auth.token.firebase.sign_in_provider == 'google.com' &&
-        request.auth.token.email.matches('^[^@]+@smpialwasi-maros\\.sch\\.id$');
+    function userProfileExists() {
+      return isSchoolIdentity()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function userRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
     }
 
     function isAdmin() {
-      return isSchoolGoogleAccount() &&
-        request.auth.token.email == 'amiruddin@smpialwasi-maros.sch.id';
+      return userProfileExists()
+        && userRole() == 'super_admin'
+        && request.auth.token.email == 'amiruddin@smpialwasi-maros.sch.id';
     }
 
-    function canManageExamQuestions() {
-      return isAdmin() ||
-        (isSchoolGoogleAccount() &&
-          exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'guru');
+    function isGuruOrAdmin() {
+      return userProfileExists()
+        && userRole() in ['super_admin', 'guru'];
     }
 
-    function validOwnProfile(userId) {
-      return isSchoolGoogleAccount() &&
-        request.auth.uid == userId &&
-        request.resource.data.uid == request.auth.uid &&
-        request.resource.data.email == request.auth.token.email &&
-        request.resource.data.role == (isAdmin() ? 'super_admin' : 'guru');
+    function validProfile(userId) {
+      return isSchoolIdentity()
+        && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly(['uid', 'email', 'displayName', 'role', 'nip', 'assignedClass', 'subject', 'phone'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0
+        && request.resource.data.displayName.size() <= 100
+        && request.resource.data.role == (
+          request.auth.token.email == 'amiruddin@smpialwasi-maros.sch.id' ? 'super_admin' : 'guru'
+        );
+    }
+
+    function validStudentRegistration(studentId) {
+      return signedIn()
+        && request.auth.token.firebase.sign_in_provider == 'anonymous'
+        && studentId.size() == 68
+        && studentId.matches('^std-[a-f0-9]+$')
+        && request.resource.data.keys().hasOnly([
+          'id', 'nis', 'nisn', 'name', 'gender', 'className',
+          'status', 'registeredAt', 'registrationSource'
+        ])
+        && request.resource.data.id == studentId
+        && request.resource.data.nis is string
+        && request.resource.data.nis.size() <= 30
+        && request.resource.data.nisn is string
+        && request.resource.data.nisn.size() <= 30
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 3
+        && request.resource.data.name.size() <= 100
+        && request.resource.data.gender in ['L', 'P']
+        && request.resource.data.className in ['VII (Tujuh)', 'VIII (Delapan)', 'IX (Sembilan)']
+        && request.resource.data.status == 'menunggu'
+        && request.resource.data.registeredAt is string
+        && request.resource.data.registeredAt.size() <= 50
+        && request.resource.data.registrationSource == 'public_form'
+        && !exists(/databases/$(database)/documents/students/$(studentId));
     }
 
     match /users/{userId} {
-      allow read: if isSchoolGoogleAccount() && (request.auth.uid == userId || isAdmin());
-      allow create, update: if validOwnProfile(userId) || isAdmin();
+      allow get: if isSchoolIdentity()
+        && (request.auth.uid == userId || isAdmin());
+      allow list: if isAdmin();
+
+      // Akun hanya dapat membuat profil dirinya dengan peran awal yang ditentukan server-side.
+      allow create: if validProfile(userId);
+
+      // Pengguna tidak dapat mengubah perannya sendiri. Perubahan peran hanya oleh admin.
+      allow update: if isAdmin()
+        || (validProfile(userId)
+          && request.resource.data.role == resource.data.role);
       allow delete: if isAdmin();
     }
 
     match /students/{studentId} {
-      allow read, update, delete: if isSchoolGoogleAccount();
-      allow create: if isSchoolGoogleAccount() || (
-        isSignedIn() &&
-        request.auth.token.firebase.sign_in_provider == 'anonymous' &&
-        studentId.size() == 68 &&
-        studentId.matches('^std-[a-f0-9]+$') &&
-        incoming().id == studentId &&
-        incoming().name is string &&
-        incoming().name.size() >= 3 &&
-        incoming().name.size() <= 100 &&
-        incoming().nis == '' &&
-        incoming().nisn == '' &&
-        incoming().gender == 'L' &&
-        incoming().status == 'Aktif' &&
-        incoming().className in ['VII (Tujuh)', 'VIII (Delapan)', 'IX (Sembilan)'] &&
-        incoming().registrationSource == 'public_form' &&
-        !exists(/databases/$(database)/documents/students/$(studentId))
-      );
+      // Daftar lengkap siswa hanya untuk admin. Guru dan akun anonim tidak dapat membaca.
+      allow read: if isAdmin();
+      // Impor Excel memakai setDoc(..., {merge:true}); admin perlu create dan update.
+      allow create, update, delete: if isAdmin()
+        || (request.method == 'create' && validStudentRegistration(studentId));
     }
-    match /attendance/{attendanceId} {
-      allow read, write: if isSchoolGoogleAccount();
+
+    match /attendance/{id} {
+      allow read, write: if isGuruOrAdmin();
     }
-    match /journals/{journalId} {
-      allow read, write: if isSchoolGoogleAccount();
+    match /attendance_history/{id} {
+      allow read, write: if isGuruOrAdmin();
     }
-    match /behaviors/{behaviorId} {
-      allow read, write: if isSchoolGoogleAccount();
+    match /journals/{id} {
+      allow read, write: if isGuruOrAdmin();
     }
-    match /counseling/{counselingId} {
-      allow read, write: if isSchoolGoogleAccount();
+    match /behaviors/{id} {
+      allow read, write: if isGuruOrAdmin();
     }
-    match /assessments/{assessmentId} {
-      allow read, write: if isSchoolGoogleAccount();
+    match /counseling/{id} {
+      allow read, write: if isAdmin()
+        || (userProfileExists() && userRole() == 'guru_bk');
     }
-    match /settings/{settingId} {
-      allow read, write: if isSchoolGoogleAccount();
+    match /assessments/{id} {
+      allow read, write: if isGuruOrAdmin();
     }
-    match /teachers/{teacherId} {
-      allow read, write: if isSchoolGoogleAccount();
+    match /settings/{id} {
+      allow read, write: if isAdmin();
     }
-    match /master_classes/{classId} {
-      allow read, write: if isSchoolGoogleAccount();
+    match /teachers/{id} {
+      allow read, write: if isAdmin();
     }
-    match /master_subjects/{subjectId} {
-      allow read, write: if isSchoolGoogleAccount();
+    match /master_classes/{id} {
+      allow read, write: if isAdmin();
     }
-    match /extracurriculars/{itemId} {
-      allow read, write: if isSchoolGoogleAccount();
+    match /master_subjects/{id} {
+      allow read, write: if isAdmin();
     }
-    match /attendance_history/{historyId} {
-      allow read, write: if isSchoolGoogleAccount();
+    match /extracurriculars/{id} {
+      allow read, write: if isGuruOrAdmin();
     }
 
     match /examQuestions/{questionId} {
       allow read, write: if isAdmin();
     }
+
     match /examPublicQuestions/{questionId} {
-      allow read: if isSignedIn();
-      allow create, update: if canManageExamQuestions() && !('answer' in request.resource.data);
-      allow delete: if canManageExamQuestions();
-    }
-    match /examAnswerKeys/{questionId} {
-      allow read: if isAdmin();
-      allow create, update, delete: if canManageExamQuestions();
-    }
-    match /exams/{examId} {
-      allow read: if isSignedIn();
-      allow create, update, delete: if isAdmin();
-    }
-    match /examStudentCodes/{code} {
-      allow get: if isSignedIn() && resource.data.active == true &&
-        (resource.data.ownerUid == null || resource.data.ownerUid == request.auth.uid);
-      allow list: if isAdmin();
-      allow create, delete: if isAdmin();
-      allow update: if isAdmin() ||
-        (isSignedIn() && resource.data.active == true &&
-          resource.data.ownerUid == null &&
-          request.resource.data.ownerUid == request.auth.uid &&
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ownerUid']));
-    }
-    match /examAttempts/{attemptId} {
-      allow read: if isAdmin() || (isSignedIn() && resource.data.ownerUid == request.auth.uid);
-      allow create: if isSignedIn() &&
-        incoming().ownerUid == request.auth.uid &&
-        !('score' in incoming()) && !('total' in incoming()) && !('percent' in incoming());
-      allow update: if isAdmin() ||
-        (isSignedIn() &&
-          resource.data.ownerUid == request.auth.uid &&
-          request.resource.data.ownerUid == request.auth.uid &&
-          resource.data.status == 'Mengerjakan' &&
-          !('score' in request.resource.data) &&
-          !('total' in request.resource.data) &&
-          !('percent' in request.resource.data));
-      allow delete: if isAdmin();
-    }
-  }
-}) &&
-        incoming().id == studentId &&
-        incoming().name is string &&
-        incoming().name.size() >= 3 &&
-        incoming().name.size() <= 100 &&
-        incoming().nis == '' &&
-        incoming().nisn == '' &&
-        incoming().gender == 'L' &&
-        incoming().status == 'Aktif' &&
-        incoming().className in ['VII (Tujuh)', 'VIII (Delapan)', 'IX (Sembilan)'] &&
-        incoming().registrationSource == 'public_form' &&
-        !exists(/databases/$(database)/documents/students/$(studentId))
-      );
-    }
-    match /attendance/{attendanceId} {
-      allow read, write: if isSchoolGoogleAccount();
-    }
-    match /journals/{journalId} {
-      allow read, write: if isSchoolGoogleAccount();
-    }
-    match /behaviors/{behaviorId} {
-      allow read, write: if isSchoolGoogleAccount();
-    }
-    match /counseling/{counselingId} {
-      allow read, write: if isSchoolGoogleAccount();
-    }
-    match /assessments/{assessmentId} {
-      allow read, write: if isSchoolGoogleAccount();
-    }
-    match /settings/{settingId} {
-      allow read, write: if isSchoolGoogleAccount();
-    }
-    match /teachers/{teacherId} {
-      allow read, write: if isSchoolGoogleAccount();
-    }
-    match /master_classes/{classId} {
-      allow read, write: if isSchoolGoogleAccount();
-    }
-    match /master_subjects/{subjectId} {
-      allow read, write: if isSchoolGoogleAccount();
-    }
-    match /extracurriculars/{itemId} {
-      allow read, write: if isSchoolGoogleAccount();
-    }
-    match /attendance_history/{historyId} {
-      allow read, write: if isSchoolGoogleAccount();
+      // Koleksi ini khusus konten soal publik; kunci jawaban harus disimpan terpisah.
+      allow read: if (signedIn()
+          && request.auth.token.firebase.sign_in_provider == 'anonymous'
+          && !('answer' in resource.data)
+          && !('correctAnswer' in resource.data)
+          && !('answerKey' in resource.data)
+          && !('correctOption' in resource.data))
+        || isGuruOrAdmin();
+      allow create, update: if isGuruOrAdmin()
+        && !('answer' in request.resource.data)
+        && !('correctAnswer' in request.resource.data)
+        && !('answerKey' in request.resource.data)
+        && !('correctOption' in request.resource.data);
+      allow delete: if isGuruOrAdmin();
     }
 
-    match /examQuestions/{questionId} {
-      allow read, write: if isAdmin();
-    }
-    match /examPublicQuestions/{questionId} {
-      allow read: if isSignedIn();
-      allow create, update: if canManageExamQuestions() && !('answer' in request.resource.data);
-      allow delete: if canManageExamQuestions();
-    }
     match /examAnswerKeys/{questionId} {
-      allow read: if isAdmin();
-      allow create, update, delete: if canManageExamQuestions();
+      allow read, write: if isGuruOrAdmin();
     }
+
     match /exams/{examId} {
-      allow read: if isSignedIn();
-      allow create, update, delete: if isAdmin();
+      allow read: if isGuruOrAdmin()
+        || (signedIn()
+          && request.auth.token.firebase.sign_in_provider == 'anonymous'
+          && resource.data.status == 'Aktif');
+      allow create, update, delete: if isGuruOrAdmin();
     }
+
     match /examStudentCodes/{code} {
-      allow get: if isSignedIn() && resource.data.active == true &&
-        (resource.data.ownerUid == null || resource.data.ownerUid == request.auth.uid);
+      allow get: if isAdmin()
+        || (signedIn()
+          && request.auth.token.firebase.sign_in_provider == 'anonymous'
+          && resource.data.active == true
+          && (resource.data.ownerUid == null || resource.data.ownerUid == request.auth.uid));
       allow list: if isAdmin();
       allow create, delete: if isAdmin();
-      allow update: if isAdmin() ||
-        (isSignedIn() && resource.data.active == true &&
-          resource.data.ownerUid == null &&
-          request.resource.data.ownerUid == request.auth.uid &&
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ownerUid']));
+      allow update: if isAdmin()
+        || (signedIn()
+          && request.auth.token.firebase.sign_in_provider == 'anonymous'
+          && resource.data.active == true
+          && resource.data.ownerUid == null
+          && request.resource.data.ownerUid == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ownerUid']));
     }
+
     match /examAttempts/{attemptId} {
-      allow read: if isAdmin() || (isSignedIn() && resource.data.ownerUid == request.auth.uid);
-      allow create: if isSignedIn() &&
-        incoming().ownerUid == request.auth.uid &&
-        !('score' in incoming()) && !('total' in incoming()) && !('percent' in incoming());
-      allow update: if isAdmin() ||
-        (isSignedIn() &&
-          resource.data.ownerUid == request.auth.uid &&
-          request.resource.data.ownerUid == request.auth.uid &&
-          resource.data.status == 'Mengerjakan' &&
-          !('score' in request.resource.data) &&
-          !('total' in request.resource.data) &&
-          !('percent' in request.resource.data));
+      allow read: if isGuruOrAdmin()
+        || (signedIn()
+          && request.auth.token.firebase.sign_in_provider == 'anonymous'
+          && resource.data.ownerUid == request.auth.uid);
+
+      allow create: if signedIn()
+        && request.auth.token.firebase.sign_in_provider == 'anonymous'
+        && request.resource.data.keys().hasOnly([
+          'examId', 'examTitle', 'studentId', 'studentName', 'className',
+          'answers', 'ownerUid', 'status', 'startedAt'
+        ])
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.examId is string
+        && request.resource.data.examId.size() <= 128
+        && request.resource.data.studentId is string
+        && request.resource.data.studentId.size() <= 128
+        && request.resource.data.studentName is string
+        && request.resource.data.studentName.size() <= 100
+        && request.resource.data.className is string
+        && request.resource.data.className.size() <= 30
+        && request.resource.data.answers is map
+        && request.resource.data.status == 'Mengerjakan'
+        && request.resource.data.startedAt is string
+        && exists(/databases/$(database)/documents/exams/$(request.resource.data.examId))
+        && get(/databases/$(database)/documents/exams/$(request.resource.data.examId)).data.status == 'Aktif';
+
+      allow update: if isGuruOrAdmin()
+        || (signedIn()
+          && request.auth.token.firebase.sign_in_provider == 'anonymous'
+          && resource.data.ownerUid == request.auth.uid
+          && request.resource.data.ownerUid == request.auth.uid
+          && resource.data.status == 'Mengerjakan'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'answers', 'status', 'submittedAt', 'autoSubmitted', 'lastSavedAt'
+          ])
+          && request.resource.data.answers is map
+          && request.resource.data.status in ['Mengerjakan', 'Selesai']
+          && (!('submittedAt' in request.resource.data)
+            || request.resource.data.submittedAt is string)
+          && (!('autoSubmitted' in request.resource.data)
+            || request.resource.data.autoSubmitted is bool)
+          && (!('lastSavedAt' in request.resource.data)
+            || request.resource.data.lastSavedAt is string));
       allow delete: if isAdmin();
+    }
+
+    // Default deny: semua koleksi/dokumen lain tertutup kecuali diizinkan eksplisit di atas.
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

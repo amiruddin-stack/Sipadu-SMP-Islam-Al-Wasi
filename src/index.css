@@ -37,7 +37,7 @@ html, body, #root, button, input, textarea, select, option {
 }
 
 body {
-  background: #f5f8f6;
+  background: #F3F7F5;
   color: #172B22;
 }
 
@@ -144,31 +144,27 @@ body {
 
 .hero img,
 .hero .hero-illustration {
-  width: 140px;
+  width: 150px;
   max-width: 100%;
   height: auto;
 }
 
 .hero h1 {
-  margin: 0;
-  font-size: 30px;
-  color: #ffffff;
+  font-size: 34px;
 }
 
 .hero h2 {
-  font-size: 16px;
-  line-height: 1.2;
-  color: #ffffff;
+  font-size: 18px;
+  line-height: 1.25;
 }
 
 .hero .tagline {
-  font-size: 13px;
-  color: #d4f3e2;
+  font-size: 14px;
 }
 
 .hero .btn {
-  padding: 7px 14px;
-  font-size: 12px;
+  padding: 8px 16px;
+  font-size: 13px;
 }
 
 
@@ -179,8 +175,8 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #e3f6ec;
-  box-shadow: none;
+  background: linear-gradient(135deg, #e3f6ec, #d3f0e1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
 }
 
 .btn-back {
@@ -188,7 +184,7 @@ body {
   height: 38px;
   flex: none;
   border-radius: 50%;
-  border: 0;
+  border: 1px solid rgba(0, 0, 0, .08);
   background: #fff;
   color: #0f7a4a;
   display: flex;

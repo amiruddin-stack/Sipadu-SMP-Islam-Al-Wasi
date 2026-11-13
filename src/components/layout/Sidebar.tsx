@@ -78,9 +78,7 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({ activeTab, onNav
         </button>
       </nav>
 
-      <div className="mt-4 border-t border-[#E3F7EC] pt-4">
-        <p className="truncate px-2 text-xs font-bold text-slate-800">{currentUser?.displayName || 'Akun'}</p>
-        <p className="mt-1 truncate px-2 text-[10px] text-slate-400">{currentUser?.role === 'super_admin' ? 'Admin Utama' : currentUser?.email || ''}</p>
+      <div className="mt-4 border-t border-slate-100 pt-4">
         {firebaseUser && !firebaseUser.isAnonymous && currentUser && (
           <button type="button" onClick={() => void logout()} className="mt-3 flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-500 hover:bg-slate-50 hover:text-red-600">
             <LogOut size={15} />Keluar

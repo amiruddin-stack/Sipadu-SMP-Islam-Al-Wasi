@@ -91,6 +91,32 @@ function saveLocal<T>(key: string, data: T) {
   }
 }
 
+
+async function syncStudentExamDirectoryRecord(student: Student | null, studentId: string, isAdmin: boolean) {
+  if (!isAdmin) return;
+  const ref = doc(db, 'studentExamDirectory', studentId);
+  if (!student || student.status !== 'Aktif' || !student.name?.trim() || !student.className?.trim()) {
+    await deleteDoc(ref);
+    return;
+  }
+  await setDoc(ref, {
+    id: studentId,
+    name: student.name.trim().toLocaleUpperCase('id-ID'),
+    className: student.className.trim(),
+    status: 'Aktif',
+  });
+}
+
+async function reconcileStudentExamDirectory(students: Student[], isAdmin: boolean) {
+  if (!isAdmin) return;
+  const active = students.filter(s => s.status === 'Aktif' && s.name?.trim() && s.className?.trim());
+  const directory = collection(db, 'studentExamDirectory');
+  const existing = await getDocs(directory);
+  const activeIds = new Set(active.map(s => s.id));
+  await Promise.all(existing.docs.filter(item => !activeIds.has(item.id)).map(item => deleteDoc(item.ref)));
+  await Promise.all(active.map(student => syncStudentExamDirectoryRecord(student, student.id, true)));
+}
+
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { firebaseUser, currentUser } = useAuth();
   const [students, setStudents] = useState<Student[]>(() => loadLocal('students', initialStudents));
@@ -215,30 +241,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, (error) => console.warn('Firestore extracurriculars snapshot:', error.message));
 
     // Listen to Students
+    const isDirectoryAdmin = currentUser?.role === 'super_admin' && firebaseUser.email?.toLowerCase() === 'amiruddin@smpialwasi-maros.sch.id';
     const unsubStudents = onSnapshot(
       collection(db, 'students'),
       (snapshot) => {
-        if (!snapshot.empty) {
-          const list = snapshot.docs.map((d) => ({ ...d.data(), id: d.id } as Student));
-          setStudents(list);
-          saveLocal('students', list);
-          void (async () => {
-            try {
-              const activeRoster = list.filter(student => student.status === 'Aktif' && student.name?.trim() && student.className?.trim());
-              const directoryRef = collection(db, 'studentExamDirectory');
-              const existing = await getDocs(directoryRef);
-              const activeIds = new Set(activeRoster.map(student => student.id));
-              await Promise.all(existing.docs.filter(item => !activeIds.has(item.id)).map(item => deleteDoc(item.ref)));
-              await Promise.all(activeRoster.map(student => setDoc(doc(db, 'studentExamDirectory', student.id), {
-                studentId: student.id,
-                name: student.name.trim().toUpperCase(),
-                className: student.className.trim(),
-              })));
-            } catch (error) {
-              console.warn('Sinkronisasi daftar siswa ruang ujian:', error);
-            }
-          })();
-        }
+        const list = snapshot.docs.map((d) => ({ ...d.data(), id: d.id } as Student));
+        setStudents(list);
+        saveLocal('students', list);
+        void reconcileStudentExamDirectory(list, isDirectoryAdmin).catch(error => console.warn('Sinkronisasi direktori ujian:', error));
       },
       (error) => {
         console.warn('Firestore students snapshot offline mode:', error.message);
@@ -483,17 +493,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return updated;
     });
 
-    try {
-      await setDoc(doc(db, 'students', newStudent.id), newStudent);
-    } catch (e) {
-      console.warn('Saved student locally:', e);
-    }
+    await setDoc(doc(db, 'students', newStudent.id), newStudent);
+    await syncStudentExamDirectoryRecord(newStudent, newStudent.id, currentUser?.role === 'super_admin' && firebaseUser?.email?.toLowerCase() === 'amiruddin@smpialwasi-maros.sch.id');
   };
 
   const updateStudent = async (id: string, partial: Partial<Student>) => {
+    const current = students.find(s => s.id === id);
+    const updatedStudent = { ...(current || { id, name: '', className: '', status: 'menunggu' }), ...partial, id } as Student;
     await setDoc(doc(db, 'students', id), partial, { merge: true });
+    await syncStudentExamDirectoryRecord(updatedStudent, id, currentUser?.role === 'super_admin' && firebaseUser?.email?.toLowerCase() === 'amiruddin@smpialwasi-maros.sch.id');
     setStudents((prev) => {
-      const updated = prev.map((s) => (s.id === id ? { ...s, ...partial } : s));
+      const updated = prev.map((s) => (s.id === id ? updatedStudent : s));
       saveLocal('students', updated);
       return updated;
     });
@@ -501,6 +511,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const deleteStudent = async (id: string) => {
     await deleteDoc(doc(db, 'students', id));
+    await syncStudentExamDirectoryRecord(null, id, currentUser?.role === 'super_admin' && firebaseUser?.email?.toLowerCase() === 'amiruddin@smpialwasi-maros.sch.id');
     setStudents((prev) => {
       const updated = prev.filter((s) => s.id !== id);
       saveLocal('students', updated);

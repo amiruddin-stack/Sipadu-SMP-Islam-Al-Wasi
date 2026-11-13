@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 import { deleteOfflineRecord, readOfflineRecord, readOfflineRecords, saveOfflineRecord } from '../lib/examOffline';
-import { signInAnonymously } from 'firebase/auth';
+import { signInAnonymously, signOut } from 'firebase/auth';
 import { BookOpen, Clock3, Plus, ClipboardList, Trophy, ArrowLeft, ChevronRight, CheckCircle2, Link as LinkIcon, Play, Save, Copy, ExternalLink } from 'lucide-react';
 import { db, auth } from '../firebase/config';
 import { useData } from '../context/DataContext';
@@ -19,13 +19,6 @@ const field = 'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 te
 const btn = 'inline-flex items-center justify-center gap-2 rounded-xl bg-[#16B364] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#0B8F4D] disabled:cursor-not-allowed disabled:opacity-50';
 
 function classLevel(value: string) { return value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3); }
-function makeStudentExamCode() {
-  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  const bytes = new Uint8Array(10);
-  crypto.getRandomValues(bytes);
-  const raw = Array.from(bytes, value => alphabet[value % alphabet.length]).join('');
-  return `SW-${raw.slice(0, 4)}-${raw.slice(4, 8)}`;
-}
 export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const { students, classes, settings } = useData();
   const { firebaseUser, currentUser } = useAuth();
@@ -53,9 +46,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [attemptId, setAttemptId] = useState('');
   const [ownerUid, setOwnerUid] = useState('');
-  const [studentCode, setStudentCode] = useState('');
   const [verifiedStudentName, setVerifiedStudentName] = useState('');
-  const [studentCodes, setStudentCodes] = useState<any[]>([]);
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [deadlineAt, setDeadlineAt] = useState(0);
   const [isOnline, setIsOnline] = useState(typeof navigator === 'undefined' ? true : navigator.onLine);
@@ -70,7 +61,6 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     let unQ = () => {};
     let unE = () => {};
     let unA = () => {};
-    let unCodes = () => {};
     const setNetwork = () => setIsOnline(navigator.onLine);
     window.addEventListener('online', setNetwork);
     window.addEventListener('offline', setNetwork);
@@ -111,19 +101,12 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
           setStudentId(cachedIdentity.studentId || '');
           setStudentClass(cachedIdentity.className || '');
           setVerifiedStudentName(cachedIdentity.studentName || '');
-          setStudentCode(cachedIdentity.code || '');
         }
         if (!navigator.onLine) return;
 
         if (!isVerifiedExamAdmin && !auth.currentUser) await signInAnonymously(auth);
         if (!active || !auth.currentUser) return;
 
-        if (isVerifiedExamAdmin) {
-          const snapshot = await getDocs(collection(db, 'students'));
-          if (active && !snapshot.empty) {
-            setExamStudents(snapshot.docs.map(d => ({ ...d.data(), id: d.id } as typeof students[number])));
-          }
-        }
         if (!active) return;
 
         unQ = onSnapshot(collection(db, 'examPublicQuestions'), snap => {
@@ -144,9 +127,6 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
           unA = onSnapshot(collection(db, 'examAttempts'), snap => {
             setAttempts(snap.docs.map(d => ({ ...d.data(), id: d.id } as Attempt)));
           }, e => console.warn(e));
-          unCodes = onSnapshot(collection(db, 'examStudentCodes'), snap => {
-            setStudentCodes(snap.docs.map(d => ({ ...d.data(), id: d.id })));
-          }, e => setMessage('Daftar ID siswa belum dapat dibaca: ' + e.message));
         }
       } catch (e) {
         console.warn('Persiapan akses ujian:', e);
@@ -162,7 +142,6 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       unQ();
       unE();
       unA();
-      unCodes();
     };
   }, [isVerifiedExamAdmin]);
 
@@ -208,6 +187,12 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     void gradeCompletedAttempts();
     return () => { cancelled = true; };
   }, [isVerifiedExamAdmin, attempts, exams]);
+
+  useEffect(() => {
+    if (!linkedExamId || !exams.length || studentId) return;
+    const linkedExam = exams.find(item => item.id === linkedExamId);
+    if (linkedExam) setStudentClass(linkedExam.className);
+  }, [linkedExamId, exams, studentId]);
 
   const selectedClassNames = useMemo(() => classes.filter(c => classLevel(c) === level), [classes, level]);
   const classQuestions = questions.filter(q => classLevel(q.className) === level && (!subject || q.subject === subject));
@@ -274,47 +259,24 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     finally { setSaving(false); }
   };
 
-  const verifyStudentCode = async () => {
-    const code = studentCode.trim().toUpperCase();
-    if (!code) { setMessage('Masukkan ID Ujian siswa.'); return; }
+  const enterGuestMode = async () => {
+    const name = verifiedStudentName.trim();
+    if (!name) { setMessage('Masukkan nama lengkap terlebih dahulu.'); return; }
+    if (!studentClass) { setMessage('Pilih kelas terlebih dahulu.'); return; }
     try {
       await auth.authStateReady();
+      if (auth.currentUser && !auth.currentUser.isAnonymous) await signOut(auth);
       if (!auth.currentUser) await signInAnonymously(auth);
       const uid = auth.currentUser?.uid;
-      if (!uid) throw new Error('Sesi perangkat belum siap.');
-      const codeRef = doc(db, 'examStudentCodes', code);
-      const codeSnap = await getDoc(codeRef);
-      if (!codeSnap.exists()) throw new Error('ID Ujian tidak ditemukan. Periksa kembali kode yang diberikan sekolah.');
-      const data = codeSnap.data();
-      if (data.active !== true) throw new Error('ID Ujian ini sudah dinonaktifkan. Hubungi admin sekolah.');
-      if (!data.studentId || !data.studentName || !data.className) throw new Error('Data ID Ujian tidak lengkap. Hubungi admin sekolah.');
-      if (data.ownerUid && data.ownerUid !== uid) throw new Error('ID Ujian sudah terikat pada perangkat lain. Hubungi admin untuk memperbarui ID.');
-      if (!data.ownerUid) await updateDoc(codeRef, { ownerUid: uid });
-      await saveOfflineRecord('student:identity', { studentId: data.studentId, studentName: data.studentName, className: data.className, code, ownerUid: uid });
-      setStudentId(data.studentId);
-      setStudentClass(data.className);
-      setVerifiedStudentName(data.studentName);
-      setMessage('Identitas berhasil diverifikasi.');
-    } catch (e) { setStudentId(''); setVerifiedStudentName(''); setMessage(e instanceof Error ? e.message : 'Verifikasi ID Ujian gagal.'); }
-  };
-
-  const generateStudentCode = async (student: typeof students[number]) => {
-    if (!isVerifiedExamAdmin) return;
-    const previous = studentCodes.filter(item => item.studentId === student.id && item.active);
-    await Promise.all(previous.map(item => updateDoc(doc(db, 'examStudentCodes', item.id), { active: false })));
-    let code = makeStudentExamCode();
-    while (studentCodes.some(item => item.id === code)) code = makeStudentExamCode();
-    await setDoc(doc(db, 'examStudentCodes', code), { studentId: student.id, studentName: student.name, className: student.className, active: true, ownerUid: null, createdAt: new Date().toISOString() });
-  };
-
-  const generateAllStudentCodes = async () => {
-    if (!isVerifiedExamAdmin || !examStudents.length) { setMessage('Data siswa belum tersedia. Pastikan daftar siswa sudah tersinkron.'); return; }
-    setSaving(true);
-    try {
-      for (const student of examStudents.filter(item => item.status === 'Aktif')) await generateStudentCode(student);
-      setMessage('ID Ujian seluruh siswa aktif berhasil diperbarui. ID lama dinonaktifkan.');
-    } catch (e) { setMessage('Pembaruan ID belum selesai. Periksa koneksi lalu coba lagi.'); }
-    finally { setSaving(false); }
+      if (!uid || !auth.currentUser?.isAnonymous) throw new Error('Mode tamu belum tersedia. Coba buka kembali tautan ujian.');
+      const guestId = 'TAMU-' + uid;
+      await saveOfflineRecord('student:identity', { studentId: guestId, studentName: name, className: studentClass, ownerUid: uid });
+      setStudentId(guestId);
+      setVerifiedStudentName(name);
+      setMessage('Mode tamu aktif. Silakan mulai ujian.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Tidak dapat masuk sebagai tamu. Periksa koneksi internet.');
+    }
   };
 
   const startExam = async (exam: Exam) => {
@@ -437,11 +399,11 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
 
   const fmt = (seconds: number) => String(Math.floor(seconds / 60)).padStart(2,'0') + ':' + String(seconds % 60).padStart(2,'0');
   const studentEntry = () => <div className="mx-auto max-w-xl space-y-4">
-    <div className="text-center"><div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E3F7EC] text-[#16B364]"><BookOpen size={30}/></div><h2 className="text-2xl font-black text-slate-800">Ruang Ujian Siswa</h2><p className="mt-1 text-sm text-slate-500">Masukkan ID Ujian yang diberikan sekolah. Nama dan kelas akan dikenali otomatis.</p></div>
-    <div className={panel}>
-      <label className="mb-1 block text-xs font-bold text-slate-600">ID Ujian Siswa</label>
-      <div className="flex flex-col gap-2 sm:flex-row"><input className={field+' uppercase tracking-widest'} value={studentCode} onChange={e=>setStudentCode(e.target.value.toUpperCase())} placeholder="SW-XXXX-XXXX" disabled={Boolean(studentId)}/><button className={btn+' shrink-0'} onClick={()=>void verifyStudentCode()} disabled={Boolean(studentId)}>Verifikasi</button></div>
-      {studentId&&<div className="mt-4 rounded-xl border border-[#B7E8CD] bg-[#F7FCF9] p-3"><p className="text-xs font-bold text-[#0B8F4D]">IDENTITAS TERVERIFIKASI</p><p className="mt-1 font-extrabold">{verifiedStudentName}</p><p className="text-sm text-slate-500">{studentClass}</p><button className="mt-3 text-xs font-bold text-rose-600" onClick={()=>{setStudentId('');setStudentClass('');setVerifiedStudentName('');setStudentCode('');void deleteOfflineRecord('student:identity');}}>Keluar / Ganti ID</button></div>}
+    <div className="text-center"><div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E3F7EC] text-[#16B364]"><BookOpen size={30}/></div><h2 className="text-2xl font-black text-slate-800">Ruang Ujian Siswa</h2><p className="mt-1 text-sm text-slate-500">Masuk sebagai tamu. Tidak perlu login Google atau membuat akun.</p></div>
+    <div className={panel+' space-y-3'}>
+      <div><label className="mb-1 block text-xs font-bold text-slate-600">Nama lengkap</label><input className={field} value={verifiedStudentName} onChange={e=>setVerifiedStudentName(e.target.value)} placeholder="Ketik nama lengkap" disabled={Boolean(studentId)}/></div>
+      <div><label className="mb-1 block text-xs font-bold text-slate-600">Kelas</label>{linkedExamId?<input className={field} value={studentClass || 'Memuat kelas ujian…'} readOnly/>:<select className={field} value={studentClass} onChange={e=>setStudentClass(e.target.value)} disabled={Boolean(studentId)}><option value="">Pilih kelas</option>{classes.map(item=><option key={item} value={item}>{item}</option>)}</select>}</div>
+      {studentId?<div className="rounded-xl border border-[#B7E8CD] bg-[#F7FCF9] p-3"><p className="text-xs font-bold text-[#0B8F4D]">MODE TAMU AKTIF</p><p className="mt-1 font-extrabold">{verifiedStudentName}</p><p className="text-sm text-slate-500">{studentClass}</p><button className="mt-3 text-xs font-bold text-rose-600" onClick={()=>{setStudentId('');void deleteOfflineRecord('student:identity');}}>Ganti identitas</button></div>:<button className={btn+' w-full'} onClick={()=>void enterGuestMode()}>Lanjutkan sebagai tamu</button>}
     </div>
     {studentId && <div className="space-y-3"><h3 className="font-bold text-slate-700">Ujian tersedia</h3>{availableExams.map(ex=><div key={ex.id} className={panel}><div className="flex items-start justify-between gap-3"><div><h4 className="font-extrabold">{ex.title}</h4><p className="mt-1 text-xs text-slate-500">{ex.subject} · {ex.duration} menit · {ex.questionIds.length} soal</p></div><button className={btn} onClick={()=>void startExam(ex)}><Play size={15}/> Mulai</button></div></div>)}{!availableExams.length&&<p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Belum ada ujian aktif untuk kelas ini.</p>}</div>}
   </div>;
@@ -479,7 +441,6 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       <button className={panel+' flex min-h-[170px] flex-col items-start gap-4 text-left transition hover:-translate-y-0.5 hover:border-[#16B364] hover:shadow-md'} onClick={()=>setSection('results')}><span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#E3F7EC] text-[#0B8F4D]"><Trophy size={22}/></span><span className="min-w-0 flex-1"><strong className="block font-extrabold">Hasil Ujian</strong><span className="mt-1 block text-xs leading-5 text-slate-500">Pantau peserta dan hasil pengerjaan siswa.</span></span><ChevronRight className="self-end text-slate-400" size={20}/></button>
     </div>}    {section==='create'&&<div className={panel}><button className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>setSection('home')}><ArrowLeft size={16}/> Kembali</button><h3 className="mb-4 text-lg font-black">Buat Ujian</h3><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><div><label className="mb-1 block text-xs font-bold">Tahun ajaran</label><input className={field} value={settings.activeAcademicYear} readOnly/></div><div><label className="mb-1 block text-xs font-bold">Semester</label><input className={field} value={settings.activeSemester} readOnly/></div><div><label className="mb-1 block text-xs font-bold">Kelas</label><select className={field} value={level} onChange={e=>setLevel(e.target.value)}>{cls.map(c=><option key={c}>{c}</option>)}</select></div><div><label className="mb-1 block text-xs font-bold">Mata pelajaran</label><select className={field} value={subject} onChange={e=>setSubject(e.target.value)}><option value="">Pilih mapel</option>{SCHOOL_SUBJECTS.map(s=><option key={s}>{s}</option>)}</select></div></div><label className="mb-1 mt-3 block text-xs font-bold">Nama ujian</label><input className={field} value={title} onChange={e=>setTitle(e.target.value)} placeholder="Nama ujian"/><label className="mb-1 mt-3 block text-xs font-bold">Durasi (menit)</label><input type="number" min="1" max="240" className={field+' max-w-40'} value={duration} onChange={e=>setDuration(Math.max(1,Number(e.target.value)))}/><h4 className="mb-2 mt-5 font-extrabold">Pilih soal dari bank soal</h4><div className="max-h-96 space-y-3 overflow-auto rounded-xl border border-slate-200 p-3">{questionPackages.map(pkg=>{const ids=pkg.questions.map(q=>q.id);const allSelected=ids.length>0&&ids.every(id=>selectedQuestions.includes(id));return <div key={pkg.key} className="rounded-xl border border-slate-200 p-3"><label className="flex cursor-pointer items-start gap-3"><input type="checkbox" checked={allSelected} onChange={e=>setSelectedQuestions(current=>e.target.checked?Array.from(new Set([...current,...ids])):current.filter(id=>!ids.includes(id)))}/><span className="min-w-0"><strong className="block text-sm">{pkg.title}</strong><small className="text-slate-500">{pkg.questions.length} soal dalam satu paket · {pkg.questions[0]?.subject} · {pkg.questions[0]?.className}</small></span></label><details className="mt-2"><summary className="cursor-pointer text-xs font-semibold text-[#0B8F4D]">Pratinjau isi paket</summary><ol className="mt-2 list-decimal space-y-1 pl-5 text-xs text-slate-600">{pkg.questions.map(q=><li key={q.id}>{q.prompt}</li>)}</ol></details></div>})}{!questionPackages.length&&<p className="text-sm text-slate-500">Belum ada paket soal untuk kelas dan mapel ini. Impor soal melalui menu Mapel terlebih dahulu.</p>}</div><button className={btn+' mt-4'} disabled={saving} onClick={()=>void createExam()}><Plus size={16}/> Terbitkan Ujian ({selectedQuestions.length} soal)</button></div>}
     {section==='manage'&&<div className={panel}><button className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>setSection('home')}><ArrowLeft size={16}/> Kembali</button><h3 className="mb-3 text-lg font-black">Kelola Ujian</h3><div className="space-y-3">{exams.map(ex=><div key={ex.id} className="rounded-xl border border-slate-200 p-3"><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0"><p className="font-extrabold">{ex.title}</p><p className="mt-1 text-xs text-slate-500">{ex.className} · {ex.subject} · {ex.duration} menit · {ex.questionIds.length} soal</p><span className={'mt-2 inline-flex rounded-full px-3 py-1 text-xs font-bold '+(ex.status==='Aktif'?'bg-[#E3F7EC] text-[#0B8F4D]':'bg-slate-100 text-slate-600')}>{ex.status}</span></div><div className="flex flex-wrap gap-2"><button className="rounded-xl border border-[#16B364] px-3 py-2 text-xs font-bold text-[#0B8F4D]" onClick={()=>{const url=makeExamLink(ex.id);setShareLink(url);setSection('share');}}><Copy size={14} className="mr-1 inline"/>Bagikan link</button><button className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600" onClick={()=>void updateDoc(doc(db,'exams',ex.id),{status:ex.status==='Aktif'?'Draft':'Aktif'})}>{ex.status==='Aktif'?'Nonaktifkan':'Aktifkan'}</button></div></div></div>)}{!exams.length&&<p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Belum ada ujian. Buat ujian terlebih dahulu.</p>}</div>
-      {isVerifiedExamAdmin&&<div className="mt-6 border-t border-slate-100 pt-5"><div className="flex flex-wrap items-center justify-between gap-3"><div><h4 className="font-extrabold">ID Ujian Siswa</h4><p className="mt-1 text-xs text-slate-500">Buat ID untuk setiap siswa atau perbarui seluruh siswa aktif.</p></div><button className={btn} onClick={()=>void generateAllStudentCodes()} disabled={saving}>{saving?'Memproses…':'Perbarui Semua ID'}</button></div><div className="mt-3 max-h-96 space-y-2 overflow-auto">{examStudents.filter(s=>s.status==='Aktif').map(student=>{const activeCode=studentCodes.find(item=>item.studentId===student.id&&item.active);return <div key={student.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-100 p-3"><div className="min-w-0"><p className="font-bold">{student.name}</p><p className="text-xs text-slate-500">{student.className} · {activeCode?activeCode.id:'Belum memiliki ID'}</p></div><button className="rounded-xl border border-[#16B364] px-3 py-2 text-xs font-bold text-[#0B8F4D]" onClick={()=>void generateStudentCode(student)}>{activeCode?'Perbarui ID':'Buat ID'}</button></div>})}{!examStudents.length&&<p className="text-sm text-slate-500">Data siswa belum tersedia.</p>}</div><p className="mt-3 text-xs text-slate-500">ID lama otomatis dinonaktifkan. ID baru perlu diverifikasi kembali oleh siswa.</p></div>}
     </div>}
     {section==='share'&&<div className={panel+' mx-auto max-w-2xl'}><div className="text-center"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E3F7EC] text-[#0B8F4D]"><LinkIcon size={28}/></div><h3 className="mt-3 text-xl font-black">Ujian berhasil dibuat</h3><p className="mt-1 text-sm text-slate-500">Bagikan tautan ini kepada siswa. Saat dibuka, siswa langsung masuk ke halaman ujian.</p></div><label className="mb-2 mt-5 block text-xs font-bold">Link pengerjaan siswa</label><div className="flex flex-col gap-2 sm:flex-row"><input className={field+' min-w-0'} readOnly value={shareLink}/><button className={btn+' shrink-0'} onClick={()=>void navigator.clipboard.writeText(shareLink)}><Copy size={15}/> Salin link</button></div><a href={shareLink} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[#0B8F4D]">Buka halaman siswa <ExternalLink size={14}/></a><div className="mt-5 flex flex-wrap gap-2"><button className={btn} onClick={()=>setSection('manage')}>Ke Kelola Ujian</button><button className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-600" onClick={()=>setSection('home')}>Kembali ke menu</button></div></div>}
     {section==='results'&&<div className={panel}><div className="mb-4 flex items-center justify-between gap-3"><button className="flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>selectedResultExamId?setSelectedResultExamId(''):setSection('home')}><ArrowLeft size={16}/> {selectedResultExamId?'Daftar Ujian':'Kembali'}</button>{selectedResultExam&&<span className="rounded-full bg-[#E3F7EC] px-3 py-1 text-xs font-bold text-[#0B8F4D]">{selectedResultAttempts.length} peserta</span>}</div><h3 className="mb-3 text-lg font-black">{selectedResultExam?selectedResultExam.title:'Hasil Ujian'}</h3>{!selectedResultExam?<div className="space-y-3">{resultExamGroups.map(exam=><button key={exam.id} onClick={()=>setSelectedResultExamId(exam.id)} className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 p-4 text-left transition hover:border-[#16B364] hover:bg-[#F7FCF9]"><span className="min-w-0"><strong className="block truncate">{exam.title}</strong><span className="mt-1 block text-xs text-slate-500">{exam.subject?exam.subject+' · ':''}{exam.className} · {exam.attempts.length} peserta</span></span><ChevronRight className="shrink-0 text-[#0B8F4D]"/></button>)}{!resultExamGroups.length&&<p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Belum ada ujian atau hasil pengerjaan siswa.</p>}</div>:<><p className="mb-3 text-sm text-slate-500">{selectedResultExam.subject} · {selectedResultExam.className}</p><div className="overflow-x-auto"><table className="w-full min-w-[560px] text-left text-sm"><thead><tr className="border-b bg-slate-50 text-xs text-slate-500"><th className="p-3">Nama Siswa</th><th className="p-3">Kelas</th><th className="p-3">Skor</th><th className="p-3">Nilai</th><th className="p-3">Status</th></tr></thead><tbody>{selectedResultAttempts.map(a=><tr key={a.id} className="border-b border-slate-100"><td className="p-3 font-semibold">{a.studentName}</td><td className="p-3">{a.className}</td><td className="p-3 font-bold">{a.status==='Selesai'&&typeof a.score==='number'&&typeof a.total==='number'?a.score+' / '+a.total:'—'}</td><td className="p-3 font-bold text-[#0B8F4D]">{a.status==='Selesai'?typeof a.score==='number'&&typeof a.total==='number'?Math.round(a.score/Math.max(1,a.total)*100):'Sedang diperiksa':'—'}</td><td className="p-3">{a.status==='Selesai'?(typeof a.score==='number'?'Selesai':'Menunggu pemeriksaan'):a.status}</td></tr>)}</tbody></table></div>{!selectedResultAttempts.length&&<p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Belum ada siswa yang mengerjakan ujian ini.</p>}</>}</div>}

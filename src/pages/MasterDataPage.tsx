@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { addDoc, collection, doc, getDocs, onSnapshot, setDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
@@ -32,7 +32,7 @@ export const MasterDataPage:React.FC<{initialSubTab?:'kelas'|'mapel'}>=({initial
  const approve=async(p:Pending)=>{if(p.type==='guru')await addTeacher({nip:p.nip,name:p.name,email:p.email,role:'guru',subject:p.subject,status:'Aktif'});else await addStudent({nis:p.nis,nisn:p.nisn,name:p.name,gender:p.gender,className:p.className,status:'Aktif'});const next=pending.filter(x=>x.id!==p.id);setPending(next);putPending(next)};
  const reject=(id:string)=>{const next=pending.filter(p=>p.id!==id);setPending(next);putPending(next)};
  const browseOnly=Boolean(initialSubTab);
- const syncSubjectUrl=(subject:string|null,folder:string|null,level:string,method:'push'|'replace'='push')=>{const url=new URL(window.location.href);if(subject)url.searchParams.set('mapel',subject);else url.searchParams.delete('mapel');if(folder)url.searchParams.set('folder',folder);else url.searchParams.delete('folder');url.searchParams.set('kelas',level);const state={...(window.history.state||{}),simpatikTab:'subjects',simpatikSubject:subject,simpatikFolder:folder,simpatikClass:level};window.history[method+'State'](state,'',url);};
+ const syncSubjectUrl=(subject:string|null,folder:string|null,level:string,method:'push'|'replace'='push')=>{const url=new URL(window.location.href);if(subject)url.searchParams.set('mapel',subject);else url.searchParams.delete('mapel');if(folder)url.searchParams.set('folder',folder);else url.searchParams.delete('folder');url.searchParams.set('kelas',level);const state={...(window.history.state||{}),simpatikTab:'subjects',simpatikSubject:subject,simpatikFolder:folder,simpatikClass:level};if(method==='replace') window.history.replaceState(state,'',url); else window.history.pushState(state,'',url);};
  const openSubject=(subject:string)=>{setSelectedSubject(subject);setSubjectFolder(null);setSubjectClass('VII (Tujuh)');setGoogleImportOpen(false);syncSubjectUrl(subject,null,'VII (Tujuh)')};
  const openSubjectFolder=(folder:'Daftar Hadir'|'Modul Ajar'|'Bank Soal')=>{setSubjectFolder(folder);setSubjectClass('VII (Tujuh)');setGoogleImportOpen(false);setBankMessage('');syncSubjectUrl(selectedSubject,folder,'VII (Tujuh)')};
  const changeSubjectClass=(level:string)=>{setSubjectClass(level);syncSubjectUrl(selectedSubject,subjectFolder,level,'replace')};

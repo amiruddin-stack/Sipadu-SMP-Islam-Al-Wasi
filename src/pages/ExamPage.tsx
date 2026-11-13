@@ -420,7 +420,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   }
 
   return <div className="space-y-5">
-    {!linkedExamId&&<section className="relative isolate overflow-hidden rounded-[24px] border border-[#D5EADB] bg-gradient-to-br from-white via-[#E3F7EC] to-[#E7F6EF] px-5 py-5 shadow-sm md:px-7 md:py-6">
+    {!linkedExamId&&<section className="relative isolate overflow-hidden rounded-[24px] border border-slate-200 bg-white px-5 py-5 shadow-sm md:px-7 md:py-6">
       <div className="pointer-events-none absolute inset-0 -z-10 opacity-70" style={{backgroundImage:'radial-gradient(circle at 82% 16%, rgba(160,226,206,0.45) 0%, rgba(198,240,226,0.25) 30%, transparent 60%), radial-gradient(circle at 12% 26%, rgba(192,238,222,0.35) 0%, transparent 45%), linear-gradient(180deg, #F5FAF8 0%, #FFFFFF 100%)'}}/>
       <div className="flex items-center gap-3">
         {onBack&&<button type="button" onClick={onBack} aria-label="Kembali ke beranda" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#CDE8D8] bg-white/90 text-[#0B8F4D] shadow-sm transition hover:bg-[#E3F7EC]"><ArrowLeft size={20}/></button>}

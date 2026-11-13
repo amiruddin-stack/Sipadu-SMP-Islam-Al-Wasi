@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, setDoc } from 'firebase/firestore';
-import { db } from '../firebase/config';
+import { signInAnonymously } from 'firebase/auth';
+import { db, auth } from '../firebase/config';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import { Teacher } from '../types';
@@ -17,10 +18,42 @@ const groupQuestionPackages=(items:any[])=>{const groups=new Map<string,{key:str
 const getPending=():Pending[]=>{try{return JSON.parse(localStorage.getItem('sipadu_pending_registrations')||'[]')}catch{return []}};
 const putPending=(v:Pending[])=>localStorage.setItem('sipadu_pending_registrations',JSON.stringify(v));
 export const RegistrationPage:React.FC<{type:'guru'|'siswa'}>=({type})=>{
- const [form,setForm]=useState({name:'',email:'',phone:'',nis:'',nisn:'',gender:'L' as 'L'|'P',className:CLASSES[0],nip:'',subject:''}); const [sent,setSent]=useState(false);
- const update=(key:string,value:string)=>setForm(p=>({...p,[key]:value}));
- const submit=(e:React.FormEvent)=>{e.preventDefault();const all=getPending();all.push({...form,id:'reg-'+Date.now(),type});putPending(all);setSent(true)};
- return <main className='min-h-screen bg-[#f5faf7] px-4 py-10'><div className='mx-auto max-w-xl overflow-hidden rounded-3xl border border-[#d9eee2] bg-white shadow-sm'><div className='bg-[#0B8F4D] px-6 py-7 text-white'><p className='text-xs font-bold uppercase tracking-widest'>SMP Islam Al-Wasi’</p><h1 className='mt-2 text-2xl font-extrabold'>Pendaftaran {type==='guru'?'Guru':'Siswa'}</h1><p className='mt-2 text-sm text-white/85'>Lengkapi data. Pendaftaran menunggu pemeriksaan operator.</p></div>{sent?<div className='p-8 text-center'><Check className='mx-auto h-12 w-12 text-[#16B364]'/><h2 className='mt-3 text-xl font-bold'>Pendaftaran tercatat</h2><p className='mt-2 text-sm text-slate-500'>Status: Menunggu Persetujuan.</p></div>:<form onSubmit={submit} className='grid gap-4 p-6'><label className='grid gap-1 text-sm font-semibold'>Nama lengkap<input required value={form.name} onChange={e=>update('name',e.target.value)} className='rounded-xl border p-3 font-normal'/></label><label className='grid gap-1 text-sm font-semibold'>Email<input required type='email' value={form.email} onChange={e=>update('email',e.target.value)} className='rounded-xl border p-3 font-normal'/></label><label className='grid gap-1 text-sm font-semibold'>Nomor HP<input required value={form.phone} onChange={e=>update('phone',e.target.value)} className='rounded-xl border p-3 font-normal'/></label>{type==='guru'?<><label className='grid gap-1 text-sm font-semibold'>NIP (jika ada)<input value={form.nip} onChange={e=>update('nip',e.target.value)} className='rounded-xl border p-3 font-normal'/></label><label className='grid gap-1 text-sm font-semibold'>Mata pelajaran / tugas<input required value={form.subject} onChange={e=>update('subject',e.target.value)} className='rounded-xl border p-3 font-normal'/></label></>:<><div className='grid grid-cols-2 gap-3'><label className='grid gap-1 text-sm font-semibold'>NIS<input required value={form.nis} onChange={e=>update('nis',e.target.value)} className='min-w-0 rounded-xl border p-3 font-normal'/></label><label className='grid gap-1 text-sm font-semibold'>NISN<input required value={form.nisn} onChange={e=>update('nisn',e.target.value)} className='min-w-0 rounded-xl border p-3 font-normal'/></label></div><label className='grid gap-1 text-sm font-semibold'>Jenis kelamin<select value={form.gender} onChange={e=>update('gender',e.target.value)} className='rounded-xl border p-3 font-normal'><option value='L'>Laki-laki</option><option value='P'>Perempuan</option></select></label><label className='grid gap-1 text-sm font-semibold'>Kelas<select value={form.className} onChange={e=>update('className',e.target.value)} className='rounded-xl border p-3 font-normal'>{CLASSES.map(c=><option key={c}>{c}</option>)}</select></label></>}<button className='rounded-xl bg-[#0B8F4D] px-4 py-3 font-bold text-white'>Kirim Pendaftaran</button></form>}</div></main>;
+ const [form,setForm]=useState({name:'',email:'',phone:'',nis:'',nisn:'',gender:'L' as 'L'|'P',className:CLASSES[0],nip:'',subject:''});
+ const [sent,setSent]=useState(false);
+ const [saving,setSaving]=useState(false);
+ const [message,setMessage]=useState('');
+ const update=(key:string,value:string)=>setForm(p=>({...p,[key]:key==='name'?value.toLocaleUpperCase('id-ID'):value}));
+ const submit=async(e:React.FormEvent)=>{
+  e.preventDefault();
+  if(type==='siswa'){
+   const name=form.name.trim().replace(/\\s+/g,' ').toLocaleUpperCase('id-ID');
+   if(name.length<3){setMessage('Masukkan nama lengkap dengan benar.');return;}
+   setSaving(true);setMessage('');
+   try{
+    if(!auth.currentUser) await signInAnonymously(auth);
+    const identity=name+'|'+form.className;
+    const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(identity));
+    const hash=Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    const studentId='std-'+hash;
+    await setDoc(doc(db,'students',studentId),{id:studentId,nis:'',nisn:'',name,gender:'L',className:form.className,status:'Aktif',registeredAt:new Date().toISOString(),registrationSource:'public_form'});
+    setSent(true);
+   }catch(error){
+    console.error('Pendaftaran siswa:',error);
+    setMessage('Pendaftaran belum berhasil. Jika nama dan kelas ini sudah pernah didaftarkan, data tidak akan dibuat dua kali. Silakan coba lagi atau hubungi sekolah.');
+   }finally{setSaving(false);}
+   return;
+  }
+  const all=getPending();all.push({...form,name:form.name.trim().toLocaleUpperCase('id-ID'),id:'reg-'+Date.now(),type});putPending(all);setSent(true);
+ };
+ return <main className='min-h-screen bg-[#f5faf7] px-4 py-8 sm:py-12'><div className='mx-auto max-w-xl overflow-hidden rounded-3xl border border-[#d9eee2] bg-white shadow-sm'>
+  <div className='bg-gradient-to-br from-[#0B8F4D] to-[#087640] px-6 py-7 text-white'><p className='text-xs font-bold uppercase tracking-widest'>SMP Islam Al-Wasi’</p><h1 className='mt-2 text-2xl font-extrabold'>{type==='siswa'?'Pendaftaran Siswa Baru':'Pendaftaran Guru'}</h1><p className='mt-2 text-sm text-white/90'>{type==='siswa'?'Isi nama lengkap dan pilih kelas untuk masuk ke data siswa SIMPATIK.':'Lengkapi data pendaftaran guru.'}</p><div className='mt-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-bold'><span className='h-2 w-2 rounded-full bg-emerald-200'/> MODE TAMU · TANPA LOGIN</div></div>
+  {sent?<div className='p-8 text-center'><Check className='mx-auto h-12 w-12 text-[#16B364]'/><h2 className='mt-3 text-xl font-bold'>Pendaftaran berhasil</h2><p className='mt-2 text-sm leading-6 text-slate-500'>{type==='siswa'?'Nama '+form.name+' telah tercatat sebagai siswa aktif di kelas '+form.className+'.':'Pendaftaran tercatat dan menunggu pemeriksaan operator.'}</p><p className='mt-4 rounded-xl bg-[#E3F7EC] p-3 text-xs font-semibold text-[#087640]'>Silakan tutup halaman ini.</p></div>:<form onSubmit={submit} className='grid gap-4 p-6'>
+   {type==='siswa'?<><label className='grid gap-1.5 text-sm font-bold'>Nama lengkap<input required minLength={3} maxLength={100} autoComplete='name' value={form.name} onChange={e=>update('name',e.target.value)} placeholder='Ketik nama lengkap siswa' className='rounded-xl border border-slate-200 p-3 text-base font-semibold uppercase outline-none focus:border-[#16B364] focus:ring-2 focus:ring-[#E3F7EC]'/><span className='text-xs font-normal text-slate-500'>Nama otomatis ditulis dengan HURUF KAPITAL.</span></label><label className='grid gap-1.5 text-sm font-bold'>Kelas<select required value={form.className} onChange={e=>update('className',e.target.value)} className='rounded-xl border border-slate-200 bg-white p-3 text-base font-semibold outline-none focus:border-[#16B364]'><option value='VII (Tujuh)'>VII (Tujuh)</option><option value='VIII (Delapan)'>VIII (Delapan)</option><option value='IX (Sembilan)'>IX (Sembilan)</option></select></label></>:<><label className='grid gap-1 text-sm font-semibold'>Nama lengkap<input required value={form.name} onChange={e=>update('name',e.target.value)} className='rounded-xl border p-3 font-normal'/></label><label className='grid gap-1 text-sm font-semibold'>Email<input required type='email' value={form.email} onChange={e=>update('email',e.target.value)} className='rounded-xl border p-3 font-normal'/></label><label className='grid gap-1 text-sm font-semibold'>Nomor HP<input required value={form.phone} onChange={e=>update('phone',e.target.value)} className='rounded-xl border p-3 font-normal'/></label><label className='grid gap-1 text-sm font-semibold'>NIP (jika ada)<input value={form.nip} onChange={e=>update('nip',e.target.value)} className='rounded-xl border p-3 font-normal'/></label><label className='grid gap-1 text-sm font-semibold'>Mata pelajaran / tugas<input required value={form.subject} onChange={e=>update('subject',e.target.value)} className='rounded-xl border p-3 font-normal'/></label></>}
+   {message&&<p role='alert' className='rounded-xl bg-amber-50 p-3 text-sm leading-5 text-amber-800'>{message}</p>}
+   <button disabled={saving} className='mt-1 flex items-center justify-center gap-2 rounded-xl bg-[#0B8F4D] px-4 py-3.5 font-bold text-white shadow-sm transition hover:bg-[#087640] disabled:opacity-60'>{saving?'Menyimpan…':type==='siswa'?'Simpan Pendaftaran':'Kirim Pendaftaran'}</button>
+   {type==='siswa'&&<p className='text-center text-[11px] leading-5 text-slate-400'>Pastikan nama dan kelas sudah benar sebelum menyimpan. Pendaftaran hanya dapat dilakukan satu kali untuk nama dan kelas yang sama.</p>}
+  </form>}
+ </div></main>;
 };
 export const MasterDataPage:React.FC<{initialSubTab?:'kelas'|'mapel'}>=({initialSubTab})=>{
  const {students,teachers,extracurriculars,addStudent,addTeacher,updateTeacher,deleteTeacher,addExtracurricular,deleteExtracurricular}=useData();

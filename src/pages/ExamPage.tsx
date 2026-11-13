@@ -108,7 +108,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
           setStudentClass(cachedIdentity.className || '');
           setVerifiedStudentName(cachedIdentity.studentName || '');
         }
-        if (!navigator.onLine) return;
+        if (!navigator.onLine) { setRosterLoadState('error'); setMessage('Daftar siswa belum tersedia saat offline. Hubungkan internet dan hubungi admin sekolah.'); return; }
 
         if (!isVerifiedExamAdmin && !auth.currentUser) await signInAnonymously(auth);
         if (!active || !auth.currentUser) return;
@@ -150,7 +150,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
         }
       } catch (e) {
         console.warn('Persiapan akses ujian:', e);
-        if (active) setMessage('Akses ujian belum siap. Periksa koneksi dan akun Firebase.');
+        if (active) { setRosterLoadState('error'); setMessage('Daftar siswa belum tersedia. Hubungi admin sekolah dan periksa koneksi internet.'); }
       }
     };
 

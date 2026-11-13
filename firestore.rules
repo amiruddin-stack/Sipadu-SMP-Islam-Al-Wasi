@@ -37,12 +37,13 @@ service cloud.firestore {
     function validProfile(userId) {
       return isSchoolIdentity()
         && request.auth.uid == userId
-        && request.resource.data.keys().hasOnly(['uid', 'email', 'displayName', 'role', 'nip', 'assignedClass', 'subject', 'phone'])
+        && request.resource.data.keys().hasOnly(['uid', 'email', 'displayName', 'role', 'nip', 'assignedClass', 'subject', 'phone', 'createdAt'])
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.email == request.auth.token.email
         && request.resource.data.displayName is string
         && request.resource.data.displayName.size() > 0
         && request.resource.data.displayName.size() <= 100
+        && (!('createdAt' in request.resource.data) || (request.resource.data.createdAt is string && request.resource.data.createdAt.size() <= 50))
         && request.resource.data.role == (
           request.auth.token.email == 'amiruddin@smpialwasi-maros.sch.id' ? 'super_admin' : 'guru'
         );
@@ -140,16 +141,16 @@ service cloud.firestore {
       // Koleksi ini khusus konten soal publik; kunci jawaban harus disimpan terpisah.
       allow read: if (signedIn()
           && request.auth.token.firebase.sign_in_provider == 'anonymous'
-          && !('answer' in resource.data)
-          && !('correctAnswer' in resource.data)
-          && !('answerKey' in resource.data)
-          && !('correctOption' in resource.data))
+          && resource.data.keys().hasOnly([
+            'title', 'subject', 'className', 'academicYear', 'semester',
+            'prompt', 'options', 'points', 'createdAt'
+          ]))
         || isGuruOrAdmin();
       allow create, update: if isGuruOrAdmin()
-        && !('answer' in request.resource.data)
-        && !('correctAnswer' in request.resource.data)
-        && !('answerKey' in request.resource.data)
-        && !('correctOption' in request.resource.data);
+        && request.resource.data.keys().hasOnly([
+          'title', 'subject', 'className', 'academicYear', 'semester',
+          'prompt', 'options', 'points', 'createdAt'
+        ]);
       allow delete: if isGuruOrAdmin();
     }
 

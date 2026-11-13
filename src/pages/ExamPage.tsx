@@ -211,8 +211,6 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     if (!title.trim() || !subject || !selectedQuestions.length) { setMessage('Isi nama ujian, mapel, dan pilih minimal satu soal.'); return; }
     setSaving(true);
     try {
-      const answerKeys = await Promise.all(selectedQuestions.map(questionId => getDoc(doc(db, 'examAnswerKeys', questionId))));
-      const missingKeys = answerKeys.filter(snapshot => !snapshot.exists()).length;
       const created = await addDoc(collection(db, 'exams'), { title: title.trim(), subject, className: selectedClassNames[0] || level, academicYear: settings.activeAcademicYear, semester: settings.activeSemester, duration, questionIds: selectedQuestions, status: 'Aktif', createdAt: new Date().toISOString() });
       setShareLink(makeExamLink(created.id));
       setMessage('Ujian berhasil dibuat. Bagikan tautan ini kepada siswa.');

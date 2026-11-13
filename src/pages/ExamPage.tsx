@@ -230,7 +230,6 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   };
 
   const enterGuestMode = async () => {
-    const name = verifiedStudentName.trim();
     const selectedStudent = examStudents.find(s => s.id === selectedRosterStudentId);
     if (!selectedStudent) { setMessage('Pilih nama siswa dari daftar terlebih dahulu.'); return; }
     if (!studentClass || classLevel(selectedStudent.className) !== classLevel(studentClass)) { setMessage('Nama siswa tidak sesuai dengan kelas yang dipilih.'); return; }

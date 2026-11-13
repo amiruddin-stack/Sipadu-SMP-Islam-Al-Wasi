@@ -102,7 +102,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
       {mobileMenuOpen && createPortal(
         <div className="lg:hidden" style={{ position: 'fixed', inset: 0, zIndex: 2147483647, isolation: 'isolate' }}>
           <button type="button" aria-label="Tutup menu" onClick={() => setMobileMenuOpen(false)} className="bg-slate-950/45" style={{ position: 'fixed', inset: 0, zIndex: 2147483646, width: '100%', height: '100%', border: 0 }}/>
-          <aside className="flex flex-col overflow-y-auto bg-white p-5 shadow-2xl" style={{ position: 'fixed', right: 0, top: 0, zIndex: 2147483647, height: '100dvh', width: 'min(86vw, 340px)', maxWidth: 340, overscrollBehavior: 'contain' }}>
+          <aside className="flex flex-col overflow-y-auto bg-white p-5 shadow-2xl" style={{ position: 'fixed', left: 0, top: 0, zIndex: 2147483647, height: '100dvh', width: 'min(86vw, 340px)', maxWidth: 340, overscrollBehavior: 'contain' }}>
             <div className="mb-5 flex items-center justify-between border-b border-[#E3F7EC] pb-4">
               <div className="flex items-center gap-3"><img src={`${import.meta.env.BASE_URL}logo-alwasi.png`} alt="Logo sekolah" className="h-10 w-10 object-contain"/><div><p className="text-sm font-extrabold text-slate-900">SMP ISLAM AL-WASI’</p><p className="text-[10px] text-slate-500">SIMPATIK</p></div></div>
               <button type="button" onClick={() => setMobileMenuOpen(false)} className="rounded-lg p-2 text-slate-500" aria-label="Tutup menu"><X size={21}/></button>

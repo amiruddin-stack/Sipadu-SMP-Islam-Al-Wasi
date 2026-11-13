@@ -24,7 +24,7 @@ export interface Student {
   name: string;
   gender: 'L' | 'P';
   className: string;
-  status: 'Aktif' | 'Lulus' | 'Mutasi';
+  status: 'menunggu' | 'Aktif' | 'Lulus' | 'Mutasi';
   parentPhone?: string;
   parentName?: string;
 }

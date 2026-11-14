@@ -5,7 +5,6 @@ import {
   buildAttemptCreatePayload,
   buildAttemptFinishPatch,
   computeExamGrade,
-  parseGradingApiResponse,
   sanitizeAnswersMap,
   type AnswerKeyRecord,
 } from '../lib/examGrading';
@@ -26,7 +25,6 @@ const makeExamLink = (id: string) => { const url = new URL(window.location.href)
 const panel = 'rounded-2xl border border-slate-200 bg-white p-4 shadow-sm';
 const field = 'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#16B364] focus:ring-2 focus:ring-bg-[#E3F7EC]';
 const btn = 'inline-flex items-center justify-center gap-2 rounded-xl bg-[#16B364] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#0B8F4D] disabled:cursor-not-allowed disabled:opacity-50';
-const GRADING_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyw5E1QakV5saHXbqKV_vcD8HWz06F5h6YpVhVaHmySROaxrvwqlJSc16DkXNB1Us5O/exec';
 
 function classLevel(value: string) {
   const normalized = value.trim().toUpperCase().replace(/^KELAS\s+/, '');
@@ -287,80 +285,6 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     }
   };
 
-  const requestAutomaticGrade = async (id: string) => {
-    const user = auth.currentUser;
-    if (!user) throw new Error('Sesi Firebase siswa tidak tersedia.');
-    const idToken = await user.getIdToken(true);
-
-    if (typeof window !== 'undefined' && /^https?:$/i.test(window.location.protocol)) {
-      try {
-        const localRes = await fetch('/api/grade-exam', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ idToken, attemptId: id }),
-        });
-        const contentType = localRes.headers.get('content-type') || '';
-        if (contentType.includes('application/json')) {
-          const localText = await localRes.text();
-          let localJson: any = null;
-          try {
-            localJson = JSON.parse(localText);
-          } catch {
-            localJson = null;
-          }
-          if (localRes.ok) {
-            return parseGradingApiResponse(localJson ?? localText);
-          }
-          if (localRes.status !== 404 && localRes.status !== 405 && !localJson?.fallback) {
-            return parseGradingApiResponse(localJson ?? localText);
-          }
-        }
-      } catch {
-        // Backend lokal tidak tersedia (mis. GitHub Pages/Capacitor); lanjut ke Apps Script Web App
-      }
-    }
-
-    const response = await fetch(GRADING_WEB_APP_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ idToken, attemptId: id })
-    });
-    const rawText = await response.text();
-    if (!response.ok) {
-      throw new Error('Server penilaian merespons status ' + response.status + '.');
-    }
-    return parseGradingApiResponse(rawText);
-  };
-
-  const requestAutomaticGradeWithRetry = async (id: string, maxRetries = 2) => {
-    let lastError: unknown = null;
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-      try {
-        return await requestAutomaticGrade(id);
-      } catch (error) {
-        lastError = error;
-        try {
-          const snap = await getDoc(doc(db, 'examAttempts', id));
-          const data = snap.data();
-          if (snap.exists() && typeof data?.score === 'number' && typeof data?.total === 'number') {
-            return {
-              score: data.score,
-              total: data.total,
-              percent: typeof data.percent === 'number' ? data.percent : (data.total > 0 ? Math.round((data.score / data.total) * 100) : 0),
-              gradingIssue: typeof data.gradingIssue === 'string' ? data.gradingIssue : '',
-            };
-          }
-        } catch {
-          // Ignore transient read error before retry
-        }
-        if (attempt < maxRetries) {
-          await new Promise(resolve => window.setTimeout(resolve, 900 * (attempt + 1)));
-        }
-      }
-    }
-    throw (lastError instanceof Error ? lastError : new Error('Penilaian otomatis belum berhasil.'));
-  };
-
   const gradeAttemptsAsTeacher = async (targetAttempts: Attempt[], forceRegrade = false) => {
     if (!canManageExamQuestions || !targetAttempts.length) return;
     setRegrading(true);
@@ -399,17 +323,24 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
           if (!keyCache.has(keyId)) {
             let loadedKey: AnswerKeyRecord | null = null;
             try {
-              const keySnap = await getDoc(doc(db, 'examAnswerKeys', keyId));
-              if (keySnap.exists()) {
-                loadedKey = keySnap.data() as AnswerKeyRecord;
-              } else if (isVerifiedExamAdmin) {
-                const legacySnap = await getDoc(doc(db, 'examQuestions', keyId));
-                if (legacySnap.exists() && legacySnap.data()?.answer !== undefined) {
-                  loadedKey = legacySnap.data() as AnswerKeyRecord;
-                }
-              }
+              loadedKey = await readOfflineRecord<AnswerKeyRecord>('exam:key:' + keyId);
             } catch {
               loadedKey = null;
+            }
+            if (!loadedKey || loadedKey.answer === undefined || loadedKey.answer === null) {
+              try {
+                const keySnap = await getDoc(doc(db, 'examAnswerKeys', keyId));
+                if (keySnap.exists()) {
+                  loadedKey = keySnap.data() as AnswerKeyRecord;
+                } else if (isVerifiedExamAdmin) {
+                  const legacySnap = await getDoc(doc(db, 'examQuestions', keyId));
+                  if (legacySnap.exists() && legacySnap.data()?.answer !== undefined) {
+                    loadedKey = legacySnap.data() as AnswerKeyRecord;
+                  }
+                }
+              } catch {
+                loadedKey = null;
+              }
             }
             keyCache.set(keyId, loadedKey);
           }
@@ -440,7 +371,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   };
 
   useEffect(() => {
-    if (section !== 'results' || !canManageExamQuestions) return;
+    if (!canManageExamQuestions) return;
     const ungraded = attempts.filter(
       a => a.status === 'Selesai' && (typeof a.score !== 'number' || typeof a.total !== 'number') && !autoGradedAttemptsRef.current.has(a.id)
     );
@@ -606,23 +537,13 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
           submittedAt,
           forced
         );
-        try {
-          const grade = alreadyGraded || (await requestAutomaticGradeWithRetry(attemptId));
-          setFinishedResult(current => current ? { ...current, ...grade, gradingError: undefined } : current);
-          await deleteOfflineRecord('pending:' + attemptId);
-          if (grade.total > 0 && !grade.gradingIssue) {
-            setMessage((forced ? 'Waktu habis. ' : '') + 'Jawaban terkirim dan selesai dinilai. Nilai Anda: ' + grade.percent + '.');
-          } else if (grade.total > 0 && grade.gradingIssue) {
-            setMessage((forced ? 'Waktu habis. ' : '') + 'Jawaban terkirim. Nilai sementara Anda: ' + grade.percent + '. ' + grade.gradingIssue);
-          } else {
-            setMessage((forced ? 'Waktu habis. ' : '') + (grade.gradingIssue || 'Jawaban terkirim. Belum ada kunci jawaban yang tersedia.'));
-          }
-        } catch (gradingError) {
-          const reason = gradingError instanceof Error ? gradingError.message : 'Penilaian otomatis tertunda.';
-          setFinishedResult(current => current ? { ...current, gradingError: reason } : current);
-          setMessage('Jawaban berhasil disimpan, tetapi penilaian otomatis belum selesai: ' + reason);
+        if (alreadyGraded) {
+          setFinishedResult(current => current ? { ...current, ...alreadyGraded, gradingError: undefined } : current);
+          setMessage((forced ? 'Waktu habis. ' : '') + 'Jawaban terkirim. Nilai: ' + alreadyGraded.percent + '.');
+        } else {
+          setMessage((forced ? 'Waktu habis. ' : '') + 'Jawaban terkirim dan tersimpan. SIMPATIK admin akan menghitung nilai secara otomatis.');
         }
-      } else {
+        await deleteOfflineRecord('pending:' + attemptId);      } else {
         setMessage('Ujian selesai secara offline. Hasil tersimpan di perangkat dan akan dikirim otomatis saat internet kembali.');
       }
       await deleteOfflineRecord('session:active');
@@ -720,12 +641,13 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
             item.submittedAt || new Date().toISOString(),
             Boolean(item.autoSubmitted)
           );
-          const grade = alreadyGraded || (await requestAutomaticGradeWithRetry(item.id, 1));
-          setFinishedResult(current => current && current.attemptId === item.id ? { ...current, ...grade, gradingError: undefined } : current);
+          if (alreadyGraded) {
+            setFinishedResult(current => current && current.attemptId === item.id ? { ...current, ...alreadyGraded, gradingError: undefined } : current);
+          }
           await deleteOfflineRecord('pending:' + item.id);
           syncedCount += 1;
         }
-        if (syncedCount) setMessage(syncedCount + ' hasil ujian berhasil disinkronkan dan dinilai.');
+        if (syncedCount) setMessage(syncedCount + ' hasil ujian berhasil dikirim ke Firebase. SIMPATIK admin menghitung nilai secara lokal.');
       } catch (e) { console.warn('Sinkronisasi ujian offline tertunda:', e); }
     };
     void syncPending();
@@ -763,21 +685,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     const result = finishedResult;
     const isGradedWithKeys = typeof result.score === 'number' && typeof result.total === 'number' && result.total > 0;
     const isGradedWithoutKeys = typeof result.score === 'number' && typeof result.total === 'number' && result.total === 0;
-    const retryStudentGrading = async () => {
-      if (!result.attemptId || regrading) return;
-      setRegrading(true);
-      try {
-        const grade = await requestAutomaticGradeWithRetry(result.attemptId, 1);
-        setFinishedResult(current => current ? { ...current, ...grade, gradingError: undefined } : current);
-        await deleteOfflineRecord('pending:' + result.attemptId);
-      } catch (err) {
-        const reason = err instanceof Error ? err.message : 'Penilaian otomatis belum berhasil.';
-        setFinishedResult(current => current ? { ...current, gradingError: reason } : current);
-      } finally {
-        setRegrading(false);
-      }
-    };
-    return <div className="mx-auto max-w-xl space-y-4"><div className={panel+' text-center'}><Trophy size={42} className="mx-auto text-amber-500"/><h2 className="mt-3 text-2xl font-black">Hasil Ujian</h2>{result?<><p className="mt-2 font-bold">{result.title}</p><p className="mt-1 text-sm text-slate-500">{result.studentName} · {result.className}</p>{isGradedWithKeys ? <><p className="my-5 text-4xl font-black text-[#0B8F4D]">{result.percent ?? Math.round((result.score! / Math.max(1,result.total!))*100)}</p><p className="text-sm font-bold text-slate-600">Skor: {result.score} / {result.total}</p><div className="mt-3 inline-flex rounded-full bg-[#E3F7EC] px-3 py-1 text-xs font-bold text-[#0B8F4D]">{result.gradingIssue ? 'Nilai Sementara' : 'Selesai Dinilai'}</div><p className="mt-2 text-sm text-slate-600">{result.gradingIssue ? 'Nilai sementara dihitung dari soal yang sudah memiliki kunci jawaban.' : 'Penilaian otomatis telah selesai dan tersimpan.'}</p>{result.gradingIssue&&<p className="mt-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-800">{result.gradingIssue}</p>}</> : isGradedWithoutKeys ? <><p className="my-5 text-lg font-bold text-[#0B8F4D]">Jawaban berhasil disimpan</p><div className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">Menunggu Kunci Jawaban</div><p className="mt-2 text-sm text-slate-600">{result.gradingIssue || 'Belum ada soal yang dapat dinilai karena kunci jawaban belum tersedia.'}</p></> : <><p className="my-5 text-lg font-bold text-[#0B8F4D]">Jawaban berhasil disimpan</p><div className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">Sedang diperiksa</div><p className="mt-2 text-sm text-slate-600">Penilaian otomatis sedang diproses.</p>{result.gradingError&&<p className="mt-2 rounded-xl bg-amber-50 p-3 text-xs text-amber-800">{result.gradingError}</p>}{result.attemptId&&<button type="button" disabled={regrading} onClick={() => void retryStudentGrading()} className="mt-3 inline-flex items-center gap-1.5 rounded-xl border border-[#16B364] px-4 py-2 text-xs font-bold text-[#0B8F4D] disabled:opacity-50"><RefreshCw size={14} className={regrading ? 'animate-spin' : ''}/> {regrading ? 'Memeriksa nilai…' : 'Periksa Ulang Nilai'}</button>}</>}</>:<p className="mt-3 text-sm text-slate-500">Hasil sedang disimpan.</p>}<button className={btn+' mt-5'} onClick={()=>{setSection('student');setAttemptId('');setFinishedResult(null);}}>Kembali</button></div></div>;
+    return <div className="mx-auto max-w-xl space-y-4"><div className={panel+' text-center'}><Trophy size={42} className="mx-auto text-amber-500"/><h2 className="mt-3 text-2xl font-black">Hasil Ujian</h2>{result?<><p className="mt-2 font-bold">{result.title}</p><p className="mt-1 text-sm text-slate-500">{result.studentName} · {result.className}</p>{isGradedWithKeys ? <><p className="my-5 text-4xl font-black text-[#0B8F4D]">{result.percent ?? Math.round((result.score! / Math.max(1,result.total!))*100)}</p><p className="text-sm font-bold text-slate-600">Skor: {result.score} / {result.total}</p><div className="mt-3 inline-flex rounded-full bg-[#E3F7EC] px-3 py-1 text-xs font-bold text-[#0B8F4D]">{result.gradingIssue ? 'Nilai Sementara' : 'Selesai Dinilai'}</div><p className="mt-2 text-sm text-slate-600">{result.gradingIssue ? 'Nilai sementara dihitung dari soal yang sudah memiliki kunci jawaban.' : 'Penilaian otomatis telah selesai dan tersimpan.'}</p>{result.gradingIssue&&<p className="mt-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-800">{result.gradingIssue}</p>}</> : isGradedWithoutKeys ? <><p className="my-5 text-lg font-bold text-[#0B8F4D]">Jawaban berhasil disimpan</p><div className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">Menunggu Kunci Jawaban</div><p className="mt-2 text-sm text-slate-600">{result.gradingIssue || 'Belum ada soal yang dapat dinilai karena kunci jawaban belum tersedia.'}</p></> : <><p className="my-5 text-lg font-bold text-[#0B8F4D]">Jawaban berhasil disimpan</p><div className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">Sedang diperiksa</div><p className="mt-2 text-sm text-slate-600">Penilaian otomatis sedang diproses.</p>{result.gradingError&&<p className="mt-2 rounded-xl bg-amber-50 p-3 text-xs text-amber-800">{result.gradingError}</p>}</>}</>:<p className="mt-3 text-sm text-slate-500">Hasil sedang disimpan.</p>}<button className={btn+' mt-5'} onClick={()=>{setSection('student');setAttemptId('');setFinishedResult(null);}}>Kembali</button></div></div>;
   }
 
   return <div className="space-y-5">

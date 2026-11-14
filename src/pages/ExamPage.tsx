@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import * as XLSX from 'xlsx';
 import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, query, setDoc, updateDoc, where } from 'firebase/firestore';
 import { deleteOfflineRecord, readOfflineRecord, readOfflineRecords, saveOfflineRecord } from '../lib/examOffline';
 import {
@@ -6,10 +7,12 @@ import {
   buildAttemptFinishPatch,
   computeExamGrade,
   sanitizeAnswersMap,
+  normalizeAnswerKeyIndex,
+  normalizeStudentAnswerIndex,
   type AnswerKeyRecord,
 } from '../lib/examGrading';
 import { signInAnonymously, signOut } from 'firebase/auth';
-import { BookOpen, Clock3, Plus, ClipboardList, Trophy, ArrowLeft, ChevronRight, CheckCircle2, Link as LinkIcon, Play, Save, Copy, ExternalLink, RefreshCw } from 'lucide-react';
+import { BookOpen, Clock3, Plus, ClipboardList, Trophy, ArrowLeft, ChevronRight, CheckCircle2, Link as LinkIcon, Play, Save, Copy, ExternalLink, RefreshCw, FileSpreadsheet } from 'lucide-react';
 import { db, auth } from '../firebase/config';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
@@ -75,6 +78,9 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const [regrading, setRegrading] = useState(false);
   const [finishedResult, setFinishedResult] = useState<{ attemptId?: string; title: string; studentName: string; className: string; score?: number; total?: number; percent?: number; gradingIssue?: string; gradingError?: string } | null>(null);
   const [selectedResultExamId, setSelectedResultExamId] = useState('');
+  const [selectedAnswerAttemptId, setSelectedAnswerAttemptId] = useState('');
+  const [answerDetails, setAnswerDetails] = useState<any[]>([]);
+  const [exportingResults, setExportingResults] = useState(false);
   const [message, setMessage] = useState('');
   const answersRef = useRef<Record<string, number>>({});
   const autoGradedAttemptsRef = useRef<Map<string, string>>(new Map());
@@ -215,6 +221,56 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   }, [exams, attempts]);
   const selectedResultExam = resultExamGroups.find(item => item.id === selectedResultExamId);
   const selectedResultAttempts = selectedResultExam?.attempts || [];
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadAnswerDetails = async () => {
+      if (!selectedAnswerAttemptId || !selectedResultExam) {
+        setAnswerDetails([]);
+        return;
+      }
+      const attempt = selectedResultAttempts.find(item => item.id === selectedAnswerAttemptId);
+      const exam = exams.find(item => item.id === selectedResultExam.id);
+      if (!attempt || !exam) {
+        setAnswerDetails([]);
+        return;
+      }
+      const rows = await Promise.all(exam.questionIds.map(async (qid, index) => {
+        const question = questions.find(item => item.id === qid);
+        let key: AnswerKeyRecord | null = null;
+        try {
+          key = await readOfflineRecord<AnswerKeyRecord>('exam:key:' + qid);
+        } catch {
+          key = null;
+        }
+        if (!key || key.answer === undefined || key.answer === null) {
+          try {
+            const keySnap = await getDoc(doc(db, 'examAnswerKeys', qid));
+            if (keySnap.exists()) key = keySnap.data() as AnswerKeyRecord;
+          } catch {
+            key = null;
+          }
+        }
+        const given = normalizeStudentAnswerIndex(attempt.answers?.[qid]);
+        const correctIndex = normalizeAnswerKeyIndex(key?.answer);
+        const correct = given === null || correctIndex === null ? null : given === correctIndex;
+        const points = Math.max(0, Number(question?.points ?? key?.points ?? 1) || 0);
+        return {
+          id: qid,
+          number: index + 1,
+          prompt: question?.prompt || 'Soal tidak ditemukan',
+          studentAnswer: given === null ? 'Belum dijawab' : String.fromCharCode(65 + given) + '. ' + (question?.options?.[given] || ''),
+          correctAnswer: correctIndex === null ? 'Kunci belum tersedia' : String.fromCharCode(65 + correctIndex) + '. ' + (question?.options?.[correctIndex] || ''),
+          correct,
+          points,
+          earned: correct === true ? points : 0,
+        };
+      }));
+      if (!cancelled) setAnswerDetails(rows);
+    };
+    void loadAnswerDetails();
+    return () => { cancelled = true; };
+  }, [selectedAnswerAttemptId, selectedResultExamId, attempts, exams, questions]);
   const availableExams = exams.filter(e => e.status === 'Aktif' && classLevel(e.className) === classLevel(studentClass || level) && (!linkedExamId || e.id === linkedExamId));
   const questionPackages = useMemo(() => {
     const groups = new Map<string, { key: string; title: string; questions: Question[] }>();
@@ -369,6 +425,75 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       }
     } finally {
       setRegrading(false);
+    }
+  };
+
+  const exportExamResults = async () => {
+    if (!selectedResultExam) return;
+    const exam = exams.find(item => item.id === selectedResultExam.id);
+    if (!exam) {
+      setMessage('Paket ujian tidak ditemukan untuk diekspor.');
+      return;
+    }
+    setExportingResults(true);
+    try {
+      const summaryRows = selectedResultAttempts.map(attempt => ({
+        'Nama Siswa': attempt.studentName,
+        'ID Siswa': attempt.studentId,
+        'Kelas': attempt.className,
+        'Status': attempt.status,
+        'Poin Diperoleh': typeof attempt.score === 'number' ? attempt.score : '',
+        'Total Poin': typeof attempt.total === 'number' ? attempt.total : '',
+        'Nilai': typeof attempt.percent === 'number' ? attempt.percent : '',
+        'Mulai': attempt.startedAt || '',
+        'Selesai': attempt.submittedAt || '',
+      }));
+      const detailRows: Record<string, unknown>[] = [];
+      for (const attempt of selectedResultAttempts) {
+        for (let index = 0; index < exam.questionIds.length; index++) {
+          const qid = exam.questionIds[index];
+          const question = questions.find(item => item.id === qid);
+          let key: AnswerKeyRecord | null = null;
+          try {
+            key = await readOfflineRecord<AnswerKeyRecord>('exam:key:' + qid);
+          } catch {
+            key = null;
+          }
+          if (!key || key.answer === undefined || key.answer === null) {
+            try {
+              const keySnap = await getDoc(doc(db, 'examAnswerKeys', qid));
+              if (keySnap.exists()) key = keySnap.data() as AnswerKeyRecord;
+            } catch {
+              key = null;
+            }
+          }
+          const given = normalizeStudentAnswerIndex(attempt.answers?.[qid]);
+          const correctIndex = normalizeAnswerKeyIndex(key?.answer);
+          const isCorrect = given === null || correctIndex === null ? null : given === correctIndex;
+          const points = Math.max(0, Number(question?.points ?? key?.points ?? 1) || 0);
+          detailRows.push({
+            'Nama Siswa': attempt.studentName,
+            'Kelas': attempt.className,
+            'Nomor Soal': index + 1,
+            'Pertanyaan': question?.prompt || 'Soal tidak ditemukan',
+            'Jawaban Siswa': given === null ? 'Belum dijawab' : String.fromCharCode(65 + given) + '. ' + (question?.options?.[given] || ''),
+            'Kunci Jawaban': correctIndex === null ? 'Belum tersedia' : String.fromCharCode(65 + correctIndex) + '. ' + (question?.options?.[correctIndex] || ''),
+            'Hasil': isCorrect === null ? 'Belum dapat dinilai' : isCorrect ? 'Benar' : 'Salah',
+            'Bobot Poin': points,
+            'Poin Diperoleh': isCorrect === true ? points : 0,
+          });
+        }
+      }
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(summaryRows), 'Rekap Nilai');
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(detailRows), 'Detail Jawaban');
+      const safeTitle = selectedResultExam.title.replace(/[^a-z0-9_-]+/gi, '_');
+      XLSX.writeFile(workbook, 'SIMPATIK_Hasil_' + safeTitle + '.xlsx');
+      setMessage('Rekap nilai dan detail jawaban berhasil diekspor ke Excel.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Ekspor hasil ujian gagal.');
+    } finally {
+      setExportingResults(false);
     }
   };
 
@@ -711,6 +836,6 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     {section==='manage'&&<div className={panel}><button className="mb-4 flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>setSection('home')}><ArrowLeft size={16}/> Kembali</button><h3 className="mb-3 text-lg font-black">Kelola Ujian</h3><div className="space-y-3">{exams.map(ex=><div key={ex.id} className="rounded-xl border border-slate-200 p-3"><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0"><p className="font-extrabold">{ex.title}</p><p className="mt-1 text-xs text-slate-500">{ex.className} · {ex.subject} · {ex.duration} menit · {ex.questionIds.length} soal</p><span className={'mt-2 inline-flex rounded-full px-3 py-1 text-xs font-bold '+(ex.status==='Aktif'?'bg-[#E3F7EC] text-[#0B8F4D]':'bg-slate-100 text-slate-600')}>{ex.status}</span></div><div className="flex flex-wrap gap-2"><button className="rounded-xl border border-[#16B364] px-3 py-2 text-xs font-bold text-[#0B8F4D]" onClick={()=>{const url=makeExamLink(ex.id);setShareLink(url);setSection('share');}}><Copy size={14} className="mr-1 inline"/>Bagikan link</button><button className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600" onClick={()=>void updateDoc(doc(db,'exams',ex.id),{status:ex.status==='Aktif'?'Draft':'Aktif'})}>{ex.status==='Aktif'?'Nonaktifkan':'Aktifkan'}</button></div></div></div>)}{!exams.length&&<p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Belum ada ujian. Buat ujian terlebih dahulu.</p>}</div>
     </div>}
     {section==='share'&&<div className={panel+' mx-auto max-w-2xl'}><div className="text-center"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E3F7EC] text-[#0B8F4D]"><LinkIcon size={28}/></div><h3 className="mt-3 text-xl font-black">Ujian berhasil dibuat</h3><p className="mt-1 text-sm text-slate-500">Bagikan tautan ini kepada siswa. Saat dibuka, siswa langsung masuk ke halaman ujian.</p></div><label className="mb-2 mt-5 block text-xs font-bold">Link pengerjaan siswa</label><div className="flex flex-col gap-2 sm:flex-row"><input className={field+' min-w-0'} readOnly value={shareLink}/><button className={btn+' shrink-0'} onClick={()=>void navigator.clipboard.writeText(shareLink)}><Copy size={15}/> Salin link</button></div><a href={shareLink} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[#0B8F4D]">Buka halaman siswa <ExternalLink size={14}/></a><div className="mt-5 flex flex-wrap gap-2"><button className={btn} onClick={()=>setSection('manage')}>Ke Kelola Ujian</button><button className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-600" onClick={()=>setSection('home')}>Kembali ke menu</button></div></div>}
-    {section==='results'&&<div className={panel}><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><button className="flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>selectedResultExamId?setSelectedResultExamId(''):setSection('home')}><ArrowLeft size={16}/> {selectedResultExamId?'Daftar Ujian':'Kembali'}</button><div className="flex items-center gap-2">{canManageExamQuestions&&selectedResultAttempts.some(a=>a.status==='Selesai')&&<button type="button" disabled={regrading} onClick={()=>void gradeAttemptsAsTeacher(selectedResultAttempts, true)} className="inline-flex items-center gap-1.5 rounded-full border border-[#16B364] bg-white px-3 py-1 text-xs font-bold text-[#0B8F4D] transition hover:bg-[#E3F7EC] disabled:opacity-50"><RefreshCw size={13} className={regrading?'animate-spin':''}/> {regrading?'Memeriksa…':'Hitung Ulang Nilai'}</button>}{selectedResultExam&&<span className="rounded-full bg-[#E3F7EC] px-3 py-1 text-xs font-bold text-[#0B8F4D]">{selectedResultAttempts.length} peserta</span>}</div></div><h3 className="mb-3 text-lg font-black">{selectedResultExam?selectedResultExam.title:'Hasil Ujian'}</h3>{!selectedResultExam?<div className="space-y-3">{resultExamGroups.map(exam=><button key={exam.id} onClick={()=>setSelectedResultExamId(exam.id)} className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 p-4 text-left transition hover:border-[#16B364] hover:bg-[#F7FCF9]"><span className="min-w-0"><strong className="block truncate">{exam.title}</strong><span className="mt-1 block text-xs text-slate-500">{exam.subject?exam.subject+' · ':''}{exam.className} · {exam.attempts.length} peserta</span></span><ChevronRight className="shrink-0 text-[#0B8F4D]"/></button>)}{!resultExamGroups.length&&<p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Belum ada ujian atau hasil pengerjaan siswa.</p>}</div>:<><p className="mb-3 text-sm text-slate-500">{selectedResultExam.subject} · {selectedResultExam.className}</p><div className="overflow-x-auto"><table className="w-full min-w-[560px] text-left text-sm"><thead><tr className="border-b bg-slate-50 text-xs text-slate-500"><th className="p-3">Nama Siswa</th><th className="p-3">Kelas</th><th className="p-3">Skor</th><th className="p-3">Nilai</th><th className="p-3">Status</th></tr></thead><tbody>{selectedResultAttempts.map(a=>{const hasScore=a.status==='Selesai'&&typeof a.score==='number'&&typeof a.total==='number';const hasKeys=hasScore&&a.total!>0;const computedPercent=hasKeys?(typeof a.percent==='number'?a.percent:Math.round(a.score!/Math.max(1,a.total!)*100)):null;return <tr key={a.id} className="border-b border-slate-100"><td className="p-3 font-semibold">{a.studentName}</td><td className="p-3">{a.className}</td><td className="p-3 font-bold">{hasScore?(hasKeys?a.score+' / '+a.total:'0 / 0'):'—'}</td><td className="p-3 font-bold text-[#0B8F4D]">{a.status==='Selesai'?(hasKeys?computedPercent:(hasScore?'Belum ada kunci':'Sedang diperiksa')):'—'}</td><td className="p-3">{a.status!=='Selesai'?a.status:hasKeys?(a.gradingIssue?<div><span className="inline-flex rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-700">Nilai sementara</span><p className="mt-1 text-xs text-slate-500">{a.gradingIssue}</p></div>:<span className="inline-flex rounded-full bg-[#E3F7EC] px-2.5 py-0.5 text-xs font-bold text-[#0B8F4D]">Selesai dinilai</span>):hasScore?<span className="inline-flex rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-700">Menunggu kunci jawaban</span>:<div className="flex flex-wrap items-center gap-2"><span className="text-xs text-slate-600">{a.gradingIssue||'Menunggu penilaian otomatis'}</span>{canManageExamQuestions&&<button type="button" disabled={regrading} onClick={()=>void gradeAttemptsAsTeacher([a], true)} className="rounded-lg border border-[#16B364] px-2.5 py-1 text-xs font-bold text-[#0B8F4D] hover:bg-[#E3F7EC] disabled:opacity-50">Nilai sekarang</button>}</div>}</td></tr>;})}</tbody></table></div>{!selectedResultAttempts.length&&<p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Belum ada siswa yang mengerjakan ujian ini.</p>}</>}</div>}
+    {section==='results'&&<div className={panel}><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><button className="flex items-center gap-2 text-sm font-bold text-slate-500" onClick={()=>selectedResultExamId?setSelectedResultExamId(''):setSection('home')}><ArrowLeft size={16}/> {selectedResultExamId?'Daftar Ujian':'Kembali'}</button><div className="flex items-center gap-2">{canManageExamQuestions&&selectedResultAttempts.some(a=>a.status==='Selesai')&&<button type="button" disabled={regrading} onClick={()=>void gradeAttemptsAsTeacher(selectedResultAttempts, true)} className="inline-flex items-center gap-1.5 rounded-full border border-[#16B364] bg-white px-3 py-1 text-xs font-bold text-[#0B8F4D] transition hover:bg-[#E3F7EC] disabled:opacity-50"><RefreshCw size={13} className={regrading?'animate-spin':''}/> {regrading?'Memeriksa…':'Hitung Ulang Nilai'}</button>}{selectedResultExam&&<button type="button" disabled={exportingResults} onClick={()=>void exportExamResults()} className="inline-flex items-center gap-1.5 rounded-full border border-[#16B364] bg-white px-3 py-1 text-xs font-bold text-[#0B8F4D] disabled:opacity-50"><FileSpreadsheet size={14}/>{exportingResults?'Mengekspor…':'Ekspor Excel'}</button>}{selectedResultExam&&<span className="rounded-full bg-[#E3F7EC] px-3 py-1 text-xs font-bold text-[#0B8F4D]">{selectedResultAttempts.length} peserta</span>}</div></div><h3 className="mb-3 text-lg font-black">{selectedResultExam?selectedResultExam.title:'Hasil Ujian'}</h3>{!selectedResultExam?<div className="space-y-3">{resultExamGroups.map(exam=><button key={exam.id} onClick={()=>setSelectedResultExamId(exam.id)} className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 p-4 text-left transition hover:border-[#16B364] hover:bg-[#F7FCF9]"><span className="min-w-0"><strong className="block truncate">{exam.title}</strong><span className="mt-1 block text-xs text-slate-500">{exam.subject?exam.subject+' · ':''}{exam.className} · {exam.attempts.length} peserta</span></span><ChevronRight className="shrink-0 text-[#0B8F4D]"/></button>)}{!resultExamGroups.length&&<p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Belum ada ujian atau hasil pengerjaan siswa.</p>}</div>:<><p className="mb-3 text-sm text-slate-500">{selectedResultExam.subject} · {selectedResultExam.className}</p><div className="overflow-x-auto"><table className="w-full min-w-[560px] text-left text-sm"><thead><tr className="border-b bg-slate-50 text-xs text-slate-500"><th className="p-3">Nama Siswa</th><th className="p-3">Kelas</th><th className="p-3">Skor</th><th className="p-3">Nilai</th><th className="p-3">Status</th><th className="p-3">Jawaban</th></tr></thead><tbody>{selectedResultAttempts.map(a=>{const hasScore=a.status==='Selesai'&&typeof a.score==='number'&&typeof a.total==='number';const hasKeys=hasScore&&a.total!>0;const computedPercent=hasKeys?(typeof a.percent==='number'?a.percent:Math.round(a.score!/Math.max(1,a.total!)*100)):null;return <tr key={a.id} className="border-b border-slate-100"><td className="p-3 font-semibold">{a.studentName}</td><td className="p-3">{a.className}</td><td className="p-3 font-bold">{hasScore?(hasKeys?a.score+' / '+a.total:'0 / 0'):'—'}</td><td className="p-3 font-bold text-[#0B8F4D]">{a.status==='Selesai'?(hasKeys?computedPercent:(hasScore?'Belum ada kunci':'Sedang diperiksa')):'—'}</td><td className="p-3">{a.status!=='Selesai'?a.status:hasKeys?(a.gradingIssue?<div><span className="inline-flex rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-700">Nilai sementara</span><p className="mt-1 text-xs text-slate-500">{a.gradingIssue}</p></div>:<span className="inline-flex rounded-full bg-[#E3F7EC] px-2.5 py-0.5 text-xs font-bold text-[#0B8F4D]">Selesai dinilai</span>):hasScore?<span className="inline-flex rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-700">Menunggu kunci jawaban</span>:<div className="flex flex-wrap items-center gap-2"><span className="text-xs text-slate-600">{a.gradingIssue||'Menunggu penilaian otomatis'}</span>{canManageExamQuestions&&<button type="button" disabled={regrading} onClick={()=>void gradeAttemptsAsTeacher([a], true)} className="rounded-lg border border-[#16B364] px-2.5 py-1 text-xs font-bold text-[#0B8F4D] hover:bg-[#E3F7EC] disabled:opacity-50">Nilai sekarang</button>}</div>}</td><td className="p-3"><button type="button" onClick={()=>setSelectedAnswerAttemptId(current=>current===a.id?'':a.id)} className="rounded-lg border border-[#B7E8CD] px-2.5 py-1.5 text-xs font-bold text-[#0B8F4D]">{selectedAnswerAttemptId===a.id?'Tutup':'Lihat jawaban'}</button></td></tr>;})}</tbody></table></div>{selectedAnswerAttemptId&&<div className="mt-4 rounded-xl border border-[#D5EADB] bg-[#F7FCF9] p-4"><div className="mb-3 flex items-center justify-between gap-2"><h4 className="font-extrabold">Detail jawaban: {selectedResultAttempts.find(item=>item.id===selectedAnswerAttemptId)?.studentName||'Siswa'}</h4><button type="button" onClick={()=>setSelectedAnswerAttemptId('')} className="rounded-lg border px-3 py-1.5 text-xs font-bold">Tutup</button></div><div className="space-y-3">{answerDetails.map(row=><div key={row.id} className="rounded-lg border border-slate-200 bg-white p-3"><p className="text-xs font-bold text-[#0B8F4D]">SOAL {row.number}</p><p className="mt-1 text-sm font-semibold">{row.prompt}</p><div className="mt-2 grid gap-1 text-xs text-slate-600"><p>Jawaban siswa: <strong>{row.studentAnswer}</strong></p><p>Kunci jawaban: <strong>{row.correctAnswer}</strong></p><p>Hasil: <strong>{row.correct===true?'Benar':row.correct===false?'Salah':'Belum dapat dinilai'}</strong> · Poin: <strong>{row.earned}/{row.points}</strong></p></div></div>)}</div></div>}{!selectedResultAttempts.length&&<p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Belum ada siswa yang mengerjakan ujian ini.</p>}</>}</div>}
   </div>;
 };

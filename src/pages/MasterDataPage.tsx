@@ -15,7 +15,7 @@ type Section = 'guru'|'siswa'|'kelas'|'mapel'|'ekskul'|'wali';
 type Pending = {id:string;type:'guru'|'siswa';name:string;email:string;phone:string;nis:string;nisn:string;gender:'L'|'P';className:string;nip:string;subject:string};
 const CLASSES=['VII (Tujuh)','VIII (Delapan)','IX (Sembilan)'];
 const SUBJECTS=SCHOOL_SUBJECTS;
-const classLevel=(value:string)=>{const normalized=String(value||'').trim().toUpperCase().replace(/^KELAS\\s+/,'');const match=normalized.match(/^(VIII|VII|IX)(?=$|[\\s(-])/);return match?match[1]:normalized.replace(/[^A-Z]/g,'')};
+const classLevel=(value:string)=>{const normalized=String(value||'').trim().toUpperCase().replace(/^KELAS\s+/,'');const match=normalized.match(/^(VIII|VII|IX)(?=$|[\s(-])/);return match?match[1]:normalized.replace(/[^A-Z]/g,'')};
 const groupQuestionPackages=(items:any[])=>{const groups=new Map<string,{key:string;title:string;questions:any[]}>();items.forEach(q=>{const title=q.title||'Paket Soal';const key=[q.subject||'',classLevel(q.className||''),title].join('::');const group: {key:string;title:string;questions:any[]} = groups.get(key)||{key,title,questions:[]};group.questions.push(q);groups.set(key,group)});return Array.from(groups.values())};
 const getPending=():Pending[]=>{try{return JSON.parse(localStorage.getItem('sipadu_pending_registrations')||'[]')}catch{return []}};
 const putPending=(v:Pending[])=>localStorage.setItem('sipadu_pending_registrations',JSON.stringify(v));

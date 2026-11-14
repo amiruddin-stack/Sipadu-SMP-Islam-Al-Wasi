@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../../context/AuthContext';
 import { NavTab } from './Sidebar';
-import { Menu, X, ChevronDown, Home, UserRound, GraduationCap, BookOpen, ClipboardList, LogOut } from 'lucide-react';
+import { Menu, X, ChevronDown, Home, UserRound, GraduationCap, BookOpen, ClipboardList, LogOut, CalendarDays } from 'lucide-react';
 
 interface HeaderProps {
   activeTab: NavTab;
@@ -20,6 +20,8 @@ const academicItems: [NavTab, string][] = [
   ['behavior', 'Perilaku Siswa'],
   ['reports', 'Laporan'],
   ['master', 'Data Guru & Siswa'],
+  ['homeroom', 'Guru Wali'],
+  ['schedule', 'Jadwal'],
 ];
 
 export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded = false }) => {
@@ -55,13 +57,13 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
   const isAcademicActive = academicItems.some(([tab]) => tab === activeTab);
 
   return (
-    <header className={embedded ? 'relative z-[9999] w-full bg-transparent' : 'sticky top-0 z-[9999] w-full border-b border-slate-100 bg-white text-slate-800 shadow-xs'}>
-      <div className="mx-auto flex min-h-[68px] max-w-[1240px] items-center gap-3 px-4 md:px-6">
-        <button type="button" onClick={() => navigate('dashboard')} className="flex min-w-0 shrink-0 items-center gap-2.5 text-left" aria-label="Akun guru">
+    <header className={embedded ? 'relative z-[9999] w-auto bg-transparent' : 'sticky top-0 z-[9999] w-full border-b border-slate-100 bg-white text-slate-800 shadow-xs'}>
+      <div className={embedded ? 'flex min-h-0 items-center' : 'mx-auto flex min-h-[68px] max-w-[1240px] items-center gap-3 px-4 md:px-6'}>
+        {!embedded && <button type="button" onClick={() => navigate('dashboard')} className="flex min-w-0 shrink-0 items-center gap-2.5 text-left" aria-label="Akun guru">
           <span className="max-w-[190px] truncate text-xs font-extrabold leading-tight tracking-tight text-slate-900 sm:text-sm">{currentUser?.displayName || currentUser?.email || 'Guru'}</span>
-        </button>
+        </button>}
 
-        <nav aria-label="Navigasi utama" className="hidden min-w-0 flex-1 items-center justify-center gap-1 lg:flex">
+        <nav aria-label="Navigasi utama" className={embedded ? 'hidden' : 'hidden min-w-0 flex-1 items-center justify-center gap-1 lg:flex'}>
           <button onClick={() => navigate('dashboard')} className={navClass('dashboard')}><Home size={15}/>Beranda</button>
           <button onClick={() => navigate('settings')} className={navClass('settings')}><UserRound size={15}/>Profil</button>
           <button onClick={() => navigate('classes')} className={navClass('classes')}><GraduationCap size={16}/>Kelas</button>
@@ -78,17 +80,17 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
           <button onClick={() => navigate('ils')} className={navClass('ils')}>ILS</button>
         </nav>
 
-        <div className="ml-auto flex shrink-0 items-center gap-2">
-          <div className="hidden max-w-[180px] text-right sm:block">
+        <div className={embedded ? 'flex shrink-0 items-center' : 'ml-auto flex shrink-0 items-center gap-2'}>
+          {!embedded && <div className="hidden max-w-[180px] text-right sm:block">
             <p className="truncate text-xs font-bold text-slate-700">{currentUser?.displayName || 'Akun'}</p>
             <p className="truncate text-[10px] text-slate-400">{currentUser?.role === 'super_admin' ? 'Admin Utama' : currentUser?.email || ''}</p>
-          </div>
-          {firebaseUser && !firebaseUser.isAnonymous && currentUser ? (
+          </div>}
+          {!embedded && (firebaseUser && !firebaseUser.isAnonymous && currentUser ? (
             <button type="button" onClick={() => void logout()} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-50"><LogOut size={14}/>Keluar</button>
           ) : (
             <button type="button" onClick={() => void loginWithGoogle()} disabled={loading} className="rounded-xl bg-[#18B66A] px-3 py-2 text-xs font-bold text-white hover:bg-[#0B9654] disabled:opacity-60">{loading ? 'Memeriksa…' : 'Login'}</button>
-          )}
-          <button type="button" onClick={() => setMobileMenuOpen(value => !value)} className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-[#087F49] lg:hidden" aria-label={mobileMenuOpen ? 'Tutup menu' : 'Buka menu'} aria-expanded={mobileMenuOpen}>{mobileMenuOpen ? <X size={20}/> : <Menu size={20}/>}</button>
+          ))}
+          <button type="button" onClick={() => setMobileMenuOpen(value => !value)} className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-[#087F49]" aria-label={mobileMenuOpen ? 'Tutup menu' : 'Buka menu'} aria-expanded={mobileMenuOpen}>{mobileMenuOpen ? <X size={20}/> : <Menu size={20}/>}</button>
         </div>
       </div>
 

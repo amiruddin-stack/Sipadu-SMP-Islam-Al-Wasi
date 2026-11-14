@@ -577,7 +577,15 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const startExam = async (exam: Exam) => {
     const student = examStudents.find(s => s.id === studentId);
     if (!studentId || !verifiedStudentName) { setMessage('Verifikasi ID Ujian siswa terlebih dahulu.'); return; }
-    if (!navigator.onLine) { setMessage('Koneksi internet diperlukan untuk memulai ujian agar sistem dapat mencegah pengerjaan ulang.'); return; }
+    const completionKey = 'completion:' + exam.id + ':' + studentId;
+    const localCompletion = await readOfflineRecord<any>(completionKey);
+    const pendingAttempts = await readOfflineRecords<any>('pending:');
+    const localPending = pendingAttempts.find(item => item.examId === exam.id && item.studentId === studentId && item.status === 'Selesai');
+    if (localCompletion || localPending) {
+      setCompletedExamNotice(exam.title);
+      return;
+    }
+    if (!navigator.onLine) { setMessage('Koneksi internet diperlukan untuk memulai ujian. Jika ujian sudah selesai, SIMPATIK akan menampilkan pemberitahuan dari data yang tersimpan di perangkat.'); return; }
     let examQuestions = exam.questionIds.map(id => questions.find(q => q.id === id)).filter(Boolean) as Question[];
     if (examQuestions.length !== exam.questionIds.length) {
       const cachedBundle = await readOfflineRecord<{ exam: Exam; questions: Question[] }>('cache:exam:' + exam.id);
@@ -606,14 +614,6 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       await auth.authStateReady();
       if (navigator.onLine && !auth.currentUser) await signInAnonymously(auth);
       const sessionOwnerUid = auth.currentUser?.uid || '';
-      const completionKey = 'completion:' + exam.id + ':' + studentId;
-      const localCompletion = await readOfflineRecord<any>(completionKey);
-      const pendingAttempts = await readOfflineRecords<any>('pending:');
-      const localPending = pendingAttempts.find(item => item.examId === exam.id && item.studentId === studentId && item.status === 'Selesai');
-      if (localCompletion || localPending) {
-        setCompletedExamNotice(exam.title);
-        return;
-      }
       const priorAttempts = await getDocs(query(collection(db, 'examAttempts'), where('examId', '==', exam.id)));
       const finishedDoc = priorAttempts.docs.find(snapshot => {
         const data = snapshot.data();

@@ -389,7 +389,12 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
         if (!exam || !Array.isArray(exam.questionIds) || !exam.questionIds.length) continue;
 
         const keyMap: Record<string, AnswerKeyRecord | null> = {};
+        const packagePoints: Record<string, number> = {};
         for (const qid of exam.questionIds) {
+          const packageQuestion = questions.find(question => question.id === String(qid));
+          if (packageQuestion && Number.isFinite(Number(packageQuestion.points)) && Number(packageQuestion.points) > 0) {
+            packagePoints[String(qid)] = Number(packageQuestion.points);
+          }
           const keyId = String(qid);
           if (!keyCache.has(keyId)) {
             let loadedKey: AnswerKeyRecord | null = null;
@@ -411,7 +416,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
           keyMap[keyId] = keyCache.get(keyId) || null;
         }
 
-        const grade = computeExamGrade(exam.questionIds, item.answers || {}, keyMap);
+        const grade = computeExamGrade(exam.questionIds, item.answers || {}, keyMap, packagePoints);
         await updateDoc(doc(db, 'examAttempts', item.id), {
           score: grade.score,
           total: grade.total,

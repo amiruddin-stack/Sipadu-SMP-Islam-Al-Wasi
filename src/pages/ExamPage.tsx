@@ -821,7 +821,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     };
     void syncPending();
     return () => { cancelled = true; };
-  }, [isOnline, section, activeExam, attemptId, answers, studentId, verifiedStudentName, studentClass, examStudents, deadlineAt, startedAt, ownerUid]);
+  }, [isOnline, section, activeExam, attemptId, answers, studentId, verifiedStudentName, studentClass, examStudents, deadlineAt, startedAt, ownerUid, studentAnswerKeys, questions, exams, currentExamQuestions]);
 
   const fmt = (seconds: number) => String(Math.floor(seconds / 60)).padStart(2,'0') + ':' + String(seconds % 60).padStart(2,'0');
   const rosterNames = examStudents

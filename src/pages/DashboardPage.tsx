@@ -127,7 +127,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
             </div>
             <div className="flex w-full shrink-0 items-center justify-center md:mr-0 md:w-[32%] md:translate-x-4 md:self-stretch">
               <img
-                src="./images/Desain%20tanpa%20judul_20261112_110817_0000.png"
+                src={`${import.meta.env.BASE_URL}images/Desain%20tanpa%20judul_20261114_193738_0000.png`}
                 alt="Ilustrasi struktur manajemen SIMPATIK"
                 className="hero-illustration h-auto object-contain"
                 loading="eager"

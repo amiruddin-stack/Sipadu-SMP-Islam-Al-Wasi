@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, Home, CalendarDays, NotebookPen, UserRound } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { NavTab } from '../components/layout/Sidebar';
 import { Header } from '../components/layout/Header';
@@ -90,12 +90,20 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
   const journalStartStr = [journalStart.getFullYear(), String(journalStart.getMonth() + 1).padStart(2, '0'), String(journalStart.getDate()).padStart(2, '0')].join('-');
   const visibleJournals = journals.filter(journal => journal.date >= journalStartStr && journal.date <= todayStr).sort((a,b) => b.date.localeCompare(a.date));
   const journalPeriodLabel = journalPeriod === 'today' ? 'Jurnal hari ini' : journalPeriod === 'week' ? '1 pekan terakhir' : journalPeriod + ' bulan terakhir';
+  const mobileNavItems: { tab: NavTab; label: string; icon: React.ElementType }[] = [
+    { tab: 'attendance', label: 'Presensi', icon: Users },
+    { tab: 'journal', label: 'Jurnal', icon: NotebookPen },
+    { tab: 'dashboard', label: 'Home', icon: Home },
+    { tab: 'homeroom', label: 'G-Wali', icon: UserRound },
+    { tab: 'schedule', label: 'Jadwal', icon: CalendarDays },
+  ];
 
   return (
     <div className="min-h-screen w-full bg-white font-sans text-slate-800 antialiased">
       {/* HERO SECTION with compact aligned card and integrated top navbar */}
       <section className="relative w-full overflow-hidden pb-3 pt-0 bg-white">
         <div className="relative z-10 mx-auto flex w-full max-w-[1240px] items-center gap-3 border-b border-slate-100 bg-white px-3 py-2 md:px-8">
+          <div className="md:hidden"><Header activeTab={activeTab} onNavigate={onNavigate} embedded /></div>
           <div className="flex min-w-0 items-center gap-3">
             <img src={`${import.meta.env.BASE_URL}logo-alwasi.png`} alt="Logo SMP Islam Al-Wasi’" className="h-9 w-9 shrink-0 object-contain sm:h-10 sm:w-10" />
             <span className="max-w-[112px] truncate text-xs font-extrabold tracking-tight text-slate-900 sm:max-w-none sm:text-base">SMP Islam Al-Wasi’</span>
@@ -109,30 +117,25 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
           </div>
         </div>
 
-        {/* Embedded Top Navigation Bar */}
-        <div className="relative z-10 md:hidden">
-          <Header activeTab={activeTab} onNavigate={onNavigate} embedded />
-        </div>
-
         {/* Full-width hero card with illustration beside unchanged hero text */}
         <div className="relative z-10 mx-auto max-w-[1240px] px-4 pt-2 pb-3 md:px-8 md:pt-3 md:pb-4">
-          <div className="hero relative isolate flex w-full flex-col items-center justify-between gap-5 overflow-hidden rounded-[24px] border border-white/20 bg-gradient-to-br from-[#087640] via-[#0B9654] to-[#27C879] px-6 py-6 shadow-[0_12px_30px_rgba(7,107,58,0.22)] md:flex-row md:gap-8 md:px-9 md:py-7">
+          <div className="hero relative isolate flex w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-[24px] border border-white/20 bg-gradient-to-br from-[#087640] via-[#0B9654] to-[#27C879] px-6 py-6 text-center shadow-[0_12px_30px_rgba(7,107,58,0.22)] md:gap-5 md:px-9 md:py-7">
             <div aria-hidden="true" className="pointer-events-none absolute -left-12 -top-14 h-52 w-52 rounded-full bg-white/[0.07]" />
             <div aria-hidden="true" className="pointer-events-none absolute -left-8 -bottom-20 h-40 w-40 rounded-full bg-white/[0.05]" />
             <div aria-hidden="true" className="pointer-events-none absolute -right-10 -top-14 h-52 w-52 rounded-full bg-white/[0.08]" />
             <div aria-hidden="true" className="pointer-events-none absolute right-20 -bottom-20 h-40 w-40 rounded-full bg-white/[0.06]" />
-            <div className="relative z-10 min-w-0 w-full max-w-3xl flex-1">
+            <div className="relative z-10 mx-auto w-full max-w-3xl text-center">
               <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl md:text-4xl">SIMPATIK</h1>
               <div className="mt-1.5 space-y-1 text-xs font-normal leading-relaxed tracking-[0.01em] text-white/90 sm:text-[13px]">
                 <p>Sistem Informasi Manajemen Pembelajaran &amp; Asesmen</p>
                 <p>yang Terpadu, Interaktif dan Kolaboratif</p>
               </div>
             </div>
-            <div className="relative z-10 flex w-full shrink-0 items-center justify-center md:mr-0 md:w-[32%] md:translate-x-4 md:self-stretch">
+            <div className="relative z-10 flex w-full shrink-0 items-center justify-center md:w-full md:self-auto">
               <img
                 src={`${import.meta.env.BASE_URL}images/Desain%20tanpa%20judul_20261114_225126_0000.png`}
                 alt="Ilustrasi struktur manajemen SIMPATIK"
-                className="hero-illustration h-auto object-contain"
+                className="hero-illustration mx-auto h-auto object-contain"
                 loading="eager"
               />
             </div>
@@ -141,7 +144,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
       </section>
 
       {/* MAIN CONTENT AREA */}
-      <main className="relative z-10 mx-auto max-w-[1240px] space-y-6 px-4 pt-3 pb-6 md:px-8">
+      <main className="relative z-10 mx-auto max-w-[1240px] space-y-6 px-4 pt-3 pb-24 md:px-8 md:pb-6">
         <section className="overflow-hidden rounded-[24px] border border-[#D5EADB] bg-white shadow-xs">
           <div className="flex flex-wrap items-center justify-between gap-3 bg-[#E3F7EC] px-5 py-4">
             <div><h2 className="text-lg font-extrabold text-[#076B3A]">Rekap Presensi Siswa</h2><p className="text-xs text-slate-500">{attendancePeriodLabel} · {settings.activeAcademicYear} · {settings.activeSemester}</p></div>
@@ -166,6 +169,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
           </div>
         </section>
       </main>
+      <nav aria-label="Navigasi bawah" className="fixed inset-x-0 bottom-0 z-[100] grid grid-cols-5 border-t border-[#D5EADB] bg-white/95 px-1 pb-[max(env(safe-area-inset-bottom),8px)] pt-2 shadow-[0_-6px_20px_rgba(15,70,40,0.08)] backdrop-blur md:hidden">
+        {mobileNavItems.map(({ tab, label, icon: Icon }) => (
+          <button key={tab} type="button" onClick={() => onNavigate(tab)} aria-current={activeTab === tab ? 'page' : undefined} className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-bold transition-colors ${activeTab === tab ? 'text-[#087F49]' : 'text-slate-500'}`}>
+            <span className={`flex h-8 w-9 items-center justify-center rounded-xl ${activeTab === tab ? 'bg-[#E3F7EC]' : ''}`}><Icon size={19} strokeWidth={activeTab === tab ? 2.4 : 1.9}/></span>
+            <span>{label}</span>
+          </button>
+        ))}
+      </nav>
     </div>
   );
 };

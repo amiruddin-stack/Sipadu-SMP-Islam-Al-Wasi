@@ -73,7 +73,8 @@ export function sanitizeAnswersMap(answers: Record<string, unknown>): Record<str
 export function computeExamGrade(
   questionIds: string[],
   answers: Record<string, unknown>,
-  keyMap: Record<string, AnswerKeyRecord | null | undefined>
+  keyMap: Record<string, AnswerKeyRecord | null | undefined>,
+  packagePoints: Record<string, unknown> = {}
 ): ExamGradeResult {
   let score = 0;
   let total = 0;
@@ -84,14 +85,15 @@ export function computeExamGrade(
     const questionId = String(rawQuestionId);
     const key = keyMap[questionId];
     const normalizedKey = normalizeAnswerKeyIndex(key?.answer);
+    const packagePointValue = packagePoints[questionId] ?? key?.points;
+    const rawPoints = Number(packagePointValue);
+    const points = Number.isFinite(rawPoints) && rawPoints > 0 ? rawPoints : 1;
+    total += points;
+
     if (normalizedKey === null) {
       missingQuestionIds.push(questionId);
       return;
     }
-
-    const rawPoints = Number(key?.points);
-    const points = Number.isFinite(rawPoints) && rawPoints > 0 ? rawPoints : 1;
-    total += points;
 
     const given = normalizeStudentAnswerIndex(answers?.[questionId]);
     if (given !== null && given === normalizedKey) {
@@ -102,7 +104,7 @@ export function computeExamGrade(
 
   const gradedCount = questionIds.length - missingQuestionIds.length;
   const missingCount = missingQuestionIds.length;
-  const hasNoKeys = gradedCount === 0 || total <= 0;
+  const hasNoKeys = gradedCount === 0;
   const isPartial = missingCount > 0 && gradedCount > 0;
   const percent = total > 0 ? Math.round((score / total) * 100) : 0;
 

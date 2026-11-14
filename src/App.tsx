@@ -18,13 +18,13 @@ import { SettingsPage } from './pages/SettingsPage';
 import { ExamPage } from './pages/ExamPage';
 import { LoginPage } from './pages/LoginPage';
 
-function ComingSoonPage() {
+function ComingSoonPage({ title, description }: { title: string; description: string }) {
   return (
     <section className="mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center px-6 text-center">
       <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-[#E3F7EC] text-3xl font-black text-[#0B8F4D]">ILS</div>
       <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-[#0B8F4D]">SIMPATIK AL-WASI’</p>
-      <h1 className="text-3xl font-bold text-slate-800">ILS</h1>
-      <p className="mt-3 max-w-md text-sm leading-6 text-slate-500">Fitur ini sedang dalam tahap persiapan dan akan segera tersedia.</p>
+      <h1 className="text-3xl font-bold text-slate-800">{title}</h1>
+      <p className="mt-3 max-w-md text-sm leading-6 text-slate-500">{description}</p>
       <span className="mt-6 rounded-full bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700">Coming Soon</span>
     </section>
   );
@@ -82,7 +82,9 @@ function AppContent() {
       case 'reports': return <ReportsPage />;
       case 'settings': return <SettingsPage />;
       case 'exams': return <ExamPage onBack={() => setActiveTab('dashboard')} />;
-      case 'ils': return <ComingSoonPage />;
+      case 'ils': return <ComingSoonPage title="ILS" description="Informasi dan layanan ILS sedang dalam tahap persiapan." />;
+      case 'homeroom': return <ComingSoonPage title="Guru Wali" description="Ruang kerja Guru Wali sedang dalam tahap persiapan." />;
+      case 'schedule': return <ComingSoonPage title="Jadwal" description="Informasi jadwal kegiatan dan pembelajaran sedang dalam tahap persiapan." />;
       default: return <DashboardPage activeTab={activeTab} onNavigate={(tab) => setActiveTab(tab)} />;
     }
   };

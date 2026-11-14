@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Home, Users, NotebookPen, UserRound, CalendarDays } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
 import { Header } from './components/layout/Header';
@@ -33,6 +34,13 @@ function ComingSoonPage({ title, description }: { title: string; description: st
 function AppContent() {
   const { currentUser, loading } = useAuth();
   const [activeTab, setActiveTabState] = useState<NavTab>(() => (new URLSearchParams(window.location.search).get('page') as NavTab) || 'dashboard');
+  const mobileNavItems: { tab: NavTab; label: string; icon: React.ElementType }[] = [
+    { tab: 'attendance', label: 'Presensi', icon: Users },
+    { tab: 'journal', label: 'Jurnal', icon: NotebookPen },
+    { tab: 'dashboard', label: 'Home', icon: Home },
+    { tab: 'homeroom', label: 'G-Wali', icon: UserRound },
+    { tab: 'schedule', label: 'Jadwal', icon: CalendarDays },
+  ];
   const setActiveTab = (tab: NavTab) => {
     const url = new URL(window.location.href);
     url.searchParams.set('page', tab);
@@ -96,13 +104,21 @@ function AppContent() {
         <div className="min-w-0 flex-1">
           {activeTab !== 'dashboard' && <div className="md:hidden"><Header activeTab={activeTab} onNavigate={setActiveTab} /></div>}
           <main className="min-h-screen w-full p-0">
-            <div className={activeTab === 'dashboard' ? 'w-full' : 'mx-auto w-full max-w-7xl px-4 py-5 md:px-6 md:py-6'}>
+            <div className={activeTab === 'dashboard' ? 'w-full' : 'mx-auto w-full max-w-7xl px-4 pt-5 pb-24 md:px-6 md:py-6'}>
               {activeTab !== 'dashboard' && activeTab !== 'subjects' && activeTab !== 'exams' && <PageBanner activeTab={activeTab} onBack={() => { if (window.history.state?.simpatikTab) window.history.back(); else setActiveTab('dashboard'); }} />}
               {renderCurrentPage()}
             </div>
           </main>
         </div>
       </div>
+      <nav aria-label="Navigasi bawah" className="fixed inset-x-0 bottom-0 z-[100] grid grid-cols-5 border-t border-[#D5EADB] bg-white/95 px-1 pb-[max(env(safe-area-inset-bottom),8px)] pt-2 shadow-[0_-6px_20px_rgba(15,70,40,0.08)] backdrop-blur md:hidden">
+        {mobileNavItems.map(({ tab, label, icon: Icon }) => (
+          <button key={tab} type="button" onClick={() => setActiveTab(tab)} aria-current={activeTab === tab ? 'page' : undefined} className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-bold transition-colors ${activeTab === tab ? 'text-[#087F49]' : 'text-slate-500'}`}>
+            <span className={`flex h-8 w-9 items-center justify-center rounded-xl ${activeTab === tab ? 'bg-[#E3F7EC]' : ''}`}><Icon size={19} strokeWidth={activeTab === tab ? 2.4 : 1.9}/></span>
+            <span>{label}</span>
+          </button>
+        ))}
+      </nav>
       <OfflineIndicator />
     </div>
   );

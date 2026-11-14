@@ -559,10 +559,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       }
       loadedKeys[questionId] = key || null;
     }
-    if (exam.questionIds.some(id => loadedKeys[id]?.answer === undefined || loadedKeys[id]?.answer === null)) {
-      setMessage('Kunci jawaban belum lengkap. Ujian tidak dapat dimulai sebelum paket penilaian siap.');
-      return;
-    }
+    // Kunci yang belum tersedia dibiarkan kosong; ujian tetap dapat dimulai.
     setStudentAnswerKeys(loadedKeys);
     await saveOfflineRecord('exam:keys:' + exam.id, loadedKeys);
     try {

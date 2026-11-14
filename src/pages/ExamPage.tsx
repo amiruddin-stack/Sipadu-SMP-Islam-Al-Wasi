@@ -612,18 +612,19 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     createData: { examId: string; examTitle: string; studentId: string; studentName: string; className: string; ownerUid: string; startedAt: string },
     cleanAnswers: Record<string, number>,
     submittedAt: string,
-    forced: boolean
+    forced: boolean,
+    grade: { score: number; total: number; percent: number; gradingIssue: string }
   ) => {
     const attemptRef = doc(db, 'examAttempts', targetAttemptId);
     const existingSnap = await getDoc(attemptRef);
     if (!existingSnap.exists()) {
       await setDoc(attemptRef, buildAttemptCreatePayload({ ...createData, answers: {} }));
-      await updateDoc(attemptRef, buildAttemptFinishPatch(cleanAnswers, submittedAt, forced));
+      await updateDoc(attemptRef, { ...buildAttemptFinishPatch(cleanAnswers, submittedAt, forced), ...grade, gradedAt: new Date().toISOString() });
       return null;
     }
     const existingData = existingSnap.data();
     if (existingData?.status === 'Mengerjakan') {
-      await updateDoc(attemptRef, buildAttemptFinishPatch(cleanAnswers, submittedAt, forced));
+      await updateDoc(attemptRef, { ...buildAttemptFinishPatch(cleanAnswers, submittedAt, forced), ...grade, gradedAt: new Date().toISOString() });
       return null;
     }
     if (typeof existingData?.score === 'number' && typeof existingData?.total === 'number' && !existingData?.gradingIssue) {
@@ -688,7 +689,8 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
           },
           cleanAnswers,
           submittedAt,
-          forced
+          forced,
+          computeExamGrade(activeExam.questionIds, cleanAnswers, studentAnswerKeys, Object.fromEntries(currentExamQuestions.map(q => [q.id, q.points])))
         );
         if (alreadyGraded) {
           setFinishedResult(current => current ? { ...current, ...alreadyGraded, gradingError: undefined } : current);
@@ -781,7 +783,9 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
               startedAt: resolvedStartedAt,
             }));
           } else if (existingSnap.data()?.status === 'Mengerjakan') {
-            await updateDoc(attemptRef, { answers: sanitizeAnswersMap(answers), lastSavedAt: new Date().toISOString() });
+            const clean = sanitizeAnswersMap(answers);
+            const grade = computeExamGrade(activeExam.questionIds, clean, studentAnswerKeys, Object.fromEntries(currentExamQuestions.map(q => [q.id, q.points])));
+            await updateDoc(attemptRef, { answers: clean, score: grade.score, total: grade.total, percent: grade.percent, gradingIssue: grade.gradingIssue, gradedAt: new Date().toISOString(), lastSavedAt: new Date().toISOString() });
           }
         }
         const pending = await readOfflineRecords<any>('pending:');
@@ -803,7 +807,8 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
             },
             cleanAnswers,
             item.submittedAt || new Date().toISOString(),
-            Boolean(item.autoSubmitted)
+            Boolean(item.autoSubmitted),
+            computeExamGrade((exams.find(ex => ex.id === item.examId)?.questionIds || []), cleanAnswers, studentAnswerKeys, Object.fromEntries(questions.map(q => [q.id, q.points])))
           );
           if (alreadyGraded) {
             setFinishedResult(current => current && current.attemptId === item.id ? { ...current, ...alreadyGraded, gradingError: undefined } : current);

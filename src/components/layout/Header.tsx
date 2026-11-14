@@ -51,7 +51,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
     setAcademicOpen(false);
     setMobileMenuOpen(false);
   };
-  const navClass = (tab: NavTab) => `flex min-h-11 shrink-0 items-center gap-1 rounded-xl px-2.5 text-sm font-semibold transition-colors ${activeTab === tab ? 'bg-[#E3F7EC] text-[#0B8F4D]' : 'text-slate-700 hover:bg-[#F2FAF5] hover:text-[#0B8F4D]'}`;
+  const navClass = (tab: NavTab) => `flex min-h-11 shrink-0 items-center gap-1 rounded-xl px-2.5 text-sm font-semibold transition-colors ${activeTab === tab ? 'bg-[#DDF7E9] text-[#087F49]' : 'text-slate-700 hover:bg-[#EAF9F0] hover:text-[#087F49]'}`;
   const isAcademicActive = academicItems.some(([tab]) => tab === activeTab);
 
   return (
@@ -86,9 +86,9 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onNavigate, embedded 
           {firebaseUser && !firebaseUser.isAnonymous && currentUser ? (
             <button type="button" onClick={() => void logout()} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-50"><LogOut size={14}/>Keluar</button>
           ) : (
-            <button type="button" onClick={() => void loginWithGoogle()} disabled={loading} className="rounded-xl bg-[#0B8F4D] px-3 py-2 text-xs font-bold text-white hover:bg-[#076B3A] disabled:opacity-60">{loading ? 'Memeriksa…' : 'Login'}</button>
+            <button type="button" onClick={() => void loginWithGoogle()} disabled={loading} className="rounded-xl bg-[#18B66A] px-3 py-2 text-xs font-bold text-white hover:bg-[#0B9654] disabled:opacity-60">{loading ? 'Memeriksa…' : 'Login'}</button>
           )}
-          <button type="button" onClick={() => setMobileMenuOpen(value => !value)} className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-[#0B8F4D] lg:hidden" aria-label={mobileMenuOpen ? 'Tutup menu' : 'Buka menu'} aria-expanded={mobileMenuOpen}>{mobileMenuOpen ? <X size={20}/> : <Menu size={20}/>}</button>
+          <button type="button" onClick={() => setMobileMenuOpen(value => !value)} className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-[#087F49] lg:hidden" aria-label={mobileMenuOpen ? 'Tutup menu' : 'Buka menu'} aria-expanded={mobileMenuOpen}>{mobileMenuOpen ? <X size={20}/> : <Menu size={20}/>}</button>
         </div>
       </div>
 

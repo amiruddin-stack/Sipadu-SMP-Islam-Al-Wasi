@@ -49,7 +49,7 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({ activeTab, onNav
   const itemClass = (tab: NavTab) =>
     `flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[13px] font-semibold transition-colors ${
       activeTab === tab
-        ? 'bg-gradient-to-br from-[#0B8F4D] to-[#087640] text-white shadow-sm'
+        ? 'bg-gradient-to-br from-[#27C879] via-[#18B66A] to-[#0B9654] text-white shadow-sm'
         : 'text-slate-600 hover:bg-[#F2FAF5] hover:text-[#076B3A]'
     }`;
 

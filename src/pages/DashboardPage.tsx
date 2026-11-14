@@ -116,29 +116,37 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
 
         {/* Full-width hero card with illustration beside unchanged hero text */}
         <div className="relative z-10 mx-auto max-w-[1240px] px-4 pt-2 pb-3 md:px-8 md:pt-3 md:pb-4">
-          <div className="hero flex w-full flex-col items-center justify-between gap-5 overflow-hidden rounded-[24px] border border-[#D5EADB] bg-gradient-to-br from-[#27C879] via-[#18B66A] to-[#0B9654] px-6 py-6 shadow-sm md:flex-row md:gap-8 md:px-9 md:py-7">
-            <div className="min-w-0 w-full max-w-3xl flex-1">
-              <h1 className="font-black tracking-tight text-white text-3xl sm:text-4xl md:text-5xl">
-                SIMPATIK
-              </h1>
-              <p className="mt-1 whitespace-nowrap font-semibold tracking-tight text-white text-[9px] sm:text-xs md:text-sm">
-                Sistem Informasi Manajemen Pembelajaran &amp; Asesmen
-              </p>
-              <p className="whitespace-nowrap font-semibold tracking-tight text-white text-[9px] sm:text-xs md:text-sm">
-                yang Terpadu, Interaktif dan Kolaboratif
-              </p>
-              <div className="mt-3 border-t border-white/35 pt-3">
-                <h2 className="text-lg font-extrabold tracking-tight text-white sm:text-xl md:text-2xl">SMP Islam Al-Wasi'</h2>
-                <p className="mt-1 text-xs font-semibold tracking-wide text-white sm:text-sm md:text-base">Qur'ani, Ramah Anak dan Berkarakter</p>
+          <div className="hero relative isolate w-full overflow-hidden rounded-[24px] border border-white/20 bg-gradient-to-br from-[#087640] via-[#0B9654] to-[#27C879] p-5 shadow-[0_12px_30px_rgba(7,107,58,0.22)] md:p-5">
+            <div aria-hidden="true" className="pointer-events-none absolute -right-10 -top-14 h-52 w-52 rounded-full bg-white/[0.08]" />
+            <div aria-hidden="true" className="pointer-events-none absolute right-20 -bottom-20 h-40 w-40 rounded-full bg-white/[0.06]" />
+            <div className="relative z-10 flex flex-col justify-between gap-4 md:min-h-[190px] md:flex-row md:items-center md:gap-6">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">SIMPATIK</h1>
+                <div className="mt-1.5 space-y-1 text-xs font-normal leading-relaxed tracking-[0.01em] text-white/90 sm:text-[13px]">
+                  <p>Sistem Informasi Manajemen Pembelajaran &amp; Asesmen</p>
+                  <p>yang Terpadu, Interaktif dan Kolaboratif</p>
+                </div>
+              </div>
+              <div className="flex w-full shrink-0 items-center justify-center md:h-full md:w-[32%]">
+                <img
+                  src={`${import.meta.env.BASE_URL}images/Desain%20tanpa%20judul_20261114_223031_0000.png`}
+                  alt="Ilustrasi struktur manajemen SIMPATIK"
+                  className="hero-illustration h-auto max-h-[190px] object-contain md:max-h-[210px]"
+                  loading="eager"
+                />
               </div>
             </div>
-            <div className="flex w-full shrink-0 items-center justify-center md:mr-0 md:w-[32%] md:translate-x-4 md:self-stretch">
+            <div className="relative z-10 my-4 h-px w-full bg-white/25" />
+            <div className="relative z-10 flex items-center gap-2.5">
               <img
-                src={`${import.meta.env.BASE_URL}images/Desain%20tanpa%20judul_20261114_223031_0000.png`}
-                alt="Ilustrasi struktur manajemen SIMPATIK"
-                className="hero-illustration h-auto object-contain"
-                loading="eager"
+                src={`${import.meta.env.BASE_URL}logo-alwasi.png`}
+                alt="Logo SMP Islam Al-Wasi’"
+                className="h-8 w-8 shrink-0 object-contain"
               />
+              <div className="min-w-0">
+                <h2 className="text-[15px] font-semibold leading-tight tracking-tight text-white">SMP Islam Al-Wasi'</h2>
+                <p className="mt-0.5 text-xs font-normal leading-relaxed text-white/90">Qur'ani, Ramah Anak dan Berkarakter</p>
+              </div>
             </div>
           </div>
         </div>

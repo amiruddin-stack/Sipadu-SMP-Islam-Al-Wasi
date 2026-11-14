@@ -116,14 +116,21 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
 
         {/* Full-width hero card with illustration beside unchanged hero text */}
         <div className="relative z-10 mx-auto max-w-[1240px] px-4 pt-2 pb-3 md:px-8 md:pt-3 md:pb-4">
-          <div className="hero flex w-full flex-col items-center justify-between gap-5 overflow-hidden rounded-[24px] border border-[#D5EADB] bg-gradient-to-br from-[#0B8F4D] to-[#087640] px-6 py-6 shadow-sm md:flex-row md:gap-8 md:px-9 md:py-7">
+          <div className="hero flex w-full flex-col items-center justify-between gap-5 overflow-hidden rounded-[24px] border border-[#D5EADB] bg-gradient-to-br from-[#27C879] via-[#18B66A] to-[#0B9654] px-6 py-6 shadow-sm md:flex-row md:gap-8 md:px-9 md:py-7">
             <div className="min-w-0 w-full max-w-3xl flex-1">
-              <h1 className="font-black tracking-tight text-white text-2xl sm:text-3xl md:text-4xl">
-                SMP Islam Al-Wasi'
+              <h1 className="font-black tracking-tight text-white text-3xl sm:text-4xl md:text-5xl">
+                SIMPATIK
               </h1>
-              <p className="mt-2 font-semibold tracking-wide text-white text-sm sm:text-base md:text-lg">
-                Qur'ani, Ramah Anak dan Berkarakter
+              <p className="mt-1 whitespace-nowrap font-semibold tracking-tight text-white text-[9px] sm:text-xs md:text-sm">
+                Sistem Informasi Manajemen Pembelajaran &amp; Asesmen
               </p>
+              <p className="whitespace-nowrap font-semibold tracking-tight text-white text-[9px] sm:text-xs md:text-sm">
+                yang Terpadu, Interaktif dan Kolaboratif
+              </p>
+              <div className="mt-3 border-t border-white/35 pt-3">
+                <h2 className="text-lg font-extrabold tracking-tight text-white sm:text-xl md:text-2xl">SMP Islam Al-Wasi'</h2>
+                <p className="mt-1 text-xs font-semibold tracking-wide text-white sm:text-sm md:text-base">Qur'ani, Ramah Anak dan Berkarakter</p>
+              </div>
             </div>
             <div className="flex w-full shrink-0 items-center justify-center md:mr-0 md:w-[32%] md:translate-x-4 md:self-stretch">
               <img

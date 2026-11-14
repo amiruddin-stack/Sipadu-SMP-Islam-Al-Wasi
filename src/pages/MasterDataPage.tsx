@@ -101,7 +101,6 @@ export const MasterDataPage:React.FC<{initialSubTab?:'kelas'|'mapel'}>=({initial
         if(typeof question.answer==='number'&&question.answer>=0&&question.answer<question.options.length){
           const keyRecord={answer:question.answer,points:question.points,createdAt};
           await saveOfflineRecord('exam:key:'+questionRef.id,keyRecord);
-          await setDoc(doc(db,'examAnswerKeys',questionRef.id),keyRecord);
         }else{
           withoutKey++;
           await deleteOfflineRecord('exam:key:'+questionRef.id);

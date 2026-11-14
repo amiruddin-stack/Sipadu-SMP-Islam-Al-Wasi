@@ -614,10 +614,10 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       await auth.authStateReady();
       if (navigator.onLine && !auth.currentUser) await signInAnonymously(auth);
       const sessionOwnerUid = auth.currentUser?.uid || '';
-      const priorAttempts = await getDocs(query(collection(db, 'examAttempts'), where('examId', '==', exam.id)));
+      const priorAttempts = await getDocs(query(collection(db, 'examAttempts'), where('ownerUid', '==', sessionOwnerUid)));
       const finishedDoc = priorAttempts.docs.find(snapshot => {
         const data = snapshot.data();
-        return data.status === 'Selesai' && (data.studentId === studentId || (!data.studentId && sessionOwnerUid && data.ownerUid === sessionOwnerUid));
+        return data.examId === exam.id && data.status === 'Selesai' && (!data.studentId || data.studentId === studentId);
       });
       if (finishedDoc) {
         const data = finishedDoc.data();

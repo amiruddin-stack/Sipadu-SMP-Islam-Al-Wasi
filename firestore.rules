@@ -177,7 +177,11 @@ service cloud.firestore {
     }
 
     match /examAnswerKeys/{questionId} {
-      allow read, write: if isGuruOrAdmin();
+      // Kunci dapat dibaca oleh sesi siswa anonim untuk pemeriksaan lokal saat ujian.
+      // Ini berarti kunci tidak dapat dijamin rahasia dari siswa yang membongkar data aplikasi.
+      allow read: if isGuruOrAdmin()
+        || (signedIn() && request.auth.token.firebase.sign_in_provider == 'anonymous');
+      allow create, update, delete: if isGuruOrAdmin();
     }
 
     match /exams/{examId} {
@@ -239,7 +243,8 @@ service cloud.firestore {
           && request.resource.data.ownerUid == request.auth.uid
           && resource.data.status == 'Mengerjakan'
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-            'answers', 'status', 'submittedAt', 'autoSubmitted', 'lastSavedAt'
+            'answers', 'status', 'submittedAt', 'autoSubmitted', 'lastSavedAt',
+            'score', 'total', 'percent', 'gradingIssue', 'gradedAt'
           ])
           && request.resource.data.answers is map
           && request.resource.data.status in ['Mengerjakan', 'Selesai']
@@ -248,7 +253,12 @@ service cloud.firestore {
           && (!('autoSubmitted' in request.resource.data)
             || request.resource.data.autoSubmitted is bool)
           && (!('lastSavedAt' in request.resource.data)
-            || request.resource.data.lastSavedAt is string));
+            || request.resource.data.lastSavedAt is string)
+          && (!('score' in request.resource.data) || request.resource.data.score is number)
+          && (!('total' in request.resource.data) || request.resource.data.total is number)
+          && (!('percent' in request.resource.data) || request.resource.data.percent is number)
+          && (!('gradingIssue' in request.resource.data) || request.resource.data.gradingIssue is string)
+          && (!('gradedAt' in request.resource.data) || request.resource.data.gradedAt is string));
       allow delete: if isAdmin();
     }
 

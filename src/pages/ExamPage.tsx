@@ -309,7 +309,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
 
 
   const createExam = async () => {
-    if (!isVerifiedExamAdmin) { setMessage('Hanya admin sekolah yang dapat menerbitkan ujian.'); return; }
+    if (!canManageExamQuestions) { setMessage('Login menggunakan akun Google sekolah untuk menerbitkan ujian.'); return; }
     if (!title.trim() || !subject || !selectedQuestions.length) { setMessage('Isi nama ujian, mapel, dan pilih minimal satu soal.'); return; }
     setSaving(true);
     try {

@@ -77,7 +77,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const [selectedResultExamId, setSelectedResultExamId] = useState('');
   const [message, setMessage] = useState('');
   const answersRef = useRef<Record<string, number>>({});
-  const autoGradedAttemptsRef = useRef<Set<string>>(new Set());
+  const autoGradedAttemptsRef = useRef<Map<string, string>>(new Map());
   const savingRef = useRef(false);
   answersRef.current = answers;
   savingRef.current = saving;
@@ -295,8 +295,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
 
       let gradedCount = 0;
       for (const item of targetAttempts) {
-        if (item.status !== 'Selesai') continue;
-        if (!forceRegrade && typeof item.score === 'number' && typeof item.total === 'number') continue;
+        if (item.status !== 'Selesai' && item.status !== 'Mengerjakan') continue;
 
         let exam = examCache.get(item.examId) || null;
         if (!exam) {
@@ -338,6 +337,9 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
                     loadedKey = legacySnap.data() as AnswerKeyRecord;
                   }
                 }
+                if (loadedKey?.answer !== undefined && loadedKey?.answer !== null) {
+                  await saveOfflineRecord('exam:key:' + keyId, loadedKey);
+                }
               } catch {
                 loadedKey = null;
               }
@@ -372,11 +374,13 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
 
   useEffect(() => {
     if (!canManageExamQuestions) return;
-    const ungraded = attempts.filter(
-      a => a.status === 'Selesai' && (typeof a.score !== 'number' || typeof a.total !== 'number') && !autoGradedAttemptsRef.current.has(a.id)
-    );
+    const ungraded = attempts.filter(a => {
+      if (a.status !== 'Mengerjakan' && a.status !== 'Selesai') return false;
+      const signature = JSON.stringify(a.answers || {});
+      return autoGradedAttemptsRef.current.get(a.id) !== signature;
+    });
     if (!ungraded.length) return;
-    ungraded.forEach(a => autoGradedAttemptsRef.current.add(a.id));
+    ungraded.forEach(a => autoGradedAttemptsRef.current.set(a.id, JSON.stringify(a.answers || {})));
     void gradeAttemptsAsTeacher(ungraded, false);
   }, [section, canManageExamQuestions, attempts, exams]);
 

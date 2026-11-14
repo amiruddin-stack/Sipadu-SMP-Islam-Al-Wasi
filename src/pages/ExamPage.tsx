@@ -860,11 +860,11 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const [bannerTitle, bannerDescription] = sectionTitles[section];
   return <div className="space-y-5">
     {!linkedExamId&&<section className="page-banner relative flex min-h-[104px] w-full items-center justify-between gap-4 px-4 py-4 text-white sm:min-h-[116px] sm:px-6 md:px-7">
-      <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+      <div className="relative z-10 flex min-w-0 items-center gap-3 sm:gap-4">
         <button type="button" onClick={() => section === "home" ? onBack?.() : setSection("home")} aria-label="Kembali ke halaman sebelumnya" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/35 bg-white/15 text-white shadow-sm transition hover:bg-white hover:text-[#087640] sm:h-11 sm:w-11"><ArrowLeft size={20}/></button>
         <div className="min-w-0"><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/85 sm:text-[11px]">SIMPATIK · AKADEMIK</p><h2 className="mt-0.5 truncate text-xl font-black tracking-tight text-white sm:text-2xl md:text-[28px]">{bannerTitle}</h2><p className="mt-1 line-clamp-1 text-[11px] font-medium text-white/90 sm:text-xs">{bannerDescription}</p></div>
       </div>
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/30 bg-white/15 text-white shadow-sm sm:h-14 sm:w-14"><ClipboardList size={25} strokeWidth={1.9}/></div>
+      <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/30 bg-white/15 text-white shadow-sm sm:h-14 sm:w-14"><ClipboardList size={25} strokeWidth={1.9}/></div>
     </section>}
     {offlineReady&&<div className="flex items-center gap-2 rounded-xl bg-[#E3F7EC] px-3 py-2 text-xs font-semibold text-[#0B8F4D]"><Save size={14}/> Soal dan data ujian tersimpan di perangkat untuk akses tanpa internet.</div>}
     {message&&<div className="rounded-xl bg-[#E3F7EC] p-3 text-sm text-[#076B3A]">{message}</div>}

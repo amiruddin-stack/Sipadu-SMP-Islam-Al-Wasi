@@ -35,18 +35,18 @@ export const PageBanner: React.FC<PageBannerProps> = ({ activeTab, onBack, title
   const details = pageDetails[activeTab];
   const Icon = icon || details.icon;
   return (
-    <section className="relative mb-5 flex min-h-[104px] w-full items-center justify-between gap-4 overflow-hidden rounded-[24px] border border-slate-200 bg-white px-4 py-4 shadow-sm sm:min-h-[116px] sm:px-6 md:px-7">
+    <section className="relative mb-5 flex min-h-[104px] w-full items-center justify-between gap-4 overflow-hidden rounded-[24px] bg-gradient-to-br from-[#0B8F4D] to-[#087640] px-4 py-4 text-white shadow-md sm:min-h-[116px] sm:px-6 md:px-7">
       <div className="relative z-10 flex min-w-0 items-center gap-3 sm:gap-4">
-        <button type="button" onClick={onBack} aria-label="Kembali ke Beranda" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-[#0B8F4D] shadow-sm transition hover:bg-[#0B8F4D] hover:text-white sm:h-11 sm:w-11">
+        <button type="button" onClick={onBack} aria-label="Kembali ke halaman sebelumnya" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/35 bg-white/15 text-white shadow-sm backdrop-blur-sm transition hover:bg-white hover:text-[#087640] sm:h-11 sm:w-11">
           <ArrowLeft size={20}/>
         </button>
         <div className="min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#0B8F4D] sm:text-[11px]">SIMPATIK · SMP ISLAM AL-WASI’</p>
-          <h1 className="mt-0.5 truncate text-xl font-black tracking-tight text-[#17334B] sm:text-2xl md:text-[28px]">{title || details.title}</h1>
-          <p className="mt-0.5 line-clamp-1 text-[11px] font-medium text-slate-500 sm:text-xs">{description || details.description}</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/85 sm:text-[11px]">SIMPATIK · SMP ISLAM AL-WASI’</p>
+          <h1 className="mt-0.5 truncate text-xl font-black tracking-tight text-white sm:text-2xl md:text-[28px]">{title || details.title}</h1>
+          <p className="mt-0.5 line-clamp-1 text-[11px] font-medium text-white/90 sm:text-xs">{description || details.description}</p>
         </div>
       </div>
-      <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/80 bg-white text-[#0B8F4D] shadow-sm sm:h-14 sm:w-14">
+      <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/30 bg-white/15 text-white shadow-sm backdrop-blur-sm sm:h-14 sm:w-14">
         <Icon size={25} strokeWidth={1.9}/>
       </div>
     </section>

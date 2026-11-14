@@ -113,9 +113,96 @@ function doPost(e) {
 }
 
 function authorizeAccess() {
-  const token = ScriptApp.getOAuthToken();
+  const token = getFirestoreAccessToken_();
   if (!token) throw new Error('Izin Google belum diberikan.');
-  return 'Izin Apps Script berhasil disiapkan.';
+  return 'Izin Apps Script berhasil disiapkan dengan scope Firestore.';
+}
+
+function setServiceAccountJson(jsonString) {
+  const parsed = JSON.parse(String(jsonString || ''));
+  if (!parsed || !parsed.client_email || !parsed.private_key) {
+    throw new Error('JSON Service Account tidak valid (client_email / private_key kosong).');
+  }
+  PropertiesService.getScriptProperties().setProperty('FIREBASE_SERVICE_ACCOUNT', JSON.stringify(parsed));
+  CacheService.getScriptCache().remove('sa_firestore_token');
+  return 'Service account berhasil disimpan di Script Properties.';
+}
+
+function getFirestoreAccessToken_() {
+  const saRaw = PropertiesService.getScriptProperties().getProperty('FIREBASE_SERVICE_ACCOUNT');
+  if (saRaw) {
+    return getServiceAccountToken_(saRaw);
+  }
+
+  const token = ScriptApp.getOAuthToken();
+  if (!token) throw new Error('Token OAuth Apps Script tidak tersedia.');
+
+  const infoRes = UrlFetchApp.fetch(
+    'https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=' + encodeURIComponent(token),
+    { muteHttpExceptions: true }
+  );
+  if (infoRes.getResponseCode() === 200) {
+    const info = JSON.parse(infoRes.getContentText() || '{}');
+    const scopes = String(info.scope || '').split(/\s+/);
+    const hasFirestoreScope = scopes.some(function(scope) {
+      return scope === 'https://www.googleapis.com/auth/datastore' ||
+        scope === 'https://www.googleapis.com/auth/cloud-platform';
+    });
+    if (!hasFirestoreScope) {
+      throw new Error(
+        'Token OAuth Apps Script belum memiliki scope datastore. Pastikan appsscript.json mencantumkan "https://www.googleapis.com/auth/datastore", jalankan ulang authorizeAccess(), lalu buat deployment versi baru—atau simpan JSON Service Account di Script Properties (FIREBASE_SERVICE_ACCOUNT).'
+      );
+    }
+  }
+  return token;
+}
+
+function getServiceAccountToken_(saRaw) {
+  const cache = CacheService.getScriptCache();
+  const cached = cache.get('sa_firestore_token');
+  if (cached) return cached;
+
+  const sa = JSON.parse(saRaw);
+  if (!sa.client_email || !sa.private_key) {
+    throw new Error('Konfigurasi FIREBASE_SERVICE_ACCOUNT di Script Properties tidak lengkap.');
+  }
+
+  const nowSec = Math.floor(Date.now() / 1000);
+  const header = base64UrlEncode_(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
+  const claim = base64UrlEncode_(JSON.stringify({
+    iss: sa.client_email,
+    scope: 'https://www.googleapis.com/auth/datastore',
+    aud: sa.token_uri || 'https://oauth2.googleapis.com/token',
+    iat: nowSec,
+    exp: nowSec + 3600
+  }));
+  const signingInput = header + '.' + claim;
+  const privateKey = String(sa.private_key).replace(/\\n/g, '\n');
+  const signatureBytes = Utilities.computeRsaSha256Signature(signingInput, privateKey);
+  const assertion = signingInput + '.' + base64UrlEncodeBytes_(signatureBytes);
+
+  const response = UrlFetchApp.fetch(sa.token_uri || 'https://oauth2.googleapis.com/token', {
+    method: 'post',
+    payload: {
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion: assertion
+    },
+    muteHttpExceptions: true
+  });
+  const data = JSON.parse(response.getContentText() || '{}');
+  if (response.getResponseCode() !== 200 || !data.access_token) {
+    throw new Error('Gagal memperoleh access token Service Account: ' + (data.error_description || response.getContentText()));
+  }
+  cache.put('sa_firestore_token', data.access_token, 3000);
+  return data.access_token;
+}
+
+function base64UrlEncode_(text) {
+  return Utilities.base64EncodeWebSafe(text).replace(/=+$/, '');
+}
+
+function base64UrlEncodeBytes_(bytes) {
+  return Utilities.base64EncodeWebSafe(bytes).replace(/=+$/, '');
 }
 
 function verifyFirebaseToken_(idToken) {
@@ -138,7 +225,7 @@ function getDocument_(collectionName, documentId) {
   const url = firestoreDocumentUrl_(collectionName, documentId);
   const response = UrlFetchApp.fetch(url, {
     method: 'get',
-    headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() },
+    headers: { Authorization: 'Bearer ' + getFirestoreAccessToken_() },
     muteHttpExceptions: true
   });
   if (response.getResponseCode() === 404) return null;
@@ -161,7 +248,7 @@ function patchDocument_(collectionName, documentId, values) {
   const response = UrlFetchApp.fetch(url, {
     method: 'patch',
     contentType: 'application/json',
-    headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() },
+    headers: { Authorization: 'Bearer ' + getFirestoreAccessToken_() },
     payload: JSON.stringify({ fields: fields }),
     muteHttpExceptions: true
   });

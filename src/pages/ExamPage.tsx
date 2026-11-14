@@ -291,6 +291,35 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     const user = auth.currentUser;
     if (!user) throw new Error('Sesi Firebase siswa tidak tersedia.');
     const idToken = await user.getIdToken(true);
+
+    if (typeof window !== 'undefined' && /^https?:$/i.test(window.location.protocol)) {
+      try {
+        const localRes = await fetch('/api/grade-exam', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken, attemptId: id }),
+        });
+        const contentType = localRes.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const localText = await localRes.text();
+          let localJson: any = null;
+          try {
+            localJson = JSON.parse(localText);
+          } catch {
+            localJson = null;
+          }
+          if (localRes.ok) {
+            return parseGradingApiResponse(localJson ?? localText);
+          }
+          if (localRes.status !== 404 && localRes.status !== 405 && !localJson?.fallback) {
+            return parseGradingApiResponse(localJson ?? localText);
+          }
+        }
+      } catch {
+        // Backend lokal tidak tersedia (mis. GitHub Pages/Capacitor); lanjut ke Apps Script Web App
+      }
+    }
+
     const response = await fetch(GRADING_WEB_APP_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },

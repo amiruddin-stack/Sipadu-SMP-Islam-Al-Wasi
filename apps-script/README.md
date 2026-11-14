@@ -16,15 +16,16 @@ Kunci jawaban tidak dikirim ke browser siswa. Siswa tidak diberi izin menulis fi
 1. Masuk ke [script.google.com](https://script.google.com) menggunakan akun Google yang memiliki akses **Owner** pada proyek Firebase SIMPATIK.
 2. Buat project baru, beri nama **SIMPATIK Auto Grading**.
 3. Salin isi `Code.gs` dari folder ini ke editor Apps Script.
-4. Buka **Project Settings**, aktifkan **Show "appsscript.json" manifest file in editor**, lalu ganti manifest dengan isi file `appsscript.json` di folder ini.
-5. Pilih fungsi `authorizeAccess`, lalu klik **Run** dan setujui izin Google.
-6. Klik **Deploy → New deployment → Web app**.
-7. Pilih **Execute as: Me** dan **Who has access: Anyone** (termasuk pengguna tanpa login).
-8. Klik **Deploy**, lalu salin URL yang berakhiran `/exec`.
+4. Buka **Project Settings**, aktifkan **Show "appsscript.json" manifest file in editor**, lalu ganti manifest dengan isi file `appsscript.json` di folder ini (pastikan scope `https://www.googleapis.com/auth/datastore` tercantum).
+5. *(Direkomendasikan agar bebas error `ACCESS_TOKEN_SCOPE_INSUFFICIENT`)* Simpan JSON Service Account proyek Firebase pada **Project Settings → Script Properties** dengan nama properti `FIREBASE_SERVICE_ACCOUNT`, atau panggil fungsi `setServiceAccountJson(...)` satu kali dari editor Apps Script.
+6. Pilih fungsi `authorizeAccess`, lalu klik **Run** dan pastikan muncul pesan `Izin Apps Script berhasil disiapkan dengan scope Firestore.`
+7. Klik **Deploy → New deployment → Web app** (atau **Manage deployments → New version** setiap mengubah kode).
+8. Pilih **Execute as: Me** dan **Who has access: Anyone** (termasuk pengguna tanpa login).
+9. Klik **Deploy**, lalu salin URL yang berakhiran `/exec`.
 
 ## Penting
 - Jangan pilih **Execute as: User accessing the web app**.
-- Jangan membagikan token OAuth Apps Script atau menaruhnya di kode frontend.
+- Jangan membagikan token OAuth Apps Script, file Service Account, atau menaruh kredensial rahasia di kode frontend.
 - URL Web App bukan rahasia; setiap permintaan tetap harus membawa Firebase ID token yang valid.
-- Setelah URL `/exec` tersedia, URL itu perlu dipasang pada konfigurasi SIMPATIK dan alur hasil siswa perlu diuji.
-- Firebase Rules perlu mengizinkan siswa membaca dokumen pengerjaan miliknya sendiri setelah selesai agar nilai dapat ditampilkan; aturan tulis nilai tetap ditutup untuk siswa.
+- Jika memakai backend Node.js (`server.ts`), endpoint `/api/grade-exam` memakai **Firebase Admin SDK** (`FIREBASE_SERVICE_ACCOUNT_JSON` di environment server) dan otomatis menjadi jalur utama sebelum fallback ke Apps Script.
+- Firebase Rules mengizinkan siswa membaca dokumen pengerjaan miliknya sendiri setelah selesai agar nilai dapat ditampilkan; aturan tulis nilai tetap ditutup untuk siswa.

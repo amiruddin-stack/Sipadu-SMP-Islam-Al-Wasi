@@ -122,6 +122,8 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
         if (session?.exam && session?.attemptId && session?.deadlineAt && (!linkedExamId || session.exam.id === linkedExamId)) {
           setActiveExam(session.exam);
           setAnswers(session.answers || {});
+          setStudentAnswerKeys(session.studentAnswerKeys || await readOfflineRecord<Record<string, AnswerKeyRecord | null>>('exam:keys:' + session.exam.id) || {});
+          setStudentGrade(await readOfflineRecord<any>('grade:' + session.attemptId));
           setAttemptId(session.attemptId);
           setOwnerUid(session.ownerUid || '');
           setStartedAt(session.startedAt || new Date(session.deadlineAt - (session.exam?.duration || 60) * 60 * 1000).toISOString());
@@ -562,6 +564,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       return;
     }
     setStudentAnswerKeys(loadedKeys);
+    await saveOfflineRecord('exam:keys:' + exam.id, loadedKeys);
     try {
       await auth.authStateReady();
       if (navigator.onLine && !auth.currentUser) await signInAnonymously(auth);
@@ -736,7 +739,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     const grade = computeExamGrade(activeExam.questionIds, clean, studentAnswerKeys, Object.fromEntries(currentExamQuestions.map(q => [q.id, q.points])));
     setStudentGrade(grade);
     void saveOfflineRecord('grade:' + attemptId, { ...grade, answers: clean, gradedAt: new Date().toISOString() });
-    const session = { exam: activeExam, attemptId, studentId, studentName: verifiedStudentName, className: studentClass, answers: clean, deadlineAt, startedAt, ownerUid };
+    const session = { exam: activeExam, attemptId, studentId, studentName: verifiedStudentName, className: studentClass, answers: clean, deadlineAt, startedAt, ownerUid, studentAnswerKeys };
     void saveOfflineRecord('session:active', session);
     const timer = window.setTimeout(() => {
       if (navigator.onLine && auth.currentUser?.uid && ownerUid && auth.currentUser.uid === ownerUid) {

@@ -35,11 +35,7 @@ export const PageBanner: React.FC<PageBannerProps> = ({ activeTab, onBack, title
   const details = pageDetails[activeTab];
   const Icon = icon || details.icon;
   return (
-    <section className="relative mb-5 flex min-h-[104px] w-full items-center justify-between gap-4 overflow-hidden rounded-[24px] border border-white/20 bg-[#27C879] px-4 py-4 text-white shadow-[0_12px_30px_rgba(7,107,58,0.22)] sm:min-h-[116px] sm:px-6 md:px-7">
-      <div aria-hidden="true" className="pointer-events-none absolute -left-12 -top-14 h-52 w-52 rounded-full bg-white/[0.07]" />
-      <div aria-hidden="true" className="pointer-events-none absolute -left-8 -bottom-20 h-40 w-40 rounded-full bg-white/[0.05]" />
-      <div aria-hidden="true" className="pointer-events-none absolute -right-10 -top-14 h-52 w-52 rounded-full bg-white/[0.08]" />
-      <div aria-hidden="true" className="pointer-events-none absolute right-20 -bottom-20 h-40 w-40 rounded-full bg-white/[0.06]" />
+    <section className="relative mb-5 flex min-h-[104px] w-full items-center justify-between gap-4 overflow-hidden rounded-[24px] bg-gradient-to-br from-[#27C879] via-[#18B66A] to-[#0B9654] px-4 py-4 text-white shadow-md sm:min-h-[116px] sm:px-6 md:px-7">
       <div className="relative z-10 flex min-w-0 items-center gap-3 sm:gap-4">
         <button type="button" onClick={onBack} aria-label="Kembali ke halaman sebelumnya" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/35 bg-white/15 text-white shadow-sm backdrop-blur-sm transition hover:bg-white hover:text-[#087640] sm:h-11 sm:w-11">
           <ArrowLeft size={20}/>

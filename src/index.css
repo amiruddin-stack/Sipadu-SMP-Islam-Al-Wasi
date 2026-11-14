@@ -209,34 +209,29 @@ body {
 
 .mapel-banner {
   isolation: isolate;
-  background: #27C879;
-  border: 1px solid rgb(255 255 255 / 20%);
-  box-shadow: 0 12px 30px rgba(7, 107, 58, .22);
-}
-
-.mapel-banner::before,
-.mapel-banner::after {
-  content: '';
-  position: absolute;
-  z-index: 0;
-  pointer-events: none;
-  border-radius: 9999px;
+  background: linear-gradient(115deg, #27C879 0%, #18B66A 48%, #0B9654 100%);
 }
 
 .mapel-banner::before {
-  width: 13rem;
-  height: 13rem;
-  top: -3.5rem;
-  left: -3rem;
-  background: rgb(255 255 255 / 7%);
-  box-shadow: 1rem 9rem 0 -3rem rgb(255 255 255 / 5%);
+  content: '';
+  position: absolute;
+  z-index: 0;
+  top: -65%;
+  left: -45%;
+  width: 32%;
+  height: 230%;
+  pointer-events: none;
+  transform: rotate(22deg);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 7%), rgb(255 255 255 / 38%), rgb(255 255 255 / 8%), transparent);
+  animation: mapel-banner-shine 60s ease-in-out infinite;
 }
 
-.mapel-banner::after {
-  width: 13rem;
-  height: 13rem;
-  top: -3.5rem;
-  right: -2.5rem;
-  background: rgb(255 255 255 / 8%);
-  box-shadow: -5rem 9rem 0 -3rem rgb(255 255 255 / 6%);
+@keyframes mapel-banner-shine {
+  0%, 96% { left: -45%; opacity: 0; }
+  97% { opacity: .9; }
+  100% { left: 120%; opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mapel-banner::before { animation: none !important; }
 }

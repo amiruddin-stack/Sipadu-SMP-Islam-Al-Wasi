@@ -90,12 +90,12 @@ export const MasterDataPage:React.FC<{initialSubTab?:'kelas'|'mapel'}>=({initial
       let withoutKey=0;
       const localPackageQuestions:any[]=[];
       for(const question of googlePreview.questions){
-        const existing=bankQuestions.find(item=>item.sourceFormId===googleFormUrl.trim()&&item.prompt===question.prompt&&JSON.stringify(item.options||[])===JSON.stringify(question.options));
+        const existing=bankQuestions.find(item=>item.title===googlePreview.title&&item.subject===selectedSubject&&item.className===subjectClass&&item.prompt===question.prompt&&JSON.stringify(item.options||[])===JSON.stringify(question.options));
         const questionRef=existing?doc(db,'examPublicQuestions',existing.id):doc(collection(db,'examPublicQuestions'));
         const createdAt=new Date().toISOString();
-        const publicQuestion={title:googlePreview.title,subject:selectedSubject,className:subjectClass,academicYear:'',semester:'',prompt:question.prompt,options:question.options,points:question.points,source:'google_forms',sourceFormId:googleFormUrl.trim(),createdAt};
+        const publicQuestion={title:googlePreview.title,subject:selectedSubject,className:subjectClass,academicYear:'',semester:'',prompt:question.prompt,options:question.options,points:question.points,createdAt};
         await setDoc(questionRef,publicQuestion,{merge:true});
-        const localQuestion={...publicQuestion,id:questionRef.id,answer:typeof question.answer==='number'&&question.answer>=0&&question.answer<question.options.length?question.answer:null};
+        const localQuestion={...publicQuestion,id:questionRef.id,source:'google_forms',sourceFormId:googleFormUrl.trim(),answer:typeof question.answer==='number'&&question.answer>=0&&question.answer<question.options.length?question.answer:null};
         await saveOfflineRecord('exam:question:'+questionRef.id,localQuestion);
         localPackageQuestions.push(localQuestion);
         if(typeof question.answer==='number'&&question.answer>=0&&question.answer<question.options.length){

@@ -59,8 +59,8 @@ test('computeExamGrade computes temporary score when some questions lack answer 
     }
   );
   assert.equal(result.score, 2);
-  assert.equal(result.total, 2);
-  assert.equal(result.percent, 100);
+  assert.equal(result.total, 4);
+  assert.equal(result.percent, 50);
   assert.equal(result.gradedCount, 2);
   assert.equal(result.missingCount, 2);
   assert.equal(result.isPartial, true);
@@ -75,6 +75,22 @@ test('computeExamGrade handles exam where no questions have keys without crashin
   assert.equal(result.percent, 0);
   assert.equal(result.hasNoKeys, true);
   assert.match(result.gradingIssue, /Belum ada kunci jawaban/);
+});
+
+
+test('computeExamGrade prioritizes the points assigned in the exam package', () => {
+  const result = computeExamGrade(
+    ['q1', 'q2'],
+    { q1: 0, q2: 1 },
+    {
+      q1: { answer: 0, points: 1 },
+      q2: { answer: 0, points: 1 },
+    },
+    { q1: 5, q2: 15 }
+  );
+  assert.equal(result.score, 5);
+  assert.equal(result.total, 20);
+  assert.equal(result.percent, 25);
 });
 
 test('parseGradingApiResponse supports direct, string-number, nested, and zero-key responses', () => {

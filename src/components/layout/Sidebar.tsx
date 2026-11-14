@@ -3,13 +3,13 @@ import { useAuth } from '../../context/AuthContext';
 import {
   Home, UserRound, GraduationCap, BookOpen, ClipboardList,
   Users, NotebookPen, ClipboardCheck, HeartHandshake, ShieldCheck,
-  FileText, Settings, LogOut
+  FileText, Settings, LogOut, CalendarDays
 } from 'lucide-react';
 
 export type NavTab =
   | 'dashboard' | 'attendance' | 'journal' | 'behavior' | 'counseling'
   | 'assessment' | 'exams' | 'grades' | 'master' | 'reports'
-  | 'settings' | 'classes' | 'subjects' | 'ils';
+  | 'settings' | 'classes' | 'subjects' | 'ils' | 'homeroom' | 'schedule';
 
 interface SidebarProps {
   activeTab: NavTab;
@@ -42,6 +42,8 @@ const academicItems: { tab: NavTab; label: string; icon: React.ElementType }[] =
   { tab: 'behavior', label: 'Perilaku Siswa', icon: ShieldCheck },
   { tab: 'reports', label: 'Laporan', icon: FileText },
   { tab: 'master', label: 'Data Guru & Siswa', icon: Users },
+  { tab: 'homeroom', label: 'Guru Wali', icon: UserRound },
+  { tab: 'schedule', label: 'Jadwal', icon: CalendarDays },
 ];
 
 export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({ activeTab, onNavigate }) => {

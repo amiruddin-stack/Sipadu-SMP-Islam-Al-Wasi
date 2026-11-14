@@ -116,7 +116,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
 
         {/* Full-width hero card with illustration beside unchanged hero text */}
         <div className="relative z-10 mx-auto max-w-[1240px] px-4 pt-2 pb-3 md:px-8 md:pt-3 md:pb-4">
-          <div className="hero relative isolate flex w-full flex-col items-center justify-between gap-5 overflow-hidden rounded-[24px] border border-white/20 bg-gradient-to-br from-[#087640] via-[#0B9654] to-[#27C879] px-6 py-6 shadow-[0_12px_30px_rgba(7,107,58,0.22)] md:flex-row md:gap-8 md:px-9 md:py-7">
+          <div className="hero relative isolate flex w-full flex-col items-center justify-between gap-5 overflow-hidden rounded-[24px] border border-white/20 bg-[#27C879] px-6 py-6 shadow-[0_12px_30px_rgba(7,107,58,0.22)] md:flex-row md:gap-8 md:px-9 md:py-7">
             <div aria-hidden="true" className="pointer-events-none absolute -left-12 -top-14 h-52 w-52 rounded-full bg-white/[0.07]" />
             <div aria-hidden="true" className="pointer-events-none absolute -left-8 -bottom-20 h-40 w-40 rounded-full bg-white/[0.05]" />
             <div aria-hidden="true" className="pointer-events-none absolute -right-10 -top-14 h-52 w-52 rounded-full bg-white/[0.08]" />

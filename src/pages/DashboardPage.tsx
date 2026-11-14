@@ -118,33 +118,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
         <div className="relative z-10 mx-auto max-w-[1240px] px-4 pt-2 pb-3 md:px-8 md:pt-3 md:pb-4">
           <div className="hero flex w-full flex-col items-center justify-between gap-5 overflow-hidden rounded-[24px] border border-[#D5EADB] bg-gradient-to-br from-[#0B8F4D] to-[#087640] px-6 py-6 shadow-sm md:flex-row md:gap-8 md:px-9 md:py-7">
             <div className="min-w-0 w-full max-w-3xl flex-1">
-              <h1 className="font-black tracking-tight text-white">
-                SIMPATIK
+              <h1 className="font-black tracking-tight text-white text-2xl sm:text-3xl md:text-4xl">
+                SMP Islam Al-Wasi'
               </h1>
-
-              <div className="mt-2 space-y-0.5">
-                <h2 className="whitespace-nowrap font-extrabold tracking-tight text-white text-[8px] min-[380px]:text-[10px] sm:text-sm md:text-lg">
-                  Sistem Informasi Manajemen Pendidikan &amp; Asesmen
-                </h2>
-                <h2 className="whitespace-nowrap font-extrabold tracking-tight text-black text-[9px] min-[380px]:text-[10px] sm:text-sm md:text-lg">
-                  yang Terpadu, Interaktif dan Kolaboratif.
-                </h2>
-              </div>
-
-              <div className="mt-5 flex flex-wrap items-center gap-3">
-                <button
-                  onClick={() => onNavigate('attendance')}
-                  className="btn rounded-xl border border-slate-200/90 bg-white px-6 py-2 text-sm font-semibold text-slate-800 shadow-xs transition hover:bg-slate-50 hover:shadow-sm focus:outline-none"
-                >
-                  Isi Presensi
-                </button>
-                <button
-                  onClick={() => onNavigate('journal')}
-                  className="rounded-xl border border-slate-200/90 bg-white px-6 py-2 text-sm font-semibold text-slate-800 shadow-xs transition hover:bg-slate-50 hover:shadow-sm focus:outline-none"
-                >
-                  Tulis Jurnal
-                </button>
-              </div>
+              <p className="mt-2 font-semibold tracking-wide text-white text-sm sm:text-base md:text-lg">
+                Qur'ani, Ramah Anak dan Berkarakter
+              </p>
             </div>
             <div className="flex w-full shrink-0 items-center justify-center md:mr-0 md:w-[32%] md:translate-x-4 md:self-stretch">
               <img

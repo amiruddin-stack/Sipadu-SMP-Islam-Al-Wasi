@@ -65,6 +65,10 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const [studentId, setStudentId] = useState('');
   const [activeExam, setActiveExam] = useState<Exam | null>(null);
   const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [studentAnswerKeys, setStudentAnswerKeys] = useState<Record<string, AnswerKeyRecord | null>>({});
+  const [studentGrade, setStudentGrade] = useState<{ score: number; total: number; percent: number; gradingIssue: string } | null>(null);
+  const [offlineNoticeOpen, setOfflineNoticeOpen] = useState(false);
+  const [offlineSaveNoticeOpen, setOfflineSaveNoticeOpen] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [attemptId, setAttemptId] = useState('');
   const [ownerUid, setOwnerUid] = useState('');
@@ -541,6 +545,23 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     }
     if (examQuestions.length !== exam.questionIds.length) { setMessage('Paket soal belum lengkap tersimpan di perangkat. Hubungkan internet sekali untuk memuat seluruh soal.'); return; }
     await saveOfflineRecord('cache:exam:' + exam.id, { exam, questions: examQuestions });
+    const loadedKeys: Record<string, AnswerKeyRecord | null> = {};
+    for (const questionId of exam.questionIds) {
+      let key = await readOfflineRecord<AnswerKeyRecord>('exam:key:' + questionId);
+      if ((!key || key.answer === undefined || key.answer === null) && navigator.onLine) {
+        const keySnap = await getDoc(doc(db, 'examAnswerKeys', questionId));
+        if (keySnap.exists()) {
+          key = keySnap.data() as AnswerKeyRecord;
+          await saveOfflineRecord('exam:key:' + questionId, key);
+        }
+      }
+      loadedKeys[questionId] = key || null;
+    }
+    if (exam.questionIds.some(id => loadedKeys[id]?.answer === undefined || loadedKeys[id]?.answer === null)) {
+      setMessage('Kunci jawaban belum lengkap. Ujian tidak dapat dimulai sebelum paket penilaian siap.');
+      return;
+    }
+    setStudentAnswerKeys(loadedKeys);
     try {
       await auth.authStateReady();
       if (navigator.onLine && !auth.currentUser) await signInAnonymously(auth);
@@ -579,7 +600,7 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
       await saveOfflineRecord('session:active', { exam, attemptId: id, studentId, className: resolvedClass, answers: {}, deadlineAt: endAt, startedAt: started, studentName: resolvedName, ownerUid: sessionOwnerUid });
       setOwnerUid(sessionOwnerUid);
       setStartedAt(started);
-      setAttemptId(id); setAnswers({}); setCurrentQuestion(0); setActiveExam(exam); setDeadlineAt(endAt); setSecondsLeft(exam.duration * 60); setSection('take'); setMessage(navigator.onLine ? '' : 'Mode offline aktif. Jawaban disimpan pada perangkat dan akan disinkronkan saat internet kembali.');
+      setAttemptId(id); setAnswers({}); setStudentGrade(computeExamGrade(exam.questionIds, {}, loadedKeys, Object.fromEntries(examQuestions.map(q => [q.id, q.points])))); setCurrentQuestion(0); setActiveExam(exam); setDeadlineAt(endAt); setSecondsLeft(exam.duration * 60); setSection('take'); setMessage(navigator.onLine ? '' : 'Mode offline aktif. Jawaban disimpan pada perangkat dan akan disinkronkan saat internet kembali.');
     } catch (e) { setMessage('Tidak dapat memulai ujian. Pastikan data ujian sudah tersimpan di perangkat.'); }
   };
 
@@ -702,17 +723,28 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   }, [section, activeExam, deadlineAt, attemptId]);
 
   useEffect(() => {
+    if (section !== 'take' || !activeExam) return;
+    if (isOnline) { setOfflineNoticeOpen(false); setOfflineSaveNoticeOpen(false); return; }
+    setOfflineNoticeOpen(true);
+    const timer = window.setTimeout(() => setOfflineSaveNoticeOpen(true), 60_000);
+    return () => window.clearTimeout(timer);
+  }, [section, activeExam?.id, isOnline]);
+
+  useEffect(() => {
     if (section !== 'take' || !attemptId || !activeExam) return;
     const clean = sanitizeAnswersMap(answers);
+    const grade = computeExamGrade(activeExam.questionIds, clean, studentAnswerKeys, Object.fromEntries(currentExamQuestions.map(q => [q.id, q.points])));
+    setStudentGrade(grade);
+    void saveOfflineRecord('grade:' + attemptId, { ...grade, answers: clean, gradedAt: new Date().toISOString() });
     const session = { exam: activeExam, attemptId, studentId, studentName: verifiedStudentName, className: studentClass, answers: clean, deadlineAt, startedAt, ownerUid };
     void saveOfflineRecord('session:active', session);
     const timer = window.setTimeout(() => {
       if (navigator.onLine && auth.currentUser?.uid && ownerUid && auth.currentUser.uid === ownerUid) {
-        updateDoc(doc(db, 'examAttempts', attemptId), { answers: clean, lastSavedAt: new Date().toISOString() }).catch(() => {});
+        updateDoc(doc(db, 'examAttempts', attemptId), { answers: clean, score: grade.score, total: grade.total, percent: grade.percent, gradingIssue: grade.gradingIssue, gradedAt: new Date().toISOString(), lastSavedAt: new Date().toISOString() }).catch(() => {});
       }
     }, 500);
     return () => window.clearTimeout(timer);
-  }, [answers, section, attemptId, activeExam, studentId, verifiedStudentName, studentClass, deadlineAt, startedAt, ownerUid]);
+  }, [answers, section, attemptId, activeExam, studentId, verifiedStudentName, studentClass, deadlineAt, startedAt, ownerUid, studentAnswerKeys]);
 
   useEffect(() => {
     if (!isOnline || savingRef.current) return;
@@ -805,7 +837,10 @@ export const ExamPage: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
     return <div className="mx-auto max-w-5xl space-y-4 pb-10">
       <div className="sticky top-0 z-20 rounded-2xl bg-white p-4 shadow-md"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-bold text-[#0B8F4D]">{activeExam.subject}</p><h2 className="font-black">{activeExam.title}</h2></div><div className={`flex items-center gap-2 rounded-xl px-3 py-2 font-black tabular-nums ${secondsLeft < 300 ? 'bg-rose-50 text-rose-600' : 'bg-[#E3F7EC] text-[#0B8F4D]'}`}><Clock3 size={18}/>{fmt(secondsLeft)}</div></div><div className="mt-3 flex items-center justify-between text-xs text-slate-500"><span>{done} dari {currentExamQuestions.length} dijawab</span><span>{Math.round(done / Math.max(1,currentExamQuestions.length)*100)}%</span></div><div className="mt-2 flex flex-wrap gap-1.5">{currentExamQuestions.map((item,i)=><button key={item.id} onClick={()=>setCurrentQuestion(i)} className={`h-8 min-w-8 rounded-lg px-2 text-xs font-bold ${answers[item.id] !== undefined ? 'bg-[#16B364] text-white' : 'bg-slate-100 text-slate-600'} `}>{i+1}</button>)}</div></div>
       {q && <div className={panel}><p className="text-xs font-bold text-[#0B8F4D]">SOAL {currentQuestion+1} / {currentExamQuestions.length}</p><h3 className="my-4 text-lg font-bold leading-relaxed">{q.prompt}</h3><div className="space-y-2">{q.options.map((opt,i)=><button key={i} onClick={()=>setAnswers(a=>({...a,[q.id]:i}))} className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left text-sm transition ${answers[q.id]===i?'border-[#16B364] bg-[#E3F7EC]':'border-slate-200 hover:bg-slate-50'}`}><span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${answers[q.id]===i?'bg-[#0B8F4D] text-white':'bg-slate-100 text-slate-600'}`}>{String.fromCharCode(65+i)}</span>{opt}</button>)}</div><div className="mt-6 flex items-center justify-between gap-2"><button className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold disabled:opacity-40" disabled={currentQuestion===0} onClick={()=>setCurrentQuestion(i=>i-1)}>Sebelumnya</button>{currentQuestion<currentExamQuestions.length-1?<button className={btn} onClick={()=>setCurrentQuestion(i=>i+1)}>Berikutnya</button>:<button className={btn} disabled={saving} onClick={()=>void finishExam(false)}><CheckCircle2 size={16}/> Selesaikan ujian</button>}</div></div>}
-      <p className="text-center text-xs text-slate-400"><Save size={13} className="mr-1 inline"/> Jawaban disimpan otomatis saat dipilih.</p>
+      <p className="text-center text-xs text-slate-400"><Save size={13} className="mr-1 inline"/> Jawaban disimpan otomatis di perangkat dan diperiksa langsung oleh SIMPATIK.</p>
+      {studentGrade && <p className="text-center text-xs text-slate-400">Pemeriksaan berjalan otomatis. Nilai tidak ditampilkan selama ujian.</p>}
+      {offlineSaveNoticeOpen && <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"><div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl"><h3 className="text-lg font-black">Simpan ujian sementara</h3><p className="mt-2 text-sm text-slate-600">Jawaban sudah otomatis tersimpan di HP. Tombol ini hanya memastikan penyimpanan sementara, bukan menyelesaikan ujian.</p><button className={btn+' mt-4 w-full'} onClick={()=>{void saveOfflineRecord('session:active',{exam:activeExam,attemptId,studentId,studentName:verifiedStudentName,className:studentClass,answers:sanitizeAnswersMap(answersRef.current),deadlineAt,startedAt,ownerUid,studentAnswerKeys});setOfflineSaveNoticeOpen(false);setMessage('Jawaban sementara aman tersimpan di perangkat. Ujian tetap berlangsung.');}}>Simpan Ujian</button></div></div>}
+      {offlineNoticeOpen && <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"><div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl"><h3 className="text-lg font-black">Anda sedang mengerjakan ujian secara offline</h3><p className="mt-2 text-sm text-slate-600">Silakan lanjutkan. SIMPATIK tetap menyimpan dan memeriksa jawaban di perangkat.</p><button className={btn+' mt-4 w-full'} onClick={()=>setOfflineNoticeOpen(false)}>Lanjutkan</button></div></div>}
       {message&&<p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800">{message}</p>}
     </div>;
   }

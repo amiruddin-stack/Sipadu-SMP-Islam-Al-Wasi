@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bell, Home, CalendarDays, NotebookPen, UserRound } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { NavTab } from '../components/layout/Sidebar';
 import { Header } from '../components/layout/Header';
@@ -90,14 +90,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
   const journalStartStr = [journalStart.getFullYear(), String(journalStart.getMonth() + 1).padStart(2, '0'), String(journalStart.getDate()).padStart(2, '0')].join('-');
   const visibleJournals = journals.filter(journal => journal.date >= journalStartStr && journal.date <= todayStr).sort((a,b) => b.date.localeCompare(a.date));
   const journalPeriodLabel = journalPeriod === 'today' ? 'Jurnal hari ini' : journalPeriod === 'week' ? '1 pekan terakhir' : journalPeriod + ' bulan terakhir';
-  const mobileNavItems: { tab: NavTab; label: string; icon: React.ElementType }[] = [
-    { tab: 'attendance', label: 'Presensi', icon: Users },
-    { tab: 'journal', label: 'Jurnal', icon: NotebookPen },
-    { tab: 'dashboard', label: 'Home', icon: Home },
-    { tab: 'homeroom', label: 'G-Wali', icon: UserRound },
-    { tab: 'schedule', label: 'Jadwal', icon: CalendarDays },
-  ];
-
   return (
     <div className="min-h-screen w-full bg-white font-sans text-slate-800 antialiased">
       {/* HERO SECTION with compact aligned card and integrated top navbar */}
@@ -169,14 +161,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate, active
           </div>
         </section>
       </main>
-      <nav aria-label="Navigasi bawah" className="fixed inset-x-0 bottom-0 z-[100] grid grid-cols-5 border-t border-[#D5EADB] bg-white/95 px-1 pb-[max(env(safe-area-inset-bottom),8px)] pt-2 shadow-[0_-6px_20px_rgba(15,70,40,0.08)] backdrop-blur md:hidden">
-        {mobileNavItems.map(({ tab, label, icon: Icon }) => (
-          <button key={tab} type="button" onClick={() => onNavigate(tab)} aria-current={activeTab === tab ? 'page' : undefined} className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-bold transition-colors ${activeTab === tab ? 'text-[#087F49]' : 'text-slate-500'}`}>
-            <span className={`flex h-8 w-9 items-center justify-center rounded-xl ${activeTab === tab ? 'bg-[#E3F7EC]' : ''}`}><Icon size={19} strokeWidth={activeTab === tab ? 2.4 : 1.9}/></span>
-            <span>{label}</span>
-          </button>
-        ))}
-      </nav>
     </div>
   );
 };

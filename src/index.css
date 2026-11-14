@@ -17,13 +17,13 @@
 
 :root {
   color-scheme: light;
-  --green-primary: #16B364;
-  --green-dark: #0B8F4D;
-  --green-deep: #076B3A;
-  --green-soft: #E3F7EC;
+  --green-primary: #27C879;
+  --green-dark: #18B66A;
+  --green-deep: #087F49;
+  --green-soft: #E8F9EF;
   --simpatik-primary: var(--green-primary);
   --simpatik-primary-dark: var(--green-deep);
-  --simpatik-primary-light: #8BDDB3;
+  --simpatik-primary-light: #A6EBC4;
 }
 
 html, body, #root {
@@ -96,7 +96,7 @@ body {
   --simpatik-green-bright: var(--green-primary);
   --simpatik-green-primary: var(--green-primary);
   --simpatik-green-soft: var(--green-soft);
-  --simpatik-green-line: #B7E8CD;
+  --simpatik-green-line: #C4EFD5;
 }
 
 .simpatik-hero {
@@ -209,7 +209,7 @@ body {
 
 .mapel-banner {
   isolation: isolate;
-  background: linear-gradient(115deg, #16B364 0%, #0B9852 48%, #087640 100%);
+  background: linear-gradient(115deg, #27C879 0%, #18B66A 48%, #0B9654 100%);
 }
 
 .mapel-banner::before {
